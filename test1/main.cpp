@@ -69,16 +69,35 @@ static void CreateIndexBuffer();
 static void CompileShaders();
 
 //resource management
+bool initializeProgram();
 void cleanUp();
 
 
 /************************ Main Program *************************/
 int main(int argc, char** argv)
 {
+    //initialize glut
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE|GLUT_DEPTH);
     glutInitWindowSize(width, height);
 
+    //initialize program and make sure everything is set up correctly
+    if(!initializeProgram()){
+        cerr << "Error: could not initialize program";
+    }
+
+    //if all is good, begin simulation
+    glutMainLoop();
+
+    //free up used memory
+    cleanUp();
+
+    return 0;
+}
+
+/******************** Function Implementations ********************/
+bool initializeProgram()
+{
     //create the window
     window = glutCreateWindow("Tutorial 13");
 
@@ -89,10 +108,10 @@ int main(int argc, char** argv)
     if (status != GLEW_OK) {
         cerr << "[F] GLEW NOT INITIALIZED: ";
         cerr << glewGetErrorString(status) << endl;
-        return -1;
+        return false;
     }
 
-    //print out openGL version and nvidia drivers beign used
+    //print out openGL version and nvidia drivers begin used
     printf("GL version: %s\n", glGetString(GL_VERSION));
 
     //Set all of the GLUT callbacks that will be used
@@ -104,14 +123,10 @@ int main(int argc, char** argv)
         keys[i] = false;
     }
 
-
+    //set initial background black
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-    //--Init the view and projection matrices
-    //  if you will be having a moving camera the view matrix will need to more dynamic
-    //  ...Like you should update it before you render more dynamic
-    //  for this project having them static will be fine
-
+    //set initial perspective projection
     projection = glm::perspective( 45.0f, //the FoV typically 90 degrees is good which is what this is set to
                                    float(width)/float(height), //Aspect Ratio, so Circles stay Circular
                                    0.01f, //Distance to the near plane, normally a small value like this
@@ -121,15 +136,9 @@ int main(int argc, char** argv)
     CreateIndexBuffer();
 
     CompileShaders();
-
-    glutMainLoop();
-
-    cleanUp();
-
-    return 0;
+    return true;
 }
 
-/******************** Function Implementations ********************/
 void render()
 {
     //clear screen
