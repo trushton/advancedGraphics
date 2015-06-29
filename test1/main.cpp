@@ -1,20 +1,34 @@
-#define GLM_FORCE_RADIANS
+/******************** Header Files ********************/
 #include <iostream>
 #include <assert.h>
-#include <string.h>
-#include <GL/glew.h>
+#include <chrono>
+
+#include <GL/glew.h> //must be include before the main gl libs
 #include <GL/freeglut.h>
-#include "shader.h"
+
+#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp> //Makes passing matrices to shaders easier
 
+#include "shader.h"
+#include "camera.cpp"
+
 using namespace std;
+
+
+/******************** Global Variables and Constants ********************/
 
 //useful macros
 #define ToRadian(x) ((x) * M_PI / 180.0f)
 #define ToDegree(x) ((x) * 180.0f / M_PI)
 
+//Window Variables
+int window;
+int width = 640, height = 480; //window size
+Camera camera;
+
+//uniform locations
 GLuint VBO;
 GLuint IBO;
 GLuint gWorldLocation;
@@ -25,29 +39,102 @@ glm::mat4 view;
 glm::mat4 projection;
 glm::mat4 mvp; //projection * view * model
 
-int width = 640;
-int height = 480;
-GLint windowWidth, windowHeight;
+//shader variables
+string vertexShaderName = "vertex.glsl";
+string fragmentShaderName = "fragment.glsl";
 GLuint ShaderProgram;
 
-static void CreateVertexBuffer();
-static void CreateIndexBuffer();
-//static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType);
-static void CompileShaders();
+//camera variables
+bool freeCamera = true;
+float yOffset = 0.0f;
+float zoom = 1.0f;
 
+//keyboard variables
+bool keys[256];
+
+/************************* Function Declarations ***********************/
+void InitializeGlutCallbacks();
 
 //Glut Callbacks
-void update();
 void render();
-void reshape(int n_w, int n_h);
+void update();
+void reshape(GLsizei w, GLsizei h);
+void keyboardListener(unsigned char key, int x_pos, int y_pos);
+void keyboardUpListener(unsigned char key, int x_pos, int y_pos);
+void checkKeyboard();
+
+//Shader Functions
+static void CreateVertexBuffer();
+static void CreateIndexBuffer();
+static void CompileShaders();
 
 //resource management
 void cleanUp();
 
+
+/************************ Main Program *************************/
+int main(int argc, char** argv)
+{
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE|GLUT_DEPTH);
+    glutInitWindowSize(width, height);
+
+    //create the window
+    window = glutCreateWindow("Tutorial 13");
+
+    // Must be done after glut is initialized!
+    // Now that the window is created the GL context is fully set up
+    // Because of that we can now initialize GLEW to prepare work with shaders
+    GLenum status = glewInit();
+    if (status != GLEW_OK) {
+        cerr << "[F] GLEW NOT INITIALIZED: ";
+        cerr << glewGetErrorString(status) << endl;
+        return -1;
+    }
+
+    //print out openGL version and nvidia drivers beign used
+    printf("GL version: %s\n", glGetString(GL_VERSION));
+
+    //Set all of the GLUT callbacks that will be used
+    InitializeGlutCallbacks();
+
+    // initialize the keys array to false
+    for(int i = 0; i < 256; i++)
+    {
+        keys[i] = false;
+    }
+
+
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+    //--Init the view and projection matrices
+    //  if you will be having a moving camera the view matrix will need to more dynamic
+    //  ...Like you should update it before you render more dynamic
+    //  for this project having them static will be fine
+
+    projection = glm::perspective( 45.0f, //the FoV typically 90 degrees is good which is what this is set to
+                                   float(width)/float(height), //Aspect Ratio, so Circles stay Circular
+                                   0.01f, //Distance to the near plane, normally a small value like this
+                                   300.0f); //Distance to the far plane,
+
+    CreateVertexBuffer();
+    CreateIndexBuffer();
+
+    CompileShaders();
+
+    glutMainLoop();
+
+    cleanUp();
+
+    return 0;
+}
+
+/******************** Function Implementations ********************/
 void render()
 {
     //clear screen
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     //pre-multiply the matrix
     mvp = projection * view * model;
@@ -56,7 +143,7 @@ void render()
     glUseProgram(ShaderProgram);
 
     //upload the matrix to the shader
-    glUniformMatrix4fv(gWorldLocation, 1, GL_TRUE, glm::value_ptr(model));//&World[0][0]);
+    glUniformMatrix4fv(gWorldLocation, 1, GL_FALSE, glm::value_ptr(mvp));//&World[0][0]);
 
 
     glEnableVertexAttribArray(0);
@@ -75,70 +162,130 @@ void update(){
     static float Scale = 0.0f;
     Scale += 0.001f;
 
-
-    //lame way to do transformations
-    //World[0][0] = cosf(Scale); World[0][1] = -sinf(Scale); World[0][2] = 0.0f; World[0][3] = sinf(Scale);
-    //World[1][0] = sinf(Scale); World[1][1] = cosf(Scale); World[1][2] = 0.0f; World[1][3] = 0.0f;
-    //World[2][0] = 0.0f; World[2][1] = 0.0f; World[2][2] = 1.0f; World[2][3] = 0.0f;
-    //World[3][0] = 0.0f; World[3][1] = 0.0f; World[3][2] = 0.0f; World[3][3] = 1.0f;
-
-    //much better way!
-    //World = (glm::translate(glm::mat4(1.0f), glm::vec3(4.0f * sin(Scale), 0.0f, 4.0* cos(Scale))));
+    //perform transformations of object
     model = (glm::rotate(model, sin(Scale*0.2f), glm::vec3(0.0, 1.0, 0.0)));
+
+    //render camera position
+    if(freeCamera){
+        checkKeyboard();
+    }
+
+    glm::vec3 ViewPoint = camera.Position + camera.ViewDir;
+    view = glm::lookAt( glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z),
+                        glm::vec3(ViewPoint.x, ViewPoint.y, ViewPoint.z),
+                        glm::vec3(camera.UpVector.x, camera.UpVector.y, camera.UpVector.z));
+
+    //update the state of the scene
+    glutPostRedisplay(); //call the display callback
+}
+
+void reshape(GLsizei w, GLsizei h)
+{
+    glViewport(0, 0, w, h);
+    projection = glm::infinitePerspective(45.0f, float(w)/float(h), 0.01f);
+}
+
+void keyboardListener(unsigned char key, int x_pos, int y_pos)
+{
+    // check if key is escape
+    if(key == 27)
+    {
+        glutDestroyWindow(window);
+        return;
+    }
+
+    // check if key is the minus or =/+ button
+    if(key == '-' || key == '=')
+    {
+        if(key == '-')
+        {
+            camera.movementSpeed -= 0.2f;
+            if(camera.movementSpeed <= 0.0f)
+                camera.movementSpeed = 0.2f;
+        }
+        else
+        {
+            camera.movementSpeed += 0.2f;
+        }
+    }
+
+        // assume key pressed is for movement
+    else
+    {
+        keys[key] = true;
+        freeCamera = true;
+    }
+
+    glutPostRedisplay();
+
+}
+
+
+void keyboardUpListener(unsigned char key, int x_pos, int y_pos)
+{
+    keys[key] = false;
     glutPostRedisplay();
 }
 
-
-static void InitializeGlutCallbacks()
+void checkKeyboard()
 {
-    glutDisplayFunc(render);
-    glutIdleFunc(update);
+    // Strafe left
+    if(keys['a'])
+        camera.StrafeRight(-2.1);
+
+    // Strafe right
+    if(keys['d'])
+        camera.StrafeRight(2.1);
+
+    // Move forward
+    if(keys['w'])
+        camera.MoveForward( -2.1 ) ;
+
+    // Move backward
+    if(keys['s'])
+        camera.MoveForward( 2.1 ) ;
+
+    // move up
+    if(keys['q'])
+        camera.MoveUpward(3.3);
+
+    // move down
+    if(keys['e'])
+        camera.MoveUpward(-3.3);
+
+    // look up
+    if(keys['i'])
+        camera.RotateX(1.0);
+
+    // look down
+    if(keys['k'])
+        camera.RotateX(-1.0);
+
+    // roll right
+    if(keys['l'])
+        camera.RotateZ(-2.0);
+
+    // roll left
+    if(keys['j'])
+        camera.RotateZ(2.0);
+
+    // look left
+    if(keys['u'])
+        camera.RotateY(2.0);
+
+    // look right
+    if(keys['o'])
+        camera.RotateY(-2.0);
 }
 
 
-int main(int argc, char** argv)
+void InitializeGlutCallbacks()
 {
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
-    glutReshapeFunc(reshape);// Called if the window is resized
-    glutCreateWindow("Tutorial 13");
-
-    InitializeGlutCallbacks();
-
-    // Must be done after glut is initialized!
-    GLenum res = glewInit();
-    if (res != GLEW_OK) {
-        fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
-        return 1;
-    }
-
-    printf("GL version: %s\n", glGetString(GL_VERSION));
-
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-    //--Init the view and projection matrices
-    //  if you will be having a moving camera the view matrix will need to more dynamic
-    //  ...Like you should update it before you render more dynamic
-    //  for this project having them static will be fine
-    view = glm::lookAt( glm::vec3(0.0, 8.0, -16.0), //Eye Position
-                        glm::vec3(0.0, 0.0, 0.0), //Focus point
-                        glm::vec3(0.0, 1.0, 0.0)); //Positive Y is up
-
-    projection = glm::perspective( 45.0f, //the FoV typically 90 degrees is good which is what this is set to
-                                   float(width)/float(height), //Aspect Ratio, so Circles stay Circular
-                                   0.01f, //Distance to the near plane, normally a small value like this
-                                   100.0f); //Distance to the far plane,
-
-    CreateVertexBuffer();
-    CreateIndexBuffer();
-
-    CompileShaders();
-
-    glutMainLoop();
-
-    cleanUp();
-
-    return 0;
+    glutDisplayFunc(render); //Called when its time to display
+    glutIdleFunc(update); //Called if there is nothing else to do
+    glutReshapeFunc(reshape); //Called if the window is resized
+    glutKeyboardFunc(keyboardListener); //Called if there is keyboard input
+    glutKeyboardUpFunc(keyboardUpListener);
 }
 
 void cleanUp()
@@ -191,11 +338,9 @@ static void CompileShaders()
 
     shader vertexShader(GL_VERTEX_SHADER);
     shader fragmentShader(GL_FRAGMENT_SHADER);
-    string vFile = "vertex.glsl";
-    string fFile = "fragment.glsl";
 
-    vertexShader.initialize(vFile);
-    fragmentShader.initialize(fFile);
+    vertexShader.initialize(vertexShaderName);
+    fragmentShader.initialize(fragmentShaderName);
 
     glAttachShader(ShaderProgram, vertexShader.getShader());
     glAttachShader(ShaderProgram, fragmentShader.getShader());
@@ -225,9 +370,3 @@ static void CompileShaders()
     assert(gWorldLocation != 0xFFFFFFFF);
 }
 
-void reshape(GLsizei w, GLsizei h)
-{
-    windowWidth = w;
-    windowHeight = h;
-    glViewport(0, 0, windowWidth, windowHeight);
-}

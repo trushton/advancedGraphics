@@ -6,7 +6,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "~/Desktop/advancedGraphics/test1")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -L/usr/lib/nvidia-346")
 
 set(SOURCE_FILES main.cpp shader.cpp)
-add_executable(firstTest ${SOURCE_FILES} )
+add_executable(firstTest ${SOURCE_FILES}  camera.h)
 
 INCLUDE(FindPkgConfig)
 include(FindGLEW)
