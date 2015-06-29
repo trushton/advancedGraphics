@@ -17,3 +17,4 @@ private:
     GLenum type;
     GLuint iShader;
 };
+

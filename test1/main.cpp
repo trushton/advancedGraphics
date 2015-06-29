@@ -1,12 +1,10 @@
 #define GLM_FORCE_RADIANS
 #include <iostream>
-#include <stdio.h>
 #include <assert.h>
 #include <string.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#include "math_3d.h"
-//#include "shader.h"
+#include "shader.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp> //Makes passing matrices to shaders easier
@@ -32,31 +30,9 @@ int height = 480;
 GLint windowWidth, windowHeight;
 GLuint ShaderProgram;
 
-static const char* pVS = "                                                    \n\
-#version 330                                                                  \n\
-                                                                              \n\
-layout (location = 0) in vec3 Position;                                       \n\
-uniform mat4 gWorld;                                                          \n\
-out vec4 Color;                                                               \n\
-void main()                                                                   \n\
-{                                                                             \n\
-    gl_Position = gWorld * vec4(Position, 1.0);                               \n\
-    Color = vec4(clamp(Position, 0.0, 1.0), 1.0);                             \n\
-}";
-
-static const char* pFS = "                                                    \n\
-#version 330                                                                  \n\
-                                                                              \n\
-out vec4 FragColor;                                                           \n\
-in vec4 Color;                                                                \n\
-void main()                                                                   \n\
-{                                                                             \n\
-    FragColor = Color;                                                        \n\
-}";
-
 static void CreateVertexBuffer();
 static void CreateIndexBuffer();
-static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType);
+//static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType);
 static void CompileShaders();
 
 
@@ -73,7 +49,7 @@ void render()
     //clear screen
     glClear(GL_COLOR_BUFFER_BIT);
 
-    //premultiply the matrix
+    //pre-multiply the matrix
     mvp = projection * view * model;
 
     //enable the program
@@ -198,32 +174,7 @@ static void CreateIndexBuffer()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
 }
 
-static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
-{
-    GLuint ShaderObj = glCreateShader(ShaderType);
 
-    if (ShaderObj == 0) {
-        fprintf(stderr, "Error creating shader type %d\n", ShaderType);
-        exit(0);
-    }
-
-    const GLchar* p[1];
-    p[0] = pShaderText;
-    GLint Lengths[1];
-    Lengths[0]= strlen(pShaderText);
-    glShaderSource(ShaderObj, 1, p, Lengths);
-    glCompileShader(ShaderObj);
-    GLint success;
-    glGetShaderiv(ShaderObj, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        GLchar InfoLog[1024];
-        glGetShaderInfoLog(ShaderObj, 1024, NULL, InfoLog);
-        fprintf(stderr, "Error compiling shader type %d: '%s'\n", ShaderType, InfoLog);
-        exit(1);
-    }
-
-    glAttachShader(ShaderProgram, ShaderObj);
-}
 
 static void CompileShaders()
 {
@@ -235,17 +186,19 @@ static void CompileShaders()
     }
 
 
-    AddShader(ShaderProgram, pVS, GL_VERTEX_SHADER);
-    AddShader(ShaderProgram, pFS, GL_FRAGMENT_SHADER);
+    //AddShader(ShaderProgram, pVS, GL_VERTEX_SHADER);
+    //AddShader(ShaderProgram, pFS, GL_FRAGMENT_SHADER);
 
-    //shader vertexShader(GL_VERTEX_SHADER);
-    //shader fragmentShader(GL_FRAGMENT_SHADER);
+    shader vertexShader(GL_VERTEX_SHADER);
+    shader fragmentShader(GL_FRAGMENT_SHADER);
+    string vFile = "vertex.glsl";
+    string fFile = "fragment.glsl";
 
-    //vertexShader.initialize("vertex.glsl");
-    //fragmentShader.initialize("fragment.glsl");
+    vertexShader.initialize(vFile);
+    fragmentShader.initialize(fFile);
 
-    //glAttachShader(ShaderProgram, vertexShader.getShader());
-    //glAttachShader(ShaderProgram, fragmentShader.getShader());
+    glAttachShader(ShaderProgram, vertexShader.getShader());
+    glAttachShader(ShaderProgram, fragmentShader.getShader());
 
     GLint Success = 0;
     GLchar ErrorLog[1024] = { 0 };

@@ -7,20 +7,16 @@ shader::shader (GLenum shaderType) {
 }
 
 bool shader::initialize (string filename) {
-    ifstream fstream;
-    string line;
-    string shaderStr = "";
 
-    // read in shader data from a file
-    fstream.open(filename);
-    if (fstream.is_open()) {
+    ifstream in;
+    in.open(filename.c_str());
 
-        while (getline(fstream, line)) {
-            shaderStr += line;
-        }
-        fstream.close();
+    if (in.is_open()) {
 
-        const char* shaderData = shaderStr.c_str();
+        string content( (std::istreambuf_iterator<char>(in) ),
+                        std::istreambuf_iterator<char>() );
+
+        const char* shaderData = content.c_str();
 
         //compile the shader
         char buffer[512];
