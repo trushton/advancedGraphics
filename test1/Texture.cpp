@@ -4,8 +4,7 @@
 Texture::Texture(GLenum TextureTarget, const std::string& FileName)
 {
     m_textureTarget = TextureTarget;
-    m_fileName      = FileName;
-    m_pImage        = NULL;
+    m_fileName = FileName;
 }
 
 bool Texture::Load()
@@ -18,6 +17,7 @@ bool Texture::Load()
         std::cout << "Error loading texture '" << m_fileName << "': " << Error.what() << std::endl;
         return false;
     }
+
 
     glGenTextures(1, &m_textureObj);
     glBindTexture(m_textureTarget, m_textureObj);

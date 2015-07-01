@@ -28,13 +28,12 @@ using namespace std;
 int window;
 int width = 640, height = 480; //window size
 Camera camera;
+Texture* pTexture;
 
 //uniform locations
 GLuint VBO;
 GLuint IBO;
-GLuint gMVPLocation;
-GLuint gSampler;
-Texture* pTexture = NULL;
+
 
 //transformation matrices
 glm::mat4 model; //each object gets its own model matrix
@@ -46,6 +45,8 @@ glm::mat4 mvp; //projection * view * model
 string vertexShaderName = "vertex.glsl";
 string fragmentShaderName = "fragment.glsl";
 GLuint ShaderProgram;
+GLuint gMVPLocation;
+GLuint gSampler;
 
 //camera variables
 bool freeCamera = true;
@@ -96,7 +97,7 @@ int main(int argc, char** argv)
         cerr << "Error: could not initialize program";
     }
 
-    pTexture = new Texture(GL_TEXTURE_2D, "checkboard.png");
+    pTexture = new Texture(GL_TEXTURE_2D, "test.png");
     if (!pTexture->Load()) {
         cerr << "Error: COULD NOT LOAD TEXTURE!\n";
         return 0;
@@ -114,6 +115,7 @@ int main(int argc, char** argv)
 /******************** Function Implementations ********************/
 bool initializeProgram()
 {
+
     //create the window
     window = glutCreateWindow("Tutorial 13");
 
@@ -151,7 +153,9 @@ bool initializeProgram()
                                    0.01f, //Distance to the near plane, normally a small value like this
                                    300.0f); //Distance to the far plane,
 
+
     CreateVertexBuffer();
+
     CreateIndexBuffer();
 
     CompileShaders();
@@ -412,5 +416,8 @@ static void CompileShaders()
 
     gMVPLocation = glGetUniformLocation(ShaderProgram, "gMVP");
     assert(gMVPLocation != 0xFFFFFFFF);
+    gSampler = glGetUniformLocation(ShaderProgram, "gSampler");
+    assert(gSampler != 0xFFFFFFFF);
+
 }
 

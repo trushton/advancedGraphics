@@ -9,14 +9,14 @@ shader::shader (GLenum shaderType) {
 bool shader::initialize (string filename) {
 
     ifstream in;
-    in.open(filename.c_str());
-
+    in.clear();
+    in.open(filename);
     if (in.is_open()) {
-
         string content( (std::istreambuf_iterator<char>(in) ),
                         std::istreambuf_iterator<char>() );
 
         const char* shaderData = content.c_str();
+        in.close();
 
         //compile the shader
         char buffer[512];
