@@ -25,7 +25,6 @@ Camera::Camera()
 
 void Camera::Move (glm::vec3 Direction)
 {
-    cout << movementSpeed << endl;
     Position = (Position + Direction) * movementSpeed;
 }
 
@@ -61,18 +60,15 @@ void Camera::RotateZ (GLfloat Angle)
 
 void Camera::MoveForward( GLfloat Distance )
 {
-    cout << movementSpeed << endl;
     Position = Position + (ViewDir*-(Distance * movementSpeed));
 }
 
 void Camera::StrafeRight ( GLfloat Distance )
 {
-    cout << movementSpeed << endl;
     Position = Position + (RightVector*(Distance* movementSpeed));
 }
 
 void Camera::MoveUpward( GLfloat Distance )
 {
-    cout << movementSpeed << endl;
     Position = Position + (UpVector*(Distance * movementSpeed));
 }

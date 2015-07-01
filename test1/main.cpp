@@ -13,6 +13,7 @@
 
 #include "shader.h"
 #include "camera.cpp"
+#include "Texture.h"
 
 using namespace std;
 
@@ -31,7 +32,9 @@ Camera camera;
 //uniform locations
 GLuint VBO;
 GLuint IBO;
-GLuint gWorldLocation;
+GLuint gMVPLocation;
+GLuint gSampler;
+Texture* pTexture = NULL;
 
 //transformation matrices
 glm::mat4 model; //each object gets its own model matrix
@@ -51,6 +54,13 @@ float zoom = 1.0f;
 
 //keyboard variables
 bool keys[256];
+
+//struct for vertices
+struct Vertex
+{
+    glm::vec3 Position;
+    glm::vec2 UV;
+};
 
 /************************* Function Declarations ***********************/
 void InitializeGlutCallbacks();
@@ -84,6 +94,12 @@ int main(int argc, char** argv)
     //initialize program and make sure everything is set up correctly
     if(!initializeProgram()){
         cerr << "Error: could not initialize program";
+    }
+
+    pTexture = new Texture(GL_TEXTURE_2D, "checkboard.png");
+    if (!pTexture->Load()) {
+        cerr << "Error: COULD NOT LOAD TEXTURE!\n";
+        return 0;
     }
 
     //if all is good, begin simulation
@@ -125,6 +141,9 @@ bool initializeProgram()
 
     //set initial background black
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glFrontFace(GL_CW);
+    glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
 
     //set initial perspective projection
     projection = glm::perspective( 45.0f, //the FoV typically 90 degrees is good which is what this is set to
@@ -136,6 +155,9 @@ bool initializeProgram()
     CreateIndexBuffer();
 
     CompileShaders();
+
+    glUniform1i(gSampler, 0);
+
     return true;
 }
 
@@ -152,17 +174,22 @@ void render()
     glUseProgram(ShaderProgram);
 
     //upload the matrix to the shader
-    glUniformMatrix4fv(gWorldLocation, 1, GL_FALSE, glm::value_ptr(mvp));//&World[0][0]);
+    glUniformMatrix4fv(gMVPLocation, 1, GL_FALSE, glm::value_ptr(mvp));//&World[0][0]);
 
 
     glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)12);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    pTexture->Bind(GL_TEXTURE0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
 
     glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
 
     glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
 
     glutSwapBuffers();
 }
@@ -271,19 +298,19 @@ void checkKeyboard()
         camera.RotateX(-1.0);
 
     // roll right
-    if(keys['l'])
+    if(keys['o'])
         camera.RotateZ(-2.0);
 
     // roll left
-    if(keys['j'])
+    if(keys['u'])
         camera.RotateZ(2.0);
 
     // look left
-    if(keys['u'])
+    if(keys['j'])
         camera.RotateY(2.0);
 
     // look right
-    if(keys['o'])
+    if(keys['l'])
         camera.RotateY(-2.0);
 }
 
@@ -306,11 +333,19 @@ void cleanUp()
 
 static void CreateVertexBuffer()
 {
-    glm::vec3 Vertices[4];
-    Vertices[0] = glm::vec3(-1.0f, -1.0f, 0.0f);
-    Vertices[1] = glm::vec3(0.0f, -1.0f, 1.0f);
-    Vertices[2] = glm::vec3(1.0f, -1.0f, 0.0f);
-    Vertices[3] = glm::vec3(0.0f, 1.0f, 0.0f);
+    Vertex Vertices[4];
+
+    Vertices[0].Position = glm::vec3(-1.0f, -1.0f, 0.5773f);
+    Vertices[0].UV = glm::vec2(0.0f, 0.0f);
+
+    Vertices[0].Position = glm::vec3(0.0f, -1.0f, -1.15475f);
+    Vertices[0].UV = glm::vec2(0.5f, 0.0f);
+
+    Vertices[0].Position = glm::vec3(1.0f, -1.0f, 0.5773f);
+    Vertices[0].UV = glm::vec2(1.0f, 0.0f);
+
+    Vertices[0].Position = glm::vec3(0.0f, -1.0f, 0.0f);
+    Vertices[0].UV = glm::vec2(0.5f, 1.0f);
 
 
     glGenBuffers(1, &VBO);
@@ -375,7 +410,7 @@ static void CompileShaders()
 
     glUseProgram(ShaderProgram);
 
-    gWorldLocation = glGetUniformLocation(ShaderProgram, "gWorld");
-    assert(gWorldLocation != 0xFFFFFFFF);
+    gMVPLocation = glGetUniformLocation(ShaderProgram, "gMVP");
+    assert(gMVPLocation != 0xFFFFFFFF);
 }
 
