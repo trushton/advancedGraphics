@@ -6,13 +6,12 @@ using namespace std;
 
 Camera::Camera()
 {
-    // initialize view
-    Position.x = 0.0f;
-    Position.y = 182.133f;
-    Position.z = 370.293f;
+    Position.x = 11.0f;
+    Position.y = 13.0f;
+    Position.z = 2.0f;
     ViewDir.x = 0.0f;
-    ViewDir.y = -0.48f;
-    ViewDir.z = -0.87f;
+    ViewDir.y = 0.0f;
+    ViewDir.z = -1.0f;
     RightVector.x = 1.0f;
     RightVector.y = 0.0f;
     RightVector.z = 0.0f;

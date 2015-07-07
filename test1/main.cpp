@@ -13,7 +13,7 @@
 
 #include "shader.h"
 #include "camera.cpp"
-#include "Texture.h"
+#include "Model.h"
 
 using namespace std;
 
@@ -27,12 +27,21 @@ using namespace std;
 //Window Variables
 int window;
 int width = 640, height = 480; //window size
+Model object;
+//Model skybox;
 Camera camera;
-Texture* pTexture;
 
 //uniform locations
-GLuint VBO;
-GLuint IBO;
+GLint texture_loc_mvpmat;
+
+//attribute locations
+GLint texture_loc_position;
+GLint loc_texture_coord;
+
+GLint loc_color;
+GLint color_loc_position;
+GLuint color_program;
+GLint color_loc_mvpmat; // Location of the modelviewprojection matrix in the shader
 
 
 //transformation matrices
@@ -42,11 +51,10 @@ glm::mat4 projection;
 glm::mat4 mvp; //projection * view * model
 
 //shader variables
-string vertexShaderName = "vertex.glsl";
-string fragmentShaderName = "fragment.glsl";
-GLuint ShaderProgram;
-GLuint gMVPLocation;
-GLuint gSampler;
+string vertexShaderName = "texture_vertex_shader.glsl";
+string fragmentShaderName = "texture_fragment_shader.glsl";
+GLuint texture_program;
+
 
 //camera variables
 bool freeCamera = true;
@@ -56,12 +64,9 @@ float zoom = 1.0f;
 //keyboard variables
 bool keys[256];
 
-//struct for vertices
-struct Vertex
-{
-    glm::vec3 Position;
-    glm::vec2 UV;
-};
+GLuint VB;
+
+
 
 /************************* Function Declarations ***********************/
 void InitializeGlutCallbacks();
@@ -75,9 +80,8 @@ void keyboardUpListener(unsigned char key, int x_pos, int y_pos);
 void checkKeyboard();
 
 //Shader Functions
-static void CreateVertexBuffer();
-static void CreateIndexBuffer();
-static void CompileShaders();
+bool createTextureShader();
+bool createColorShader();
 
 //resource management
 bool initializeProgram();
@@ -92,34 +96,10 @@ int main(int argc, char** argv)
     glutInitDisplayMode(GLUT_DOUBLE|GLUT_DEPTH);
     glutInitWindowSize(width, height);
 
-    //initialize program and make sure everything is set up correctly
-    if(!initializeProgram()){
-        cerr << "Error: could not initialize program";
-    }
-
-    pTexture = new Texture(GL_TEXTURE_2D, "test.png");
-    if (!pTexture->Load()) {
-        cerr << "Error: COULD NOT LOAD TEXTURE!\n";
-        return 0;
-    }
-
-    //if all is good, begin simulation
-    glutMainLoop();
-
-    //free up used memory
-    cleanUp();
-
-    return 0;
-}
-
-/******************** Function Implementations ********************/
-bool initializeProgram()
-{
 
     //create the window
-    window = glutCreateWindow("Tutorial 13");
+    window = glutCreateWindow("Tutorial 16");
 
-    // Must be done after glut is initialized!
     // Now that the window is created the GL context is fully set up
     // Because of that we can now initialize GLEW to prepare work with shaders
     GLenum status = glewInit();
@@ -135,33 +115,176 @@ bool initializeProgram()
     //Set all of the GLUT callbacks that will be used
     InitializeGlutCallbacks();
 
+    //initialize program and make sure everything is set up correctly
+    if(!initializeProgram()){
+        cerr << "Error: could not initialize program";
+    }
+
+    //if all is good, begin simulation
+    glutMainLoop();
+
+    //free up used memory
+    cleanUp();
+
+    return 0;
+}
+
+/******************** Function Implementations ********************/
+bool initializeProgram()
+{
+
+    object.loadModel("room.obj");
+    //skybox.loadModel("skybox.obj");
+
+
     // initialize the keys array to false
     for(int i = 0; i < 256; i++)
     {
         keys[i] = false;
     }
 
-    //set initial background black
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    glFrontFace(GL_CW);
-    glCullFace(GL_BACK);
-    glEnable(GL_CULL_FACE);
+    // create the texture shader
+    if(!createTextureShader())
+    {
+        return false;
+    }
+
+    // create the color shader
+    if(!createColorShader())
+    {
+        return false;
+    }
 
     //set initial perspective projection
-    projection = glm::perspective( 45.0f, //the FoV typically 90 degrees is good which is what this is set to
+    projection = glm::perspective( 90.0f, //the FoV typically 90 degrees is good which is what this is set to
                                    float(width)/float(height), //Aspect Ratio, so Circles stay Circular
                                    0.01f, //Distance to the near plane, normally a small value like this
                                    300.0f); //Distance to the far plane,
 
+    //set initial background black
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
-    CreateVertexBuffer();
+    //all done
+    return true;
+}
 
-    CreateIndexBuffer();
+bool createTextureShader()
+{
+    // set up the texture vertex shader
+    shader texture_vertex_shader(GL_VERTEX_SHADER);
+    if(!texture_vertex_shader.initialize(vertexShaderName))
+    {
+        return false;
+    }
 
-    CompileShaders();
+    // set up the texture fragment shader
+    shader texture_fragment_shader(GL_FRAGMENT_SHADER);
+    if(!texture_fragment_shader.initialize(fragmentShaderName))
+    {
+        return false;
+    }
 
-    glUniform1i(gSampler, 0);
+    // link the texture shader program
+    texture_program = glCreateProgram();
+    glAttachShader(texture_program, texture_vertex_shader.getShader());
+    glAttachShader(texture_program, texture_fragment_shader.getShader());
+    glLinkProgram(texture_program);
 
+    // check if everything linked ok
+    GLint texture_shader_status;
+    glGetProgramiv(texture_program, GL_LINK_STATUS, &texture_shader_status);
+    if(!texture_shader_status)
+    {
+        cerr << "[F] THE TEXTURE SHADER PROGRAM FAILED TO LINK" << endl;
+        return false;
+    }
+
+    // set up the vertex position attribute
+    texture_loc_position = glGetAttribLocation(texture_program, const_cast<const char*>("v_position"));
+    if(texture_loc_position == -1)
+    {
+        cerr << "[F] POSITION NOT FOUND" << endl;
+        return false;
+    }
+
+    // set up the vertex uv coordinate attribute
+    loc_texture_coord = glGetAttribLocation(texture_program, const_cast<const char*>("v_texture"));
+    if(loc_texture_coord == -1)
+    {
+        cerr << "[F] V_COLOR NOT FOUND" << endl;
+        return false;
+    }
+
+    // set up the MVP matrix attribute
+    texture_loc_mvpmat = glGetUniformLocation(texture_program, const_cast<const char*>("mvpMatrix"));
+    if(texture_loc_mvpmat == -1)
+    {
+        cerr << "[F] MVPMATRIX NOT FOUND" << endl;
+        return false;
+    }
+
+    // return
+    return true;
+}
+
+
+bool createColorShader()
+{
+    // set up the color vertex shader
+    shader color_vertex_shader(GL_VERTEX_SHADER);
+    if(!color_vertex_shader.initialize("color_vertex_shader.glsl"))
+    {
+        return false;
+    }
+
+    // set up the color fragment shader
+    shader color_fragment_shader(GL_FRAGMENT_SHADER);
+    if(!color_fragment_shader.initialize("color_fragment_shader.glsl"))
+    {
+        return false;
+    }
+
+    // link the color shader program
+    color_program = glCreateProgram();
+    glAttachShader(color_program, color_vertex_shader.getShader());
+    glAttachShader(color_program, color_fragment_shader.getShader());
+    glLinkProgram(color_program);
+
+    // check if everything linked ok
+    GLint color_shader_status;
+    glGetProgramiv(color_program, GL_LINK_STATUS, &color_shader_status);
+    if(!color_shader_status)
+    {
+        cerr << "[F] THE COLOR SHADER PROGRAM FAILED TO LINK" << endl;
+        return false;
+    }
+
+    // set up the vertex position attribute
+    color_loc_position = glGetAttribLocation(color_program, const_cast<const char*>("v_position"));
+    if(color_loc_position == -1)
+    {
+        cerr << "[F] POSITION NOT FOUND" << endl;
+        return false;
+    }
+
+    // set up the vertex color attribute
+    loc_color = glGetAttribLocation(color_program, const_cast<const char*>("v_color"));
+    if(loc_color == -1)
+    {
+        cerr << "[F] V_COLOR NOT FOUND" << endl;
+        return false;
+    }
+
+    // set up the MVP matrix attribute
+    color_loc_mvpmat = glGetUniformLocation(color_program, const_cast<const char*>("mvpMatrix"));
+    if(color_loc_mvpmat == -1)
+    {
+        cerr << "[F] MVPMATRIX NOT FOUND" << endl;
+        return false;
+    }
+
+    // return
     return true;
 }
 
@@ -171,29 +294,17 @@ void render()
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    //pre-multiply the matrix
+    //set the shader program
+    glUseProgram(texture_program);
+
+    object.mvp = projection * view * object.model;
+    glUniformMatrix4fv(texture_loc_mvpmat, 1, GL_FALSE, glm::value_ptr(object.mvp));
+    object.renderModel(texture_loc_position, loc_texture_coord);
+
     mvp = projection * view * model;
+    glUniformMatrix4fv(texture_loc_mvpmat, 1, GL_FALSE, glm::value_ptr(mvp));
+    //skybox.renderModel(texture_loc_position, loc_texture_coord);
 
-    //enable the program
-    glUseProgram(ShaderProgram);
-
-    //upload the matrix to the shader
-    glUniformMatrix4fv(gMVPLocation, 1, GL_FALSE, glm::value_ptr(mvp));//&World[0][0]);
-
-
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)12);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    pTexture->Bind(GL_TEXTURE0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-
-    glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
-
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
 
     glutSwapBuffers();
 }
@@ -203,7 +314,9 @@ void update(){
     Scale += 0.001f;
 
     //perform transformations of object
-    model = (glm::rotate(model, sin(Scale*0.2f), glm::vec3(0.0, 1.0, 0.0)));
+    object.model = (glm::translate(glm::mat4(1.0f), glm::vec3(10,10,0)));
+    object.model = (glm::rotate(object.model, sin(Scale*0.2f), glm::vec3(0.0, 1.0, 0.0)));
+    object.model = glm::scale(object.model, glm::vec3(5.0f,5.0f,5.0f));
 
     //render camera position
     if(freeCamera){
@@ -316,6 +429,14 @@ void checkKeyboard()
     // look right
     if(keys['l'])
         camera.RotateY(-2.0);
+
+    // look right
+    if(keys['1']){
+        cout << "pos x: " << camera.Position.x << " pos y: " << camera.Position.y << " pos z: " << camera.Position.z << endl;
+        cout << "view x: " << camera.ViewDir.x << " view y: " << camera.ViewDir.y << " view z: " << camera.ViewDir.z << endl;
+
+    }
+
 }
 
 
@@ -331,93 +452,6 @@ void InitializeGlutCallbacks()
 void cleanUp()
 {
     // Clean up, Clean up
-    glDeleteProgram(ShaderProgram);
-    glDeleteBuffers(1, &VBO);
-}
-
-static void CreateVertexBuffer()
-{
-    Vertex Vertices[4];
-
-    Vertices[0].Position = glm::vec3(-1.0f, -1.0f, 0.5773f);
-    Vertices[0].UV = glm::vec2(0.0f, 0.0f);
-
-    Vertices[0].Position = glm::vec3(0.0f, -1.0f, -1.15475f);
-    Vertices[0].UV = glm::vec2(0.5f, 0.0f);
-
-    Vertices[0].Position = glm::vec3(1.0f, -1.0f, 0.5773f);
-    Vertices[0].UV = glm::vec2(1.0f, 0.0f);
-
-    Vertices[0].Position = glm::vec3(0.0f, -1.0f, 0.0f);
-    Vertices[0].UV = glm::vec2(0.5f, 1.0f);
-
-
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
-}
-
-static void CreateIndexBuffer()
-{
-    unsigned int Indices[] = { 0, 3, 1,
-                               1, 3, 2,
-                               2, 3, 0,
-                               0, 2, 1 };
-
-    glGenBuffers(1, &IBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
-}
-
-
-
-static void CompileShaders()
-{
-    ShaderProgram = glCreateProgram();
-
-    if (ShaderProgram == 0) {
-        fprintf(stderr, "Error creating shader program\n");
-        exit(1);
-    }
-
-
-    //AddShader(ShaderProgram, pVS, GL_VERTEX_SHADER);
-    //AddShader(ShaderProgram, pFS, GL_FRAGMENT_SHADER);
-
-    shader vertexShader(GL_VERTEX_SHADER);
-    shader fragmentShader(GL_FRAGMENT_SHADER);
-
-    vertexShader.initialize(vertexShaderName);
-    fragmentShader.initialize(fragmentShaderName);
-
-    glAttachShader(ShaderProgram, vertexShader.getShader());
-    glAttachShader(ShaderProgram, fragmentShader.getShader());
-
-    GLint Success = 0;
-    GLchar ErrorLog[1024] = { 0 };
-
-    glLinkProgram(ShaderProgram);
-    glGetProgramiv(ShaderProgram, GL_LINK_STATUS, &Success);
-    if (Success == 0) {
-        glGetProgramInfoLog(ShaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
-        fprintf(stderr, "Error linking shader program: '%s'\n", ErrorLog);
-        exit(1);
-    }
-
-    glValidateProgram(ShaderProgram);
-    glGetProgramiv(ShaderProgram, GL_VALIDATE_STATUS, &Success);
-    if (!Success) {
-        glGetProgramInfoLog(ShaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
-        fprintf(stderr, "Invalid shader program: '%s'\n", ErrorLog);
-        exit(1);
-    }
-
-    glUseProgram(ShaderProgram);
-
-    gMVPLocation = glGetUniformLocation(ShaderProgram, "gMVP");
-    assert(gMVPLocation != 0xFFFFFFFF);
-    gSampler = glGetUniformLocation(ShaderProgram, "gSampler");
-    assert(gSampler != 0xFFFFFFFF);
-
+    glDeleteProgram(texture_program);
 }
 
