@@ -1,6 +1,5 @@
 /******************** Header Files ********************/
 #include <iostream>
-#include <assert.h>
 #include <chrono>
 
 #include <GL/glew.h> //must be include before the main gl libs
@@ -14,6 +13,8 @@
 #include "shader.h"
 #include "camera.cpp"
 #include "Model.h"
+#include "ds_geom_pass_tech.h"
+#include "gbuffer.h"
 
 using namespace std;
 
@@ -23,25 +24,20 @@ using namespace std;
 //useful macros
 #define ToRadian(x) ((x) * M_PI / 180.0f)
 #define ToDegree(x) ((x) * 180.0f / M_PI)
+#define WINDOW_WIDTH  1280
+#define WINDOW_HEIGHT 1024
 
 //Window Variables
 int window;
-int width = 640, height = 480; //window size
+int width = 1280, height = 1024; //window size
 Model object;
-//Model skybox;
 Camera camera;
 
-//uniform locations
-GLint texture_loc_mvpmat;
+GLuint shaderProgram;
 
-//attribute locations
-GLint texture_loc_position;
-GLint loc_texture_coord;
-
-GLint loc_color;
-GLint color_loc_position;
-GLuint color_program;
-GLint color_loc_mvpmat; // Location of the modelviewprojection matrix in the shader
+//deferred shading
+DSGeomPassTech m_DSGeomPassTech;
+GBuffer gbuffer;
 
 
 //transformation matrices
@@ -50,21 +46,14 @@ glm::mat4 view;
 glm::mat4 projection;
 glm::mat4 mvp; //projection * view * model
 
-//shader variables
-string vertexShaderName = "texture_vertex_shader.glsl";
-string fragmentShaderName = "texture_fragment_shader.glsl";
-GLuint texture_program;
 
 
 //camera variables
 bool freeCamera = true;
-float yOffset = 0.0f;
-float zoom = 1.0f;
 
 //keyboard variables
 bool keys[256];
 
-GLuint VB;
 
 
 
@@ -81,12 +70,14 @@ void checkKeyboard();
 
 //Shader Functions
 bool createTextureShader();
-bool createColorShader();
 
 //resource management
 bool initializeProgram();
 void cleanUp();
 
+//deferred shading
+void DSGeometryPass();
+void DSLightPass();
 
 /************************ Main Program *************************/
 int main(int argc, char** argv)
@@ -133,26 +124,31 @@ int main(int argc, char** argv)
 bool initializeProgram()
 {
 
-    object.loadModel("room.obj");
-    //skybox.loadModel("skybox.obj");
+    // create the texture shader
+//    if(!createTextureShader())
+//    {
+//        return false;
+//    }
+
+    if (!gbuffer.Init(WINDOW_WIDTH, WINDOW_HEIGHT)) {
+        return false;
+    }
+
+    if (!m_DSGeomPassTech.Init()) {
+        printf("Error initializing DSGeomPassTech\n");
+        return false;
+    }
+
+    m_DSGeomPassTech.Enable();
+    m_DSGeomPassTech.SetTextureUnit(0);
+
+    object.loadModel("phoenix_ugv.md2");
 
 
     // initialize the keys array to false
     for(int i = 0; i < 256; i++)
     {
         keys[i] = false;
-    }
-
-    // create the texture shader
-    if(!createTextureShader())
-    {
-        return false;
-    }
-
-    // create the color shader
-    if(!createColorShader())
-    {
-        return false;
     }
 
     //set initial perspective projection
@@ -169,142 +165,64 @@ bool initializeProgram()
     return true;
 }
 
-bool createTextureShader()
+
+
+void DSGeometryPass()
 {
-    // set up the texture vertex shader
-    shader texture_vertex_shader(GL_VERTEX_SHADER);
-    if(!texture_vertex_shader.initialize(vertexShaderName))
-    {
-        return false;
-    }
+    m_DSGeomPassTech.Enable();
+    gbuffer.BindForWriting();
 
-    // set up the texture fragment shader
-    shader texture_fragment_shader(GL_FRAGMENT_SHADER);
-    if(!texture_fragment_shader.initialize(fragmentShaderName))
-    {
-        return false;
-    }
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // link the texture shader program
-    texture_program = glCreateProgram();
-    glAttachShader(texture_program, texture_vertex_shader.getShader());
-    glAttachShader(texture_program, texture_fragment_shader.getShader());
-    glLinkProgram(texture_program);
+    m_DSGeomPassTech.SetMVP(mvp);
+    m_DSGeomPassTech.SetModelMatrix(object.model);
 
-    // check if everything linked ok
-    GLint texture_shader_status;
-    glGetProgramiv(texture_program, GL_LINK_STATUS, &texture_shader_status);
-    if(!texture_shader_status)
-    {
-        cerr << "[F] THE TEXTURE SHADER PROGRAM FAILED TO LINK" << endl;
-        return false;
-    }
-
-    // set up the vertex position attribute
-    texture_loc_position = glGetAttribLocation(texture_program, const_cast<const char*>("v_position"));
-    if(texture_loc_position == -1)
-    {
-        cerr << "[F] POSITION NOT FOUND" << endl;
-        return false;
-    }
-
-    // set up the vertex uv coordinate attribute
-    loc_texture_coord = glGetAttribLocation(texture_program, const_cast<const char*>("v_texture"));
-    if(loc_texture_coord == -1)
-    {
-        cerr << "[F] V_COLOR NOT FOUND" << endl;
-        return false;
-    }
-
-    // set up the MVP matrix attribute
-    texture_loc_mvpmat = glGetUniformLocation(texture_program, const_cast<const char*>("mvpMatrix"));
-    if(texture_loc_mvpmat == -1)
-    {
-        cerr << "[F] MVPMATRIX NOT FOUND" << endl;
-        return false;
-    }
-
-    // return
-    return true;
+    object.renderModel(m_DSGeomPassTech.loc_modelMatrix, m_DSGeomPassTech.loc_texture);
 }
 
-
-bool createColorShader()
+void DSLightPass()
 {
-    // set up the color vertex shader
-    shader color_vertex_shader(GL_VERTEX_SHADER);
-    if(!color_vertex_shader.initialize("color_vertex_shader.glsl"))
-    {
-        return false;
-    }
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-    // set up the color fragment shader
-    shader color_fragment_shader(GL_FRAGMENT_SHADER);
-    if(!color_fragment_shader.initialize("color_fragment_shader.glsl"))
-    {
-        return false;
-    }
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // link the color shader program
-    color_program = glCreateProgram();
-    glAttachShader(color_program, color_vertex_shader.getShader());
-    glAttachShader(color_program, color_fragment_shader.getShader());
-    glLinkProgram(color_program);
+    gbuffer.BindForReading();
 
-    // check if everything linked ok
-    GLint color_shader_status;
-    glGetProgramiv(color_program, GL_LINK_STATUS, &color_shader_status);
-    if(!color_shader_status)
-    {
-        cerr << "[F] THE COLOR SHADER PROGRAM FAILED TO LINK" << endl;
-        return false;
-    }
+    GLint HalfWidth = (GLint)(WINDOW_WIDTH / 2.0f);
+    GLint HalfHeight = (GLint)(WINDOW_HEIGHT / 2.0f);
 
-    // set up the vertex position attribute
-    color_loc_position = glGetAttribLocation(color_program, const_cast<const char*>("v_position"));
-    if(color_loc_position == -1)
-    {
-        cerr << "[F] POSITION NOT FOUND" << endl;
-        return false;
-    }
+    gbuffer.SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
+    glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, 0, HalfWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-    // set up the vertex color attribute
-    loc_color = glGetAttribLocation(color_program, const_cast<const char*>("v_color"));
-    if(loc_color == -1)
-    {
-        cerr << "[F] V_COLOR NOT FOUND" << endl;
-        return false;
-    }
+    gbuffer.SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
+    glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, HalfHeight, HalfWidth, WINDOW_HEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-    // set up the MVP matrix attribute
-    color_loc_mvpmat = glGetUniformLocation(color_program, const_cast<const char*>("mvpMatrix"));
-    if(color_loc_mvpmat == -1)
-    {
-        cerr << "[F] MVPMATRIX NOT FOUND" << endl;
-        return false;
-    }
+    gbuffer.SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_NORMAL);
+    glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, HalfWidth, HalfHeight, WINDOW_WIDTH, WINDOW_HEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-    // return
-    return true;
+    gbuffer.SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_TEXCOORD);
+    glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, HalfWidth, 0, WINDOW_WIDTH, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 }
 
 void render()
 {
-    //clear screen
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    //clear screen
+//    glClearColor(0.0, 0.0, 0.0, 1.0);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//
+//    //set the shader program
+//    glUseProgram(shaderProgram);
+//
+//    object.mvp = projection * view * object.model;
+//    glUniformMatrix4fv(loc_mvpMatrix, 1, GL_FALSE, glm::value_ptr(object.mvp));
+//    object.renderModel(loc_vertexPosition, loc_vertexTexture);
+//
+//    mvp = projection * view * model;
+//    glUniformMatrix4fv(loc_mvpMatrix, 1, GL_FALSE, glm::value_ptr(mvp));
+//    //skybox.renderModel(texture_loc_position, loc_texture_coord);
 
-    //set the shader program
-    glUseProgram(texture_program);
-
-    object.mvp = projection * view * object.model;
-    glUniformMatrix4fv(texture_loc_mvpmat, 1, GL_FALSE, glm::value_ptr(object.mvp));
-    object.renderModel(texture_loc_position, loc_texture_coord);
-
-    mvp = projection * view * model;
-    glUniformMatrix4fv(texture_loc_mvpmat, 1, GL_FALSE, glm::value_ptr(mvp));
-    //skybox.renderModel(texture_loc_position, loc_texture_coord);
-
+    DSGeometryPass();
+    DSLightPass();
 
     glutSwapBuffers();
 }
@@ -314,7 +232,7 @@ void update(){
     Scale += 0.001f;
 
     //perform transformations of object
-    object.model = (glm::translate(glm::mat4(1.0f), glm::vec3(10,10,0)));
+    object.model = (glm::translate(glm::mat4(1.0f), glm::vec3(0,0,0)));
     object.model = (glm::rotate(object.model, sin(Scale*0.2f), glm::vec3(0.0, 1.0, 0.0)));
     object.model = glm::scale(object.model, glm::vec3(5.0f,5.0f,5.0f));
 
@@ -452,6 +370,90 @@ void InitializeGlutCallbacks()
 void cleanUp()
 {
     // Clean up, Clean up
-    glDeleteProgram(texture_program);
+    glDeleteProgram(shaderProgram);
 }
 
+//bool createTextureShader()
+//{
+//    // set up the texture vertex shader
+//    shader texture_vertex_shader(GL_VERTEX_SHADER);
+//    if(!texture_vertex_shader.initialize(vertexShaderName))
+//    {
+//        return false;
+//    }
+//
+//    // set up the texture fragment shader
+//    shader texture_fragment_shader(GL_FRAGMENT_SHADER);
+//    if(!texture_fragment_shader.initialize(fragmentShaderName))
+//    {
+//        return false;
+//    }
+//
+//    // link the texture shader program
+//    shaderProgram = glCreateProgram();
+//    glAttachShader(shaderProgram, texture_vertex_shader.getShader());
+//    glAttachShader(shaderProgram, texture_fragment_shader.getShader());
+//    glLinkProgram(shaderProgram);
+//
+//    // check if everything linked ok
+//    GLint texture_shader_status;
+//
+//    // check if everything linked ok
+//    char fragmentBuffer[512];
+//
+//    glGetProgramInfoLog(shaderProgram, 512, NULL, fragmentBuffer);
+//    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &texture_shader_status);
+//    if(!texture_shader_status)
+//    {
+//        cerr << "[F] THE SHADER PROGRAM FAILED TO LINK" << endl;
+//        return false;
+//    }
+//
+//    // set up the vertex position attribute
+//    loc_vertexPosition = glGetAttribLocation(shaderProgram, const_cast<const char*>("v_position"));
+//    if(loc_vertexPosition == 0xFFFFFFFF)
+//    {
+//        cerr << "[F] POSITION NOT FOUND" << endl;
+//        cout << fragmentBuffer;
+//
+//        return false;
+//    }
+//
+//    // set up the vertex uv coordinate attribute
+//    loc_vertexTexture = glGetAttribLocation(shaderProgram, const_cast<const char*>("v_texture"));
+//    if(loc_vertexTexture == 0xFFFFFFFF)
+//    {
+//        cerr << "[F] V_COLOR NOT FOUND" << endl;
+//        cout << fragmentBuffer;
+//
+//        return false;
+//    }
+//
+//    loc_vertexNormal = glGetAttribLocation(shaderProgram, const_cast<const char*>("v_normal"));
+//    if(loc_vertexNormal == 0xFFFFFFFF)
+//    {
+//        std::cerr << "[F] V_NORMAL NOT FOUND" << std::endl;
+//        return false;
+//    }
+//
+//    // set up the MVP matrix attribute
+//    loc_mvpMatrix = glGetUniformLocation(shaderProgram, const_cast<const char*>("mvpMatrix"));
+//    if(loc_mvpMatrix == 0xFFFFFFFF)
+//    {
+//        cerr << "[F] MVPMATRIX NOT FOUND" << endl;
+//        cout << fragmentBuffer;
+//
+//        return false;
+//    }
+//
+//    loc_modelMatrix = glGetUniformLocation(shaderProgram, const_cast<const char*>("modelMatrix"));
+//    if(loc_modelMatrix == 0xFFFFFFFF)
+//    {
+//        std::cerr << "[F] MODELMATRIX NOT FOUND" << std::endl;
+//        return false;
+//
+//    }
+//
+//    // return
+//    return true;
+//}

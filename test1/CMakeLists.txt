@@ -6,7 +6,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "~/Desktop/advancedGraphics/test1")
 
 
 set(SOURCE_FILES main.cpp shader.cpp )
-add_executable(firstTest ${SOURCE_FILES} camera.h shader.h Mesh.cpp Mesh.h Vertex.h Model.cpp Model.h gbuffer.cpp gbuffer.h)
+add_executable(firstTest ${SOURCE_FILES} camera.h shader.h Mesh.cpp Mesh.h Vertex.h Model.cpp Model.h gbuffer.cpp gbuffer.h technique.cpp technique.h ds_geom_pass_tech.cpp ds_geom_pass_tech.h ogldev_util.cpp ogldev_util.h)
 
 INCLUDE(FindPkgConfig)
 include(FindGLEW)

@@ -6,9 +6,9 @@ using namespace std;
 
 Camera::Camera()
 {
-    Position.x = 11.0f;
-    Position.y = 13.0f;
-    Position.z = 2.0f;
+    Position.x = 0.0f;
+    Position.y = 0.0f;
+    Position.z = 0.0f;
     ViewDir.x = 0.0f;
     ViewDir.y = 0.0f;
     ViewDir.z = -1.0f;
@@ -16,8 +16,8 @@ Camera::Camera()
     RightVector.y = 0.0f;
     RightVector.z = 0.0f;
     UpVector.x = 0.0f;
-    UpVector.y = 0.819152f;
-    UpVector.z = 0.573576f;
+    UpVector.y = 0.1;
+    UpVector.z = 0.0;
     RotatedX = RotatedY = RotatedZ = 0.0f;
     movementSpeed = 1.0f;
 }
