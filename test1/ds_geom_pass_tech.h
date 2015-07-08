@@ -16,7 +16,9 @@ public:
     void SetModelMatrix(const glm::mat4 model);
     void SetTextureUnit(unsigned int TextureUnit);
 
-
+    GLuint loc_vertexPosition;
+    GLuint loc_vertexTexture;
+    GLuint loc_vertexNormal;
     GLuint loc_mvpMatrix;
     GLuint loc_modelMatrix;
     GLuint loc_texture;

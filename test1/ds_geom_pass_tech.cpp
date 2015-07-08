@@ -29,7 +29,35 @@ bool DSGeomPassTech::Init()
     if (!Finalize()) {
         return false;
     }
-
+// set up the vertex position attribute
+//    loc_vertexPosition = glGetAttribLocation(shaderProgram, const_cast<const char*>("v_position"));
+//    if(loc_vertexPosition == 0xFFFFFFFF)
+//    {
+//        cerr << "[F] POSITION NOT FOUND" << endl;
+//        cout << fragmentBuffer;
+//
+//        return false;
+//    }
+//
+//    // set up the vertex uv coordinate attribute
+//    loc_vertexTexture = glGetAttribLocation(shaderProgram, const_cast<const char*>("v_texture"));
+//    if(loc_vertexTexture == 0xFFFFFFFF)
+//    {
+//        cerr << "[F] V_COLOR NOT FOUND" << endl;
+//        cout << fragmentBuffer;
+//
+//        return false;
+//    }
+//
+//    loc_vertexNormal = glGetAttribLocation(shaderProgram, const_cast<const char*>("v_normal"));
+//    if(loc_vertexNormal == 0xFFFFFFFF)
+//    {
+//        std::cerr << "[F] V_NORMAL NOT FOUND" << std::endl;
+//        return false;
+//    }
+    loc_vertexPosition = glGetAttribLocation(shaderProgram, const_cast<const char*>("v_position"));
+    loc_vertexTexture = glGetAttribLocation(shaderProgram, const_cast<const char*>("v_texture"));
+    loc_vertexNormal = glGetAttribLocation(shaderProgram, const_cast<const char*>("v_normal"));
     loc_mvpMatrix = GetUniformLocation("mvpMatrix");
     loc_modelMatrix = GetUniformLocation("modelMatrix");
     loc_texture = GetUniformLocation("gColorMap");

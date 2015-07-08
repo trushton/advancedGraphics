@@ -7,8 +7,8 @@ using namespace std;
 Camera::Camera()
 {
     Position.x = 0.0f;
-    Position.y = 0.0f;
-    Position.z = 0.0f;
+    Position.y = 8.0f;
+    Position.z = -16.0f;
     ViewDir.x = 0.0f;
     ViewDir.y = 0.0f;
     ViewDir.z = -1.0f;

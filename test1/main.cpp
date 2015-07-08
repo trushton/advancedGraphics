@@ -142,7 +142,7 @@ bool initializeProgram()
     m_DSGeomPassTech.Enable();
     m_DSGeomPassTech.SetTextureUnit(0);
 
-    object.loadModel("phoenix_ugv.md2");
+    object.loadModel("hheli.obj");
 
 
     // initialize the keys array to false
@@ -174,10 +174,14 @@ void DSGeometryPass()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    object.model = (glm::translate(glm::mat4(1.0f), glm::vec3(0,0,0)));
+
+    mvp = projection * view * object.model;
     m_DSGeomPassTech.SetMVP(mvp);
     m_DSGeomPassTech.SetModelMatrix(object.model);
+    m_DSGeomPassTech.SetTextureUnit(0);
 
-    object.renderModel(m_DSGeomPassTech.loc_modelMatrix, m_DSGeomPassTech.loc_texture);
+    object.renderModel(m_DSGeomPassTech.loc_vertexPosition, m_DSGeomPassTech.loc_vertexTexture);
 }
 
 void DSLightPass()
@@ -213,11 +217,11 @@ void render()
 //    //set the shader program
 //    glUseProgram(shaderProgram);
 //
-//    object.mvp = projection * view * object.model;
+    //object.mvp = projection * view * object.model;
 //    glUniformMatrix4fv(loc_mvpMatrix, 1, GL_FALSE, glm::value_ptr(object.mvp));
 //    object.renderModel(loc_vertexPosition, loc_vertexTexture);
 //
-//    mvp = projection * view * model;
+    //mvp = projection * view * model;
 //    glUniformMatrix4fv(loc_mvpMatrix, 1, GL_FALSE, glm::value_ptr(mvp));
 //    //skybox.renderModel(texture_loc_position, loc_texture_coord);
 
