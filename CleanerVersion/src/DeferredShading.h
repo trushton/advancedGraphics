@@ -32,7 +32,7 @@ public:
     void BeginLightPasses();
     void DSPointLightsPass(unsigned int PointLightIndex);
 
-    float CalcPointLightBSphere(const PointLight& Light);
+    static float CalcPointLightBSphere(const PointLight& Light);
     float CalcSpotLightBSphere(const SpotLight& Light);
 
     void DSDirectionalLightPass();

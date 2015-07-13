@@ -8,8 +8,8 @@ Camera::Camera(Engine *eng)
         : engine(eng)
 {
     // initialize view
-    Position = glm::vec3(-1000.0f, 230.0f, -2160.0f);
-    ViewDir = glm::vec3(0.15f, 0.28f, 1.0f);
+    Position = glm::vec3(-87.0f, 200.0f, 2.0f);
+    ViewDir = glm::vec3(-1.05f, 0.05f, -0.04f);
     RightVector = glm::vec3(1.0f, 0.0, 0.0f);
     UpVector = glm::vec3(0.0f, 1.0f, 0.0f);
 

@@ -22,18 +22,19 @@ void DeferredShading::init()
     m_gbuffer.Init(windowWidth, windowHeight);
     m_DSGeomPassTech.init();
     m_DSPointLightPassTech.init();
+    m_DSPointLightPassTech.SetPointLight(m_pointLight[0]);
     m_DSDirLightPassTech.init();
     m_DSDirLightPassTech.SetDirectionalLight(m_dirLight);
-    /*m_DSSpotLightPassTech.init();
-    m_DSSpotLightPassTech.SetSpotLight(m_spotLight);*/
+    //m_DSSpotLightPassTech.init();
+    //m_DSSpotLightPassTech.SetSpotLight(m_spotLight);
     m_nullTech.init();
 
-    //object.loadModel("../bin/phoenix_ugv.md2");
+    object.loadModel("../bin/phoenix_ugv.md2");
     sphere.loadModel("../bin/sphere.obj");
     quad.loadModel("../bin/quad.obj");
     box.loadModel("../bin/hheli.obj");
-    //cone.loadModel("../bin/sphere.obj");
-    //box2.loadModel("../bin/hheli.obj");
+    cone.loadModel("../bin/sphere.obj");
+    box2.loadModel("../bin/phoenix_ugv.md2");
 
     skybox = new Skybox();
 
@@ -89,8 +90,9 @@ void DeferredShading::DSGeometryPass()
     box.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
     box.model = glm::scale(box.model, glm::vec3(5, 5, 5));
 
-    box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 2, 0));
-    // box.model = glm::scale(box.model, glm::vec3(10, 10, 10));
+    //box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 1000, 0));
+
+
 
     glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * box.model;
 
@@ -107,7 +109,7 @@ void DeferredShading::DSGeometryPass()
     m_DSGeomPassTech.set("gWorld", box2.model);
     m_DSGeomPassTech.set("gColorMap", 0);
 
-    //box2.renderModel();
+    box2.renderModel();
 
     //}
 
@@ -147,7 +149,7 @@ void DeferredShading::DSStencilPass(unsigned int PointLightIndex)
 
     sphere.renderModel();
 
-/*
+        /*
         cone.model = glm::translate(glm::mat4(1.0f), m_spotLight.Position); // MIGHT NEED TO PUT POINT LIGHT POS
 
         BSphereScale = CalcSpotLightBSphere(m_spotLight);
@@ -206,7 +208,7 @@ void DeferredShading::DSPointLightsPass(unsigned int PointLightIndex)
     m_DSPointLightPassTech.set("gColorMap", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
     m_DSPointLightPassTech.set("gNormalMap", GBuffer::GBUFFER_TEXTURE_TYPE_NORMAL);
     m_DSPointLightPassTech.set("gEyeWorldPos", Engine::getEngine()->graphics->camera->getPos());
-    m_DSPointLightPassTech.set("gMatSpecularIntensity", 1.0f);
+    m_DSPointLightPassTech.set("gMatSpecularIntensity", 150.0f);
     m_DSPointLightPassTech.set("gSpecularPower", 32.0f);
 
 
@@ -251,7 +253,7 @@ float DeferredShading::CalcPointLightBSphere(const PointLight &Light)
     float ret = (-Light.Attenuation.Linear + sqrtf(Light.Attenuation.Linear * Light.Attenuation.Linear - 4 * Light.Attenuation.Exp * (Light.Attenuation.Exp - 256 * MaxChannel * Light.DiffuseIntensity)))
                 /
                 2 * Light.Attenuation.Exp;
-
+    return 100;
     return ret;
 /*
         float maxColor = fmax(fmax(Light.Color.x, Light.Color.y), Light.Color.z);
@@ -332,11 +334,11 @@ void DeferredShading::InitLights()
     m_dirLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
 
     m_pointLight[0].DiffuseIntensity = 0.90f;
-    m_pointLight[0].Color = COLOR_WHITE;
-    m_pointLight[0].Position = glm::vec3(0.0f, 1.50f, 3.0f);
+    m_pointLight[0].Color = COLOR_RED;
+    m_pointLight[0].Position = glm::vec3(3.0f, 0.50f, 3.0f);
     m_pointLight[0].Attenuation.Constant = 1.0f;
-    m_pointLight[0].Attenuation.Linear = 0.0f;
-    m_pointLight[0].Attenuation.Exp = 0.6f;
+    m_pointLight[0].Attenuation.Linear = 1.0f;
+    m_pointLight[0].Attenuation.Exp = 1.0f;
 
     m_pointLight[1].DiffuseIntensity = 0.30f;
     m_pointLight[1].Color = COLOR_BLUE;
