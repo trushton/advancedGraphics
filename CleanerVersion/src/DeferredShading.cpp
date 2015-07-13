@@ -336,23 +336,23 @@ void DeferredShading::InitLights()
     m_pointLight[0].DiffuseIntensity = 0.90f;
     m_pointLight[0].Color = COLOR_RED;
     m_pointLight[0].Position = glm::vec3(3.0f, 0.50f, 3.0f);
-    m_pointLight[0].Attenuation.Constant = 1.0f;
-    m_pointLight[0].Attenuation.Linear = 1.0f;
-    m_pointLight[0].Attenuation.Exp = 1.0f;
+    m_pointLight[0].Attenuation.Constant = .50f;
+    m_pointLight[0].Attenuation.Linear = .50f;
+    m_pointLight[0].Attenuation.Exp = .50f;
 
     m_pointLight[1].DiffuseIntensity = 0.30f;
     m_pointLight[1].Color = COLOR_BLUE;
     m_pointLight[1].Position = glm::vec3(0.0f, 2.5f, 2.0f);
-    m_pointLight[1].Attenuation.Constant = 1.0f;
-    m_pointLight[1].Attenuation.Linear = 0.0f;
+    m_pointLight[1].Attenuation.Constant = 5.0f;
+    m_pointLight[1].Attenuation.Linear = 0.5f;
     m_pointLight[1].Attenuation.Exp = .60f;
 
     m_pointLight[2].DiffuseIntensity = 0.2f;
     m_pointLight[2].Color = COLOR_GREEN;
     m_pointLight[2].Position = glm::vec3(0.0f, 0.0f, 3.0f);
-    m_pointLight[2].Attenuation.Constant = 1.0f;
-    m_pointLight[2].Attenuation.Linear = 0.0f;
-    m_pointLight[2].Attenuation.Exp = 1.0f;
+    m_pointLight[2].Attenuation.Constant = .60f;
+    m_pointLight[2].Attenuation.Linear = 0.2f;
+    m_pointLight[2].Attenuation.Exp = .2f;
 }
 
 
