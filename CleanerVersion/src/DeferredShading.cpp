@@ -29,12 +29,12 @@ void DeferredShading::init()
     //m_DSSpotLightPassTech.SetSpotLight(m_spotLight);
     m_nullTech.init();
 
-    object.loadModel("../bin/phoenix_ugv.md2");
+    //object.loadModel("../bin/phoenix_ugv.md2");
     sphere.loadModel("../bin/sphere.obj");
     quad.loadModel("../bin/quad.obj");
     box.loadModel("../bin/hheli.obj");
-    cone.loadModel("../bin/sphere.obj");
-    box2.loadModel("../bin/phoenix_ugv.md2");
+    //cone.loadModel("../bin/sphere.obj");
+    box2.loadModel("../bin/table2.obj");
 
     skybox = new Skybox();
 
@@ -329,7 +329,7 @@ void DeferredShading::InitLights()
     m_spotLight.Cutoff = 50.0f;
 
     m_dirLight.AmbientIntensity = 0.5f;
-    m_dirLight.Color = COLOR_CYAN;
+    m_dirLight.Color = COLOR_WHITE;
     m_dirLight.DiffuseIntensity = 0.05f;
     m_dirLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
 
