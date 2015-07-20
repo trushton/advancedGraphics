@@ -349,13 +349,13 @@ void Simulation::InitLights()
     m_spotLight.Cutoff = 50.0f;
 
     m_dirLight.AmbientIntensity = 0.5f;
-    m_dirLight.Color = COLOR_WHITE;
+    m_dirLight.Color = COLOR_CYAN;
     m_dirLight.DiffuseIntensity = 0.05f;
     m_dirLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
 
     m_pointLight[0].DiffuseIntensity = 0.90f;
     m_pointLight[0].Color = COLOR_RED;
-    m_pointLight[0].Position = glm::vec3(3.0f, 0.50f, 3.0f);
+    m_pointLight[0].Position = glm::vec3(5.0f, 0.50f, 5.0f);
     m_pointLight[0].Attenuation.Constant = .50f;
     m_pointLight[0].Attenuation.Linear = .50f;
     m_pointLight[0].Attenuation.Exp = .50f;
