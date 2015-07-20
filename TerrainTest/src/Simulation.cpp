@@ -38,7 +38,7 @@ void Simulation::init()
 
     skybox = new Skybox();
 
-    terrain.SetFile("../bin/drycreek.tif");
+    terrain.SetFile("../bin/data/drycreek2.tif");
     terrain.setup();
 
 
@@ -111,6 +111,7 @@ void Simulation::DSGeometryPass()
 
     box.renderModel();
 
+    terrain.model = glm::translate(terrain.model, glm::vec3(0,-1,0));
 
 
     mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * terrain.model;
@@ -177,7 +178,8 @@ void Simulation::DSStencilPass(unsigned int PointLightIndex)
         cone.model = glm::scale(cone.model, glm::vec3(10, 10, 10));
 
         mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * cone.model;
-        m_nullTech.set("gWVP", mvp);
+        m_nullTech.set("gWVP",     model = glm::translate(model, glm::vec3(0,-1,0));
+mvp);
 
         // m_DSPointLightPassTech.SetScreenSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -274,6 +276,7 @@ float Simulation::CalcPointLightBSphere(const PointLight &Light)
     float ret = (-Light.Attenuation.Linear + sqrtf(Light.Attenuation.Linear * Light.Attenuation.Linear - 4 * Light.Attenuation.Exp * (Light.Attenuation.Exp - 256 * MaxChannel * Light.DiffuseIntensity)))
                 /
                 2 * Light.Attenuation.Exp;
+    //return 100;
     return ret;
 
 }

@@ -5,6 +5,7 @@
 #include "GBuffer.h"
 #include "buffer.h"
 #include "renderer.h"
+#include "Engine.h"
 
 using namespace std;
 
@@ -15,8 +16,12 @@ using namespace std;
 class Terrain : public Model
 {
 public:
+    glm::mat4 model;
+
+
     Terrain();
     Terrain(string filename);
+
     //void SampleTerrain();
     void setup();
     void update(float dt);
@@ -41,11 +46,14 @@ private:
     float min, max, xres, yres;
     vector<vector<float>> vecs;
     vector<TerrainVertex> vertexes;
-    vector<int> indicies;
+    vector<int> indices;
     OGRSpatialReference sr;
     glm::vec2 origin;
     glm::vec2 end;
     int width,height;
+
+    GLuint m_Buffers[3];
+
 };
 
 #endif
