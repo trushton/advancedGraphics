@@ -80,6 +80,8 @@ void Simulation::render()
 
 void Simulation::DSGeometryPass()
 {
+    static float scale = 0.00f;
+    scale += 0.002;
     m_DSGeomPassTech.enable();
     //m_gbuffer.BindForWriting();
     m_gbuffer.BindForGeomPass();
@@ -96,6 +98,7 @@ void Simulation::DSGeometryPass()
     // object.renderModel();
     //for (unsigned int i = 0 ; i < ARRAY_SIZE_IN_ELEMENTS(m_boxPositions); i++) {
     box.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, -5, 0));
+    box.model = glm::rotate(box.model, scale * 5, glm::vec3(0,1,0));
     box.model = glm::scale(box.model, glm::vec3(5, 5, 5));
 
     //box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 1000, 0));
@@ -111,7 +114,7 @@ void Simulation::DSGeometryPass()
 
     box.renderModel();
 
-    terrain.model = glm::translate(terrain.model, glm::vec3(0,-1,0));
+    terrain.model = glm::translate(terrain.model, glm::vec3(1250,-5000, -800));
 
 
     mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * terrain.model;
@@ -276,7 +279,6 @@ float Simulation::CalcPointLightBSphere(const PointLight &Light)
     float ret = (-Light.Attenuation.Linear + sqrtf(Light.Attenuation.Linear * Light.Attenuation.Linear - 4 * Light.Attenuation.Exp * (Light.Attenuation.Exp - 256 * MaxChannel * Light.DiffuseIntensity)))
                 /
                 2 * Light.Attenuation.Exp;
-    //return 100;
     return ret;
 
 }
@@ -298,7 +300,7 @@ void Simulation::DSDirectionalLightPass()
     m_DSDirLightPassTech.enable();
 
     glDisable(GL_CULL_FACE);
-    //glCullFace(GL_FRONT);
+    glCullFace(GL_FRONT);
 
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -306,9 +308,9 @@ void Simulation::DSDirectionalLightPass()
     glBlendFunc(GL_ONE, GL_ONE);
 
 
-    /*quad.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 8.0, 16.0));
+    quad.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, 0.0));
     glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * quad.model;
-    m_DSDirLightPassTech.set("gWVP", mvp);*/
+    //m_DSDirLightPassTech.set("gWVP", mvp);
     m_DSDirLightPassTech.set("gWVP", glm::mat4(1.0f));
     m_DSDirLightPassTech.set("gPositionMap", GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
     m_DSDirLightPassTech.set("gColorMap", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
@@ -323,7 +325,7 @@ void Simulation::DSDirectionalLightPass()
     quad.renderModel();
 
     glDisable(GL_BLEND);
-    // glCullFace(GL_BACK);
+     glCullFace(GL_BACK);
 
     // glEnable(GL_CULL_FACE);
 
@@ -348,31 +350,33 @@ void Simulation::InitLights()
     m_spotLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
     m_spotLight.Cutoff = 50.0f;
 
-    m_dirLight.AmbientIntensity = 0.5f;
-    m_dirLight.Color = COLOR_CYAN;
-    m_dirLight.DiffuseIntensity = 0.05f;
-    m_dirLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
+    m_dirLight.AmbientIntensity = 0.2f;
+    m_dirLight.Color = COLOR_WHITE;
+    m_dirLight.DiffuseIntensity = 0.25f;
+    m_dirLight.Direction = glm::vec3(-1.0f, -1.0f, -1.0f);
 
-    m_pointLight[0].DiffuseIntensity = 0.90f;
+    m_pointLight[0].DiffuseIntensity = 20.0f;
     m_pointLight[0].Color = COLOR_RED;
     m_pointLight[0].Position = glm::vec3(5.0f, 0.50f, 5.0f);
     m_pointLight[0].Attenuation.Constant = .50f;
     m_pointLight[0].Attenuation.Linear = .50f;
     m_pointLight[0].Attenuation.Exp = .50f;
 
-    m_pointLight[1].DiffuseIntensity = 0.30f;
+    m_pointLight[1].DiffuseIntensity = 30.0f;
     m_pointLight[1].Color = COLOR_BLUE;
     m_pointLight[1].Position = glm::vec3(0.0f, 2.5f, 2.0f);
     m_pointLight[1].Attenuation.Constant = 5.0f;
     m_pointLight[1].Attenuation.Linear = 0.5f;
     m_pointLight[1].Attenuation.Exp = .60f;
 
-    m_pointLight[2].DiffuseIntensity = 0.2f;
+    m_pointLight[2].DiffuseIntensity = 20.0f;
     m_pointLight[2].Color = COLOR_GREEN;
     m_pointLight[2].Position = glm::vec3(0.0f, 0.0f, 3.0f);
     m_pointLight[2].Attenuation.Constant = .60f;
     m_pointLight[2].Attenuation.Linear = 0.2f;
     m_pointLight[2].Attenuation.Exp = .2f;
+
+
 }
 
 
