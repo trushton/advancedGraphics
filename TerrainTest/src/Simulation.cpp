@@ -41,17 +41,68 @@ void Simulation::init()
     terrain.SetFile("../bin/data/drycreek2.tif");
     terrain.setup();
 
+    shap.resize(3);
+
+    shap[0].load("../bin/data/streamDCEW2/stream2.shp");
+    shap[0].createMesh(terrain.GetProjection(),terrain.GetOrigin(),glm::vec2(1,1),terrain);
+    shap[1].load("../bin/data/boundDCEW/boundDCEW.shp");
+    shap[1].createMesh(terrain.GetProjection(),terrain.GetOrigin(),glm::vec2(1,1),terrain);
+    shap[2].load("../bin/data/sitesDCEW2012/DCEWsites2013.shp");
+    shap[2].createMesh(terrain.GetProjection(),terrain.GetOrigin(),glm::vec2(1,1),terrain);
+
+//    proj.resize(7);
+//    for(uint i = 0; i < proj.size(); i++)
+//    {
+//        proj[i].setToMainCoordinateSystem(terrain.GetProjection(), terrain.GetOrigin());
+//    }
+//
+//    proj[0].setFile("../data/satellite/res.tif");
+//    proj[0].setup();
+//    proj[0].setScreenDims(windowWidth,windowHeight);
+//
+//    proj[0].setFile("../data/satellite/res2.tif");
+//    proj[0].setup();
+//    proj[0].setScreenDims(windowWidth,windowHeight);
+//
+//    proj[0].setFile("../data/satellite/res3.tif");
+//    proj[0].setup();
+//    proj[0].setScreenDims(windowWidth,windowHeight);
+//
+//    proj[0].setFile("../data/satellite/res4.tif");
+//    proj[0].setup();
+//    proj[0].setScreenDims(windowWidth,windowHeight);
+//
+//    proj[0].setFile("../data/satellite/res5.tif");
+//    proj[0].setup();
+//    proj[0].setScreenDims(windowWidth,windowHeight);
+//
+//    proj[0].setFile("../data/satellite/res6.tif");
+//    proj[0].setup();
+//    proj[0].setScreenDims(windowWidth,windowHeight);
+//
+//    proj[0].setFile("../data/satellite/em.1000.tif", projector::PROJECTOR_TYPE::DATA);
+//    proj[0].setup();
+//    proj[0].setScreenDims(windowWidth,windowHeight);
 
 
 }
 
 void Simulation::tick(float dt)
 {
+    for(uint i = 0; i < shap.size(); i++)
+    {
+        shap[i].model = glm::mat4(1.0f);
+    }
     terrain.model = glm::mat4(1.0f);
     object.model = glm::mat4(1.0f);
     sphere.model = glm::mat4(1.0f);
     quad.model = glm::mat4(1.0f);
     box.model = glm::mat4(1.0f);
+
+//    for(uint i = 0; i < proj.size(); i++)
+//    {
+//        proj[i].model = glm::mat4(1.0f);
+//    }
 }
 
 void Simulation::render()
@@ -61,6 +112,14 @@ void Simulation::render()
     DSGeometryPass();
 
     skybox->render();
+
+    //glDisable(GL_DEPTH_TEST);
+
+//    for(uint i = 0; i < proj.size(); i++)
+//    {
+//        proj[i].render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
+//    }
+
 
     glEnable(GL_STENCIL_TEST);
 
@@ -76,6 +135,8 @@ void Simulation::render()
 
 
     DSFinalPass();
+
+
 }
 
 void Simulation::DSGeometryPass()
@@ -126,6 +187,18 @@ void Simulation::DSGeometryPass()
 
     terrain.render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
 
+    for(uint i = 0; i < shap.size(); i++){
+        shap[i].model = glm::translate(shap[i].model, glm::vec3(1250,-5000, -800));
+
+        mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * shap[i].model;
+
+
+        m_DSGeomPassTech.set("gWVP", mvp);
+        m_DSGeomPassTech.set("gWorld", shap[i].model);
+        m_DSGeomPassTech.set("gColorMap", 0);
+
+        shap[i].render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
+    }
 
 
 //    mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * box2.model;
@@ -309,7 +382,7 @@ void Simulation::DSDirectionalLightPass()
 
 
     quad.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, 0.0));
-    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * quad.model;
+    //glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * quad.model;
     //m_DSDirLightPassTech.set("gWVP", mvp);
     m_DSDirLightPassTech.set("gWVP", glm::mat4(1.0f));
     m_DSDirLightPassTech.set("gPositionMap", GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);

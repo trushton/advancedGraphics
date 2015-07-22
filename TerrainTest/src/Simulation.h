@@ -13,6 +13,8 @@
 #include "graphics.h"
 #include "lights.h"
 #include "Terrain.h"
+#include "shape.h"
+#include "projector.h"
 
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
@@ -60,6 +62,8 @@ private:
     Model box, sphere, quad, cone, box2;
     Skybox * skybox;
     Terrain terrain;
+    vector<shape> shap;
+    vector<projector> proj;
 
     glm::vec3 m_boxPositions[5];
 
