@@ -11,7 +11,7 @@ layout (location = 3) out vec3 TexCoordOut;
 void main(void)
 {
 	WorldPosOut = WorldPos0; 
-    DiffuseOut = vec3(1,1,1);
+    DiffuseOut = vec3(1,0,0);
     NormalOut = normalize(Normal0); 
     TexCoordOut = vec3(TexCoord0, 0.0); 
 }

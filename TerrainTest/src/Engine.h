@@ -25,9 +25,10 @@ public:
 
     Input *input;
     Graphics *graphics;
+    std::chrono::time_point<std::chrono::high_resolution_clock> t1, t2;
+
 
 private:
-    std::chrono::time_point<std::chrono::high_resolution_clock> t1, t2;
     static Engine *currentEngine;
 };
 

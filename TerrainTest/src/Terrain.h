@@ -6,6 +6,8 @@
 #include "buffer.h"
 #include "renderer.h"
 #include "Engine.h"
+#include "grass_tech.h"
+#include <chrono>
 
 using namespace std;
 
@@ -37,6 +39,10 @@ public:
     {
         return &sr;
     }
+
+    void CreatePositionBuffer();
+    void RenderGrass();
+
 private:
     renderer Renderer;
     float** terrainData;
@@ -53,6 +59,11 @@ private:
     int width,height;
 
     GLuint m_Buffers[3];
+    grass_tech grass;
+
+    GLuint grass_VB;
+    std::chrono::time_point<std::chrono::high_resolution_clock> t1, t2;
+    float time;
 
 };
 

@@ -18,7 +18,7 @@ void Simulation::init()
     windowWidth = 1600;
     windowHeight = 900;
     InitLights();
-    InitBoxPositions();
+    //InitBoxPositions();
     m_gbuffer.Init(windowWidth, windowHeight);
     m_DSGeomPassTech.init();
     m_DSPointLightPassTech.init();
@@ -51,38 +51,39 @@ void Simulation::init()
     shap[2].createMesh(terrain.GetProjection(),terrain.GetOrigin(),glm::vec2(1,1),terrain);
 
 //    proj.resize(7);
+//
+//    proj[0].sositionMap", GBuffer::GBUFFER_TEXTURE_TYPE_POSITIOetFile("../bin/data/satellite/res.tif");
+//    proj[0].setup();
+//    proj[0].setScreenDims(windowWidth,windowHeight);
+//
+//    proj[0].setFile("../bin/data/satellite/res2.tif");
+//    proj[0].setup();
+//    proj[0].setScreenDims(windowWidth,windowHeight);
+//
+//    proj[0].setFile("../bin/data/satellite/res3.tif");
+//    proj[0].setup();
+//    proj[0].setScreenDims(windowWidth,windowHeight);
+//
+//    proj[0].setFile("../bin/data/satellite/res4.tif");
+//    proj[0].setup();
+//    proj[0].setScreenDims(windowWidth,windowHeight);
+//
+//    proj[0].setFile("../bin/data/satellite/res5.tif");
+//    proj[0].setup();
+//    proj[0].setScreenDims(windowWidth,windowHeight);
+//
+//    proj[0].setFile("../bin/data/satellite/res6.tif");
+//    proj[0].setup();
+//    proj[0].setScreenDims(windowWidth,windowHeight);
+//
+//    proj[0].setFile("../bin/data/em.1000.tif", projector::PROJECTOR_TYPE::DATA);
+//    proj[0].setup();
+//    proj[0].setScreenDims(windowWidth,windowHeight);
+//
 //    for(uint i = 0; i < proj.size(); i++)
 //    {
 //        proj[i].setToMainCoordinateSystem(terrain.GetProjection(), terrain.GetOrigin());
 //    }
-//
-//    proj[0].setFile("../data/satellite/res.tif");
-//    proj[0].setup();
-//    proj[0].setScreenDims(windowWidth,windowHeight);
-//
-//    proj[0].setFile("../data/satellite/res2.tif");
-//    proj[0].setup();
-//    proj[0].setScreenDims(windowWidth,windowHeight);
-//
-//    proj[0].setFile("../data/satellite/res3.tif");
-//    proj[0].setup();
-//    proj[0].setScreenDims(windowWidth,windowHeight);
-//
-//    proj[0].setFile("../data/satellite/res4.tif");
-//    proj[0].setup();
-//    proj[0].setScreenDims(windowWidth,windowHeight);
-//
-//    proj[0].setFile("../data/satellite/res5.tif");
-//    proj[0].setup();
-//    proj[0].setScreenDims(windowWidth,windowHeight);
-//
-//    proj[0].setFile("../data/satellite/res6.tif");
-//    proj[0].setup();
-//    proj[0].setScreenDims(windowWidth,windowHeight);
-//
-//    proj[0].setFile("../data/satellite/em.1000.tif", projector::PROJECTOR_TYPE::DATA);
-//    proj[0].setup();
-//    proj[0].setScreenDims(windowWidth,windowHeight);
 
 
 }
@@ -109,11 +110,9 @@ void Simulation::render()
 {
     m_gbuffer.StartFrame();
 
+
     DSGeometryPass();
-
-    skybox->render();
-
-    //glDisable(GL_DEPTH_TEST);
+    //skybox->render();
 
 //    for(uint i = 0; i < proj.size(); i++)
 //    {
@@ -128,14 +127,15 @@ void Simulation::render()
         DSPointLightsPass(i);
     }
 
+
     glDisable(GL_STENCIL_TEST);
+
 
     DSDirectionalLightPass();
     //terrain.render(view, projection);
 
 
     DSFinalPass();
-
 
 }
 
@@ -150,7 +150,7 @@ void Simulation::DSGeometryPass()
     // Only the geometry pass updates the depth buffer
 
     glDepthMask(GL_TRUE);
-
+    glDepthFunc(GL_LEQUAL);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_DEPTH_TEST);
@@ -160,7 +160,7 @@ void Simulation::DSGeometryPass()
     //for (unsigned int i = 0 ; i < ARRAY_SIZE_IN_ELEMENTS(m_boxPositions); i++) {
     box.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, -5, 0));
     box.model = glm::rotate(box.model, scale * 5, glm::vec3(0,1,0));
-    box.model = glm::scale(box.model, glm::vec3(5, 5, 5));
+    box.model = glm::scale(box.model, glm::vec3(10, 10, 10));
 
     //box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 1000, 0));
 
@@ -210,7 +210,6 @@ void Simulation::DSGeometryPass()
 //    box2.renderModel();
 
     //}
-
     glDepthMask(GL_FALSE);
 
 }
@@ -263,15 +262,6 @@ mvp);
         */
 }
 
-/*void Simulation::BeginLightPasses()
-    {
-        glEnable(GL_BLEND);
-        glBlendEquation(GL_FUNC_ADD);
-        glBlendFunc(GL_ONE, GL_ONE);
-
-        m_gbuffer.BindForReading();
-        glClear(GL_COLOR_BUFFER_BIT);
-    }*/
 
 
 void Simulation::DSPointLightsPass(unsigned int PointLightIndex)
@@ -295,7 +285,7 @@ void Simulation::DSPointLightsPass(unsigned int PointLightIndex)
     sphere.model = glm::translate(glm::mat4(1.0f), m_pointLight[PointLightIndex].Position); //MIGHT NEED TO BE LIGHT POS
 
 
-    m_DSPointLightPassTech.SetPointLight(m_pointLight[PointLightIndex]);
+    m_DSPointLightPassTech.SetPointLight(this->m_pointLight[PointLightIndex]);
 
     float BSphereScale = CalcPointLightBSphere(m_pointLight[PointLightIndex]);
     sphere.model = glm::scale(sphere.model, glm::vec3(BSphereScale, BSphereScale, BSphereScale));
@@ -352,6 +342,7 @@ float Simulation::CalcPointLightBSphere(const PointLight &Light)
     float ret = (-Light.Attenuation.Linear + sqrtf(Light.Attenuation.Linear * Light.Attenuation.Linear - 4 * Light.Attenuation.Exp * (Light.Attenuation.Exp - 256 * MaxChannel * Light.DiffuseIntensity)))
                 /
                 2 * Light.Attenuation.Exp;
+    //return 10000;
     return ret;
 
 }
@@ -389,7 +380,7 @@ void Simulation::DSDirectionalLightPass()
     m_DSDirLightPassTech.set("gColorMap", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
     m_DSDirLightPassTech.set("gNormalMap", GBuffer::GBUFFER_TEXTURE_TYPE_NORMAL);
     m_DSDirLightPassTech.set("gEyeWorldPos", Engine::getEngine()->graphics->camera->getPos());
-    m_DSDirLightPassTech.set("gMatSpecularIntensity", 1.0f);
+    m_DSDirLightPassTech.set("gMatSpecularIntensity", 0.10f);
     m_DSDirLightPassTech.set("gSpecularPower", 32.0f);
 
     glUniform2f(m_DSDirLightPassTech.getLocation("gScreenSize"), (float) windowWidth, (float) windowHeight);
@@ -413,15 +404,15 @@ void Simulation::DSFinalPass()
 
 void Simulation::InitLights()
 {
-    m_spotLight.AmbientIntensity = 0.010f;
-    m_spotLight.DiffuseIntensity = 0.01f;
-    m_spotLight.Color = COLOR_RED;
-    m_spotLight.Attenuation.Linear = 0.0f;
-    m_spotLight.Attenuation.Constant = 0.0f;
-    m_spotLight.Attenuation.Exp =  0.3f;
-    m_spotLight.Position = glm::vec3(0.0, 1.5, 0.0f);
-    m_spotLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
-    m_spotLight.Cutoff = 50.0f;
+//    m_spotLight.AmbientIntensity = 0.010f;
+//    m_spotLight.DiffuseIntensity = 0.01f;
+//    m_spotLight.Color = COLOR_RED;
+//    m_spotLight.Attenuation.Linear = 0.0f;
+//    m_spotLight.Attenuation.Constant = 0.0f;
+//    m_spotLight.Attenuation.Exp =  0.3f;
+//    m_spotLight.Position = glm::vec3(0.0, 1.5, 0.0f);
+//    m_spotLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
+//    m_spotLight.Cutoff = 50.0f;
 
     m_dirLight.AmbientIntensity = 0.2f;
     m_dirLight.Color = COLOR_WHITE;
@@ -453,20 +444,21 @@ void Simulation::InitLights()
 }
 
 
-void Simulation::InitBoxPositions()
-{
-    m_boxPositions[0] = glm::vec3(0.0f, 0.0f, 0.0f);
-    m_boxPositions[1] = glm::vec3(1.0f, 1.0f, 1.0f);
-    m_boxPositions[2] = glm::vec3(-5.0f, -1.0f, 12.0f);
-    m_boxPositions[3] = glm::vec3(4.0f, 4.0f, 15.0f);
-    m_boxPositions[4] = glm::vec3(-4.0f, 2.0f, 20.0f);
-}
+//void Simulation::InitBoxPositions()
+//{
+//    m_boxPositions[0] = glm::vec3(0.0f, 0.0f, 0.0f);
+//    m_boxPositions[1] = glm::vec3(1.0f, 1.0f, 1.0f);
+//    m_boxPositions[2] = glm::vec3(-5.0f, -1.0f, 12.0f);
+//    m_boxPositions[3] = glm::vec3(4.0f, 4.0f, 15.0f);
+//    m_boxPositions[4] = glm::vec3(-4.0f, 2.0f, 20.0f);
+//}
 
 /*void Simulation::DSLightPass()
     {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(G    getRawValuesFromFile(fname, vecs, min, max, xres, yres, projection,x,y,width,height);
+L_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         m_gbuffer.BindForReading();
 

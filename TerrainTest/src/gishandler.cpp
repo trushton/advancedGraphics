@@ -622,55 +622,55 @@ vector<int> indexs = vector<int>();
 // Time to construct a height map based on the xres and yres
 for (uint i = 0; i < input.size() - 1; i++)
 {
-for (uint j = 0; j < input[i].size() - 1; j++)
-{
+    for (uint j = 0; j < input[i].size() - 1; j++)
+    {
 
-float UL = (float)(input[i][j]) / (float)(max); // Upper left
-float LL = (float)(input[i + 1][j]) / (float)(max); // Lower left
-float UR = (float)(input[i][j + 1]) / (float)(max); // Upper right
-float LR = (float)(input[i + 1][j + 1]) / (float)(max); // Lower right
+        float UL = (float)(input[i][j]) / (float)(max); // Upper left
+        float LL = (float)(input[i + 1][j]) / (float)(max); // Lower left
+        float UR = (float)(input[i][j + 1]) / (float)(max); // Upper right
+        float LR = (float)(input[i + 1][j + 1]) / (float)(max); // Lower right
 
-if (UL <= 0)
-{
-UL = 0;
-}
-if (UR <= 0)
-{
-UR = 0;
-}
-if (LR <= 0)
-{
-LR = 0;
-}
-if (LL <= 0)
-{
-LL = 0;
-}
+        if (UL <= 0)
+        {
+            UL = 0;
+        }
+        if (UR <= 0)
+        {
+            UR = 0;
+        }
+        if (LR <= 0)
+        {
+            LR = 0;
+        }
+        if (LL <= 0)
+        {
+            LL = 0;
+        }
 
-vec3 ULV = {i * xres, UL * max, j * yres};
-vec3 LLV = {(i + 1)*xres, LL * max, j * yres};
-vec3 URV = {i * xres, UR * max, (j + 1)*yres};
-vec3 LRV = {(i + 1)*xres, LR * max, (j + 1)*yres};
+        vec3 ULV = {i * xres, UL * max, j * yres};
+        vec3 LLV = {(i + 1)*xres, LL * max, j * yres};
+        vec3 URV = {i * xres, UR * max, (j + 1)*yres};
+        vec3 LRV = {(i + 1)*xres, LR * max, (j + 1)*yres};
 
-// compute smoothed normal
-vec3 a = ComputeNormal(ULV, i, j, input.size(), input[i].size(), input, max, xres, yres);
-vec3 b = ComputeNormal(LLV, i + 1, j, input.size(), input[i].size(), input, max, xres, yres);
-vec3 c = ComputeNormal(URV, i, j + 1, input.size(), input[i].size(), input, max, xres, yres);
-vec3 d = ComputeNormal(LRV, i + 1, j + 1, input.size(), input[i].size(), input, max, xres, yres);
+        // compute smoothed normal
+        vec3 a = ComputeNormal(ULV, i, j, input.size(), input[i].size(), input, max, xres, yres);
+        vec3 b = ComputeNormal(LLV, i + 1, j, input.size(), input[i].size(), input, max, xres, yres);
+        vec3 c = ComputeNormal(URV, i, j + 1, input.size(), input[i].size(), input, max, xres, yres);
+        vec3 d = ComputeNormal(LRV, i + 1, j + 1, input.size(), input[i].size(), input, max, xres, yres);
 
-vectors.push_back(TerrainVertex{ {i * xres, UL, j * yres}, a, {(float)i / (float)input.size(), (float)j / (float)input[i].size()} } );
-vectors.push_back(TerrainVertex{ {(i + 1)*xres, LL, j * yres}, b, {(float)(i + 1) / (float)input.size(), (float)j / (float)input[i].size()} } );
-vectors.push_back(TerrainVertex{ {i * xres, UR, (j + 1)*yres}, c, {(float)i / (float)input.size(), (float)(j + 1) / (float)input[i].size()} } );
-vectors.push_back(TerrainVertex{ {(i + 1)*xres, LR, (j + 1)*yres}, d, {(float)(i + 1) / (float)input.size(), (float)(j + 1) / (float)input[i].size()} } );
-//cout << vectors[vectors.size()-1].normal.z << endl;
+        vectors.push_back(TerrainVertex{ {i * xres, UL, j * yres}, a, {(float)i / (float)input.size(), (float)j / (float)input[i].size()} } );
+        vectors.push_back(TerrainVertex{ {(i + 1)*xres, LL, j * yres}, b, {(float)(i + 1) / (float)input.size(), (float)j / (float)input[i].size()} } );
+        vectors.push_back(TerrainVertex{ {i * xres, UR, (j + 1)*yres}, c, {(float)i / (float)input.size(), (float)(j + 1) / (float)input[i].size()} } );
+        vectors.push_back(TerrainVertex{ {(i + 1)*xres, LR, (j + 1)*yres}, d, {(float)(i + 1) / (float)input.size(), (float)(j + 1) / (float)input[i].size()} } );
+        //cout << vectors[vectors.size()-1].normal.z << endl;
 
-indexs.push_back(vectors.size() - 4);
-indexs.push_back(vectors.size() - 1);
-indexs.push_back(vectors.size() - 2);
-indexs.push_back(vectors.size() - 4);
-indexs.push_back(vectors.size() - 3);
-indexs.push_back(vectors.size() - 1);
-}
+        indexs.push_back(vectors.size() - 4);
+        indexs.push_back(vectors.size() - 1);
+        indexs.push_back(vectors.size() - 2);
+        indexs.push_back(vectors.size() - 4);
+        indexs.push_back(vectors.size() - 3);
+        indexs.push_back(vectors.size() - 1);
+    }
 }
 
 // Pass Vectors out

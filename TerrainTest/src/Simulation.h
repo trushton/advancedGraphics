@@ -65,7 +65,7 @@ private:
     vector<shape> shap;
     vector<projector> proj;
 
-    glm::vec3 m_boxPositions[5];
+    //glm::vec3 m_boxPositions[5];
 
     int windowWidth;
     int windowHeight;

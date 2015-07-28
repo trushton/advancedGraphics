@@ -16,6 +16,8 @@ Terrain::Terrain(string filename)
 
 void Terrain::setup()
 {
+    t1 = std::chrono::high_resolution_clock::now();
+
     double x,y;
     getRawValuesFromFile(fname, vecs, min, max, xres, yres, projection,x,y,width,height);
     origin.x = x;
@@ -31,6 +33,8 @@ void Terrain::setup()
     Renderer.addShader(GL_FRAGMENT_SHADER,"../shaders/terrain.frag");
     cout << Renderer.compile() << endl;
     cout << Renderer.link() << endl;
+    grass.init();
+    CreatePositionBuffer();
 
     glGenBuffers(ARRAY_SIZE_IN_ELEMENTS(m_Buffers), m_Buffers);
 
@@ -57,11 +61,11 @@ void Terrain::setup()
 //
 //    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[INDEX_BUFFER]);
 //    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), &indices[0], GL_STATIC_DRAW);
+
 }
 
 void Terrain::update(float dt)
 {
-
 }
 
 void Terrain::render(glm::mat4& view, glm::mat4& projection)
@@ -85,6 +89,15 @@ void Terrain::render(glm::mat4& view, glm::mat4& projection)
     Renderer.setUniformFloat("Min", min);
 
     Renderer.render(indices.size());
+
+
+    t2 = std::chrono::high_resolution_clock::now();
+    time = std::chrono::duration_cast<std::chrono::duration<float> >(t2 - t1).count();
+    //t1=t2;
+    //cout << time <<endl;
+
+    RenderGrass();
+
 }
 
 
@@ -102,7 +115,7 @@ float Terrain::SampleTerrain(glm::vec2 point)
     //normalized.y *= -1;
     cout << origin.y << " " << end.y << endl;
     cout << width << " " << height << endl;
-    cout << "NORMALIZED X: " << normalized.x << " NROMALIZED Y: " << normalized.y << endl;
+    cout << "NORMALIZED X: " << normalized.x << " NORMALIZED Y: " << normalized.y << endl;
     if(normalized.x < 1 && normalized.x >= 0 && normalized.y < 1 && normalized.y >= 0)
     {
         int locx = (width-1) * normalized.x;
@@ -111,4 +124,43 @@ float Terrain::SampleTerrain(glm::vec2 point)
         return vecs[locx][locy];
     }
     return -1;
+}
+
+void Terrain::CreatePositionBuffer()
+{
+    grass.enable();
+    vector<glm::vec3> positions;
+    positions.resize(vertexes.size());
+
+    for(uint i = 0; i < vertexes.size(); i++)
+    {
+        positions[i] = glm::vec3(vertexes[i].position.x, vertexes[i].position.y *max, vertexes[i].position.z);
+    }
+
+    glGenBuffers(1, &grass_VB);
+    glBindBuffer(GL_ARRAY_BUFFER, grass_VB);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(positions[0]) * positions.size(), &positions[0], GL_STATIC_DRAW);
+}
+
+void Terrain::RenderGrass()
+{
+    grass.enable();
+    //glDepthFunc(GL_LESS);
+
+    glm::mat4 vp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view;
+    glm::vec3 camPos = Engine::getEngine()->graphics->camera->getPos();
+    grass.set("model", model);
+    grass.set("gVP", vp);
+    grass.set("gCameraPos", camPos);
+    grass.set("time", time);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, grass_VB);
+    glVertexAttribPointer(0,3, GL_FLOAT, GL_FALSE, 0, 0); //position
+
+    glDrawArrays(GL_POINTS, 0, vertexes.size());
+    glDisableVertexAttribArray(0);
+
+
+
 }
