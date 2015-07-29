@@ -8,14 +8,14 @@ Camera::Camera(Engine *eng)
         : engine(eng)
 {
     // initialize view
-    Position = glm::vec3(12748.4f, -2685.65f, 2275.37);
-    ViewDir = glm::vec3(-0.675698, -0.34121, 0.688849);
+    Position = glm::vec3(477.589f, 300.74f, 317.696f);
+    ViewDir = glm::vec3(-0.776424f, -0.263008f, -0.612791f);
     RightVector = glm::vec3(1.0f, 0.0, 0.0f);
     UpVector = glm::vec3(0.0f, 1.0f, 0.0f);
 
 
     RotatedX = RotatedY = RotatedZ = 0.0f;
-    movementSpeed = 5.0f;
+    movementSpeed = 1.0f;
 }
 
 void Camera::Move(glm::vec3 Direction)

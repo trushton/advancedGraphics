@@ -8,6 +8,7 @@
 #include "Engine.h"
 #include "grass_tech.h"
 #include <chrono>
+#include <ctime>
 
 using namespace std;
 
@@ -61,6 +62,7 @@ private:
     GLuint m_Buffers[3];
     grass_tech grass;
 
+    vector<glm::vec3> positions;
     GLuint grass_VB;
     std::chrono::time_point<std::chrono::high_resolution_clock> t1, t2;
     float time;

@@ -1,15 +1,16 @@
-#ifndef TERRAINTEST_GRASS_TECH_H
-#define TERRAINTEST_GRASS_TECH_H
-#include "Program.h"
-#include "lights.h"
-#include <iostream>
-#include <chrono>
+#ifndef PS_UPDATE_TECHNIQUE_H
+#define	PS_UPDATE_TECHNIQUE_H
 
-class grass_tech : public Program
+#include "Program.h"
+#include <iostream>
+
+
+class PSUpdate : public Program
 {
     public:
         glm::mat4 model;
-        grass_tech();
+
+        PSUpdate();
 
         void init();
 
@@ -28,6 +29,5 @@ class grass_tech : public Program
 
         void initShaderLocations();
 };
+#endif	/* PS_UPDATE_TECHNIQUE_H */
 
-
-#endif

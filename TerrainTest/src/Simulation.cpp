@@ -1,3 +1,4 @@
+#include <sys/time.h>
 #include "lights.h"
 #include "Simulation.h"
 #include "skybox.h"
@@ -14,6 +15,7 @@ Simulation::~Simulation()
 
 void Simulation::init()
 {
+    fireworks.InitParticleSystem(glm::vec3(0,0,0));
 
     windowWidth = 1600;
     windowHeight = 900;
@@ -28,6 +30,8 @@ void Simulation::init()
     //m_DSSpotLightPassTech.init();
     //m_DSSpotLightPassTech.SetSpotLight(m_spotLight);
     m_nullTech.init();
+
+
 
     //object.loadModel("../bin/phoenix_ugv.md2");
     sphere.loadModel("../bin/sphere.obj");
@@ -86,6 +90,7 @@ void Simulation::init()
 //    }
 
 
+
 }
 
 void Simulation::tick(float dt)
@@ -112,7 +117,9 @@ void Simulation::render()
 
 
     DSGeometryPass();
-    //skybox->render();
+
+    skybox->render();
+
 
 //    for(uint i = 0; i < proj.size(); i++)
 //    {
@@ -131,12 +138,28 @@ void Simulation::render()
     glDisable(GL_STENCIL_TEST);
 
 
+
     DSDirectionalLightPass();
     //terrain.render(view, projection);
 
+    renderParticles();
 
     DSFinalPass();
 
+}
+
+void Simulation::renderParticles(){
+    timeval t;
+
+    gettimeofday(&t, NULL);
+    timeNow = t.tv_sec*1000 + t.tv_usec/1000;
+
+    int DeltaTimeMillis = (int)(timeNow - currentTime);
+    currentTime = timeNow;
+
+    glEnable(GL_DEPTH_TEST);
+    fireworks.Render(DeltaTimeMillis);
+    glDisable(GL_DEPTH_TEST);
 }
 
 void Simulation::DSGeometryPass()
@@ -246,7 +269,7 @@ void Simulation::DSStencilPass(unsigned int PointLightIndex)
 
     sphere.renderModel();
 
-        /*
+/*
         cone.model = glm::translate(glm::mat4(1.0f), m_spotLight.Position); // MIGHT NEED TO PUT POINT LIGHT POS
 
         BSphereScale = CalcSpotLightBSphere(m_spotLight);

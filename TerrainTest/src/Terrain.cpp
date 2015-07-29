@@ -129,13 +129,47 @@ float Terrain::SampleTerrain(glm::vec2 point)
 void Terrain::CreatePositionBuffer()
 {
     grass.enable();
-    vector<glm::vec3> positions;
     positions.resize(vertexes.size());
+    vector<int> inactive;
+    float maxDisplacement = 10.0f;
+    float direction;
+    float val;
+    //float activate;
 
-    for(uint i = 0; i < vertexes.size(); i++)
-    {
-        positions[i] = glm::vec3(vertexes[i].position.x, vertexes[i].position.y *max, vertexes[i].position.z);
+    //seed random number generator
+    std::srand(std::time(0));
+
+
+    for(uint i = 0; i < vertexes.size(); i++) {
+        val = maxDisplacement * ((float) std::rand() / RAND_MAX);
+        direction = (float) std::rand() / RAND_MAX;
+//        activate = (float) std::rand() / RAND_MAX;
+
+        //randomizes which grass blades are rendered
+//        if (activate > 0.7){
+
+            if (direction > 0.5) {
+                positions[i] = glm::vec3(vertexes[i].position.x + val * 1.25, vertexes[i].position.y * max,
+                                         vertexes[i].position.z - val);
+            }
+            else {
+                positions[i] = glm::vec3(vertexes[i].position.x - val, vertexes[i].position.y * max,
+                                         vertexes[i].position.z + val * 1.3);
+            }
+//        }
+//        else
+//        {
+//            //push onto a vector to know which will be deleted;
+//            positions[i] = glm::vec3(0,0,0);
+//            inactive.push_back(i);
+//        }
     }
+
+//    for(uint i = 0; i < inactive.size(); i++)
+//    {
+//        positions.erase(positions.begin()+ inactive[i]);
+//    }
+//    positions.shrink_to_fit();
 
     glGenBuffers(1, &grass_VB);
     glBindBuffer(GL_ARRAY_BUFFER, grass_VB);
@@ -158,7 +192,7 @@ void Terrain::RenderGrass()
     glBindBuffer(GL_ARRAY_BUFFER, grass_VB);
     glVertexAttribPointer(0,3, GL_FLOAT, GL_FALSE, 0, 0); //position
 
-    glDrawArrays(GL_POINTS, 0, vertexes.size());
+    glDrawArrays(GL_POINTS, 0, positions.size());
     glDisableVertexAttribArray(0);
 
 

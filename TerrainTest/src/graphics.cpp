@@ -29,8 +29,8 @@ void Graphics::init()
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     //SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
 
     window = SDL_CreateWindow("Deferred Shading With Terrain", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight,
                               SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
@@ -143,7 +143,7 @@ void Graphics::windowResized()
     projection = glm::perspective(45.0f, //the FoV typically 90 degrees is good which is what this is set to
                                   float(width) /
                                   float(height), //Aspect Ratio, so Circles stay Circular
-                                  0.01f, //Distance to the near plane, normally a small value like this
+                                  0.9f, //Distance to the near plane, normally a small value like this
                                   1000000.0f); //Distance to the far plane,
 }
 

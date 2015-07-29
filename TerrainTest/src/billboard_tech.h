@@ -1,15 +1,15 @@
-#ifndef TERRAINTEST_GRASS_TECH_H
-#define TERRAINTEST_GRASS_TECH_H
+#ifndef BILLBOARD_TECH_H
+#define	BILLBOARD_TECH_H
 #include "Program.h"
 #include "lights.h"
 #include <iostream>
 #include <chrono>
 
-class grass_tech : public Program
+class billboard_tech : public Program
 {
     public:
         glm::mat4 model;
-        grass_tech();
+        billboard_tech();
 
         void init();
 

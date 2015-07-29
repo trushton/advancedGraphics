@@ -15,6 +15,7 @@
 #include "Terrain.h"
 #include "shape.h"
 #include "projector.h"
+#include "particle_system.h"
 
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
@@ -45,6 +46,8 @@ public:
     void InitBoxPositions();
     void DSLightPass();
 
+    void renderParticles();
+
 private:
     GBuffer m_gbuffer;
     Model object;
@@ -69,6 +72,10 @@ private:
 
     int windowWidth;
     int windowHeight;
+
+    ParticleSystem fireworks;
+    long long currentTime, timeNow;
+
 };
 
 

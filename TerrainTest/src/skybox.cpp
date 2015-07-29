@@ -6,12 +6,12 @@
 
 Skybox::Skybox()
 {
-    m_fileNames[0] = "../bin/sp3right.jpg";
-    m_fileNames[1] = "../bin/sp3left.jpg";
-    m_fileNames[3] = "../bin/sp3top.jpg";
-    m_fileNames[2] = "../bin/sp3bot.jpg";
-    m_fileNames[4] = "../bin/sp3front.jpg";
-    m_fileNames[5] = "../bin/sp3back.jpg";
+    m_fileNames[0] = "../bin/skybox/posx.jpg";
+    m_fileNames[1] = "../bin/skybox/negx.jpg";
+    m_fileNames[3] = "../bin/skybox/posy.jpg";
+    m_fileNames[2] = "../bin/skybox/negy.jpg";
+    m_fileNames[4] = "../bin/skybox/posz.jpg";
+    m_fileNames[5] = "../bin/skybox/negz.jpg";
 
     init();
 }
