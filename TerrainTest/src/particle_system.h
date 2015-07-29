@@ -29,18 +29,21 @@ class ParticleSystem {
     private:
         void updateParticles(int DeltaTimeMillis);
         void renderParticles();
+
         bool isFirst;
+
         unsigned int currVB;
         unsigned int currTFB;
+
         GLuint m_particleBuffer[2];
         GLuint m_transformFeedback[2];
-        billboard_tech m_billboardTechnique;
 
+        billboard_tech m_billboardTechnique;
         PSUpdate m_updateTechnique;
 
         RandomTexture random_texture;
         Texture* texture;
-        int time;
+        int timeT;
 };
 
 #endif	/* PARTICLE_SYSTEM_H */

@@ -28,7 +28,7 @@ ParticleSystem::ParticleSystem()
     currTFB = 1;
 
     isFirst = true;
-    time = 0;
+    //timeT = 0;
     texture = NULL;
 
     ZERO_MEM(m_transformFeedback);
@@ -72,7 +72,7 @@ void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
     m_updateTechnique.enable();
     m_updateTechnique.set("gRandomTexture", RANDOM_TEXTURE_UNIT_INDEX);
     m_updateTechnique.set("gLauncherLife", 100.f);
-    m_updateTechnique.set("gShellLife", 10000.f);
+    m_updateTechnique.set("gShellLife", 5000.f);
     m_updateTechnique.set("gSecondaryLife", 2500.f);
 
     random_texture.InitRandomTexture(1000);
@@ -89,13 +89,12 @@ void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
 
     texture = new Texture(GL_TEXTURE_2D, "../bin/fireworks_red.jpg");
     texture->Load();
-
+    timeT = 0;
 }
 
 void ParticleSystem::Render(int DeltaTimeMillis)
 {
-    time += DeltaTimeMillis;
-    cout << DeltaTimeMillis << endl;
+    timeT += DeltaTimeMillis;
 
     updateParticles(DeltaTimeMillis);
     renderParticles();
@@ -108,7 +107,7 @@ void ParticleSystem::Render(int DeltaTimeMillis)
 void ParticleSystem::updateParticles(int DeltaTimeMillis)
 {
     m_updateTechnique.enable();
-    m_updateTechnique.set("gTime", time);
+    m_updateTechnique.set("gTime", timeT);
     m_updateTechnique.set("gDeltaTime", DeltaTimeMillis);
 
     random_texture.Bind(RANDOM_TEXTURE_UNIT);

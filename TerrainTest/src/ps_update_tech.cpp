@@ -68,8 +68,8 @@ void PSUpdate::initShaderLocations()
 {
     glUseProgram(program);
     locations["gDeltaTime"] = glGetAttribLocation(program, "gDeltaTime");
-    locations["gRandomTexture"] = glGetUniformLocation(program, "gRandomTexture");
     locations["gTime"] = glGetUniformLocation(program, "gTime");
+    locations["gRandomTexture"] = glGetUniformLocation(program, "gRandomTexture");
     locations["gLauncherLife"] = glGetUniformLocation(program, "gLauncherLife");
     locations["gShellLife"] = glGetUniformLocation(program, "gShellLife");
     locations["gSecondaryLife"] = glGetUniformLocation(program, "gSecondaryLife");

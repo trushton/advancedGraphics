@@ -22,6 +22,9 @@ uniform float gLauncherLife;
 uniform float gShellLife;
 uniform float gSecondaryLife;
 
+float LAUNCHER = 0.0f;
+float SHELL = 1.0f;
+float SECONDARY = 2.0f;
 
 
 vec3 GetRandomDir(float TexCoord)
@@ -37,11 +40,11 @@ void main() {
 
     float Age = Age0[0] + gDeltaTime;
 
-    if(Type0[0] == 0.0f)
+    if(Type0[0] == LAUNCHER)
     {
         if(Age >= gLauncherLife)
         {
-            Type1 = 1.0f;
+            Type1 = SHELL;
             Position1 = Position0[0];
             vec3 Dir = GetRandomDir(gTime/1000.0);
             Dir.y = max(Dir.y, 0.5);
@@ -51,7 +54,7 @@ void main() {
             EndPrimitive();
             Age = 0.0;
         }
-        Type1 = 0.0f;
+        Type1 = LAUNCHER;
         Position1 = Position0[0];
         Velocity1 = Velocity0[0];
         Age1 = Age;
@@ -65,9 +68,9 @@ void main() {
         vec3 DeltaP = DeltaTimeSecs * Velocity0[0];
         vec3 DeltaV = vec3(DeltaTimeSecs)*(0.0,-0.981,0.0);
 
-        if(Type0[0] == 1.0f){
+        if(Type0[0] == SHELL){
             if(Age < gShellLife){
-                Type1 = 1.0f;
+                Type1 = SHELL;
                 Position1 = Position0[0] + DeltaP;
                 Velocity1 = Velocity0[0] + DeltaV;
                 Age1 = Age;
@@ -77,12 +80,11 @@ void main() {
             else{
                 for(int i = 0; i < 10; i++)
                 {
-                    Type1 = 2.0f;
+                    Type1 = SECONDARY;
                     Position1 = Position0[0];
                     vec3 Dir = GetRandomDir((gTime+i)/1000.0);
                     Velocity1 = normalize(Dir) / 20.0;
                     Age1 = 0.0f;
-
                     EmitVertex();
                     EndPrimitive();
                 }
@@ -91,11 +93,10 @@ void main() {
         else{
             if(Age < gSecondaryLife)
             {
-                Type1 = 2.0f;
+                Type1 = SECONDARY;
                 Position1 = Position0[0] + DeltaP;
                 Velocity1 = Velocity0[0] + DeltaV;
                 Age1 = Age;
-
                 EmitVertex();
                 EndPrimitive();
             }

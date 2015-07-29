@@ -89,7 +89,8 @@ void Simulation::init()
 //        proj[i].setToMainCoordinateSystem(terrain.GetProjection(), terrain.GetOrigin());
 //    }
 
-
+    timeNow = 0;
+    currentTime = 0;
 
 }
 
@@ -150,10 +151,14 @@ void Simulation::render()
 
 void Simulation::renderParticles(){
     timeval t;
+    static bool first = true;
 
     gettimeofday(&t, NULL);
     timeNow = t.tv_sec*1000 + t.tv_usec/1000;
-
+    if(first){
+        currentTime = timeNow;
+        first = false;
+    }
     int DeltaTimeMillis = (int)(timeNow - currentTime);
     currentTime = timeNow;
 
