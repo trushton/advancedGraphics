@@ -59,7 +59,7 @@ private:
     DSDirLightPassTech m_DSDirLightPassTech;
 
     DirectionalLight m_dirLight;
-    PointLight m_pointLight[3];
+    vector<PointLight> m_pointLight;
 
     Model box, sphere, quad, box2;
     Skybox * skybox;
@@ -72,7 +72,8 @@ private:
     int windowHeight;
 
     ParticleSystem fireworks;
-    long long currentTime, timeNow;
+    std::chrono::time_point<std::chrono::high_resolution_clock> t1, t2;
+    int time;
 
     water_tech water;
 

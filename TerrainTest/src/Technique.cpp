@@ -75,7 +75,6 @@ void Technique::initShaderLocations()
 {
     glUseProgram(program);
     locations["gWVP"] = glGetUniformLocation(program, "gWVP");
-
     if (locations["gWVP"]  == INVALID_UNIFORM_LOCATION ) {
 
         std::cout << "TEST!" << std::endl;

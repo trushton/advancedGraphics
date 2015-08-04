@@ -19,7 +19,13 @@
 #define RANDOM_TEXTURE_UNIT GL_TEXTURE3
 #define RANDOM_TEXTURE_UNIT_INDEX 3
 
-
+struct Particle
+{
+    float Type;
+    glm::vec3 Pos;
+    glm::vec3 Vel;
+    float LifetimeMillis;
+};
 
 ParticleSystem::ParticleSystem()
 {
@@ -49,7 +55,7 @@ ParticleSystem::~ParticleSystem()
 
 void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
 {
-    Particle Particles[MAX_PARTICLES];
+    Particle Particles[1000];
     ZERO_MEM(Particles);
 
     Particles[0].Type = PARTICLE_TYPE_LAUNCHER;
@@ -71,7 +77,7 @@ void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
 
     m_updateTechnique.enable();
     m_updateTechnique.set("gRandomTexture", RANDOM_TEXTURE_UNIT_INDEX);
-    m_updateTechnique.set("gLauncherLife", 100.f);
+    m_updateTechnique.set("gLauncherLife", 10000.f);
     m_updateTechnique.set("gShellLife", 10000.f);
     m_updateTechnique.set("gSecondaryLife", 2500.f);
 
@@ -89,12 +95,14 @@ void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
 
     texture = new Texture(GL_TEXTURE_2D, "../bin/fireworks_red.jpg");
     texture->Load();
+
+
 }
 
 void ParticleSystem::Render(int DeltaTimeMillis)
 {
     timeT += DeltaTimeMillis;
-
+    cout << "total time: " << timeT << " |  DeltaTime: " << DeltaTimeMillis << endl;
     updateParticles(DeltaTimeMillis);
     renderParticles();
 
@@ -112,8 +120,8 @@ void ParticleSystem::updateParticles(int DeltaTimeMillis)
     random_texture.Bind(RANDOM_TEXTURE_UNIT);
 
     glEnable(GL_RASTERIZER_DISCARD);
-    glBindBuffer(GL_ARRAY_BUFFER, m_particleBuffer[currVB]);
-    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, m_transformFeedback[currTFB]);
+    glBindBuffer(GL_ARRAY_BUFFER, m_particleBuffer[currTFB]);
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, m_transformFeedback[currVB]);
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
@@ -130,9 +138,11 @@ void ParticleSystem::updateParticles(int DeltaTimeMillis)
     if (isFirst) {
         glDrawArrays(GL_POINTS, 0, 1);
         isFirst = false;
+
     }
     else {
         glDrawTransformFeedback(GL_POINTS, m_transformFeedback[currVB]);
+        cout << m_transformFeedback[currVB] << endl;
     }
 
     glEndTransformFeedback();

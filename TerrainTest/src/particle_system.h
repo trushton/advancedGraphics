@@ -10,13 +10,7 @@
 
 
 
-struct Particle
-{
-    float Type;
-    glm::vec3 Pos;
-    glm::vec3 Vel;
-    float LifetimeMillis;
-};
+
 
 class ParticleSystem {
 

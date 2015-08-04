@@ -16,7 +16,7 @@ Simulation::~Simulation()
 void Simulation::init()
 {
     fireworks.InitParticleSystem(glm::vec3(0,1,0));
-
+    m_pointLight.resize(3);
     windowWidth = 1600;
     windowHeight = 900;
     InitLights();
@@ -28,8 +28,9 @@ void Simulation::init()
     m_DSDirLightPassTech.init();
     m_DSDirLightPassTech.SetDirectionalLight(m_dirLight);
     m_nullTech.init();
+    InitLights();
 
-    //water.init();
+    water.init();
 
     sphere.loadModel("../bin/sphere.obj");
     quad.loadModel("../bin/quad.obj");
@@ -85,8 +86,7 @@ void Simulation::init()
 //        proj[i].setToMainCoordinateSystem(terrain.GetProjection(), terrain.GetOrigin());
 //    }
 
-    timeNow = 0;
-    currentTime = 0;
+    t2 = t1 = std::chrono::high_resolution_clock::now();
 
 }
 
@@ -127,9 +127,8 @@ void Simulation::render()
 
 
     glEnable(GL_STENCIL_TEST);
-    renderParticles();
 
-    for (unsigned int i = 0 ; i < ARRAY_SIZE_IN_ELEMENTS(m_pointLight); i++) {
+    for (unsigned int i = 0 ; i < m_pointLight.size(); i++) {
 
         DSStencilPass(i);
         DSPointLightsPass(i);
@@ -138,32 +137,23 @@ void Simulation::render()
 
     glDisable(GL_STENCIL_TEST);
 
-
-
     DSDirectionalLightPass();
 
+    renderParticles();
 
     DSFinalPass();
-
 
 }
 
 void Simulation::renderParticles(){
-    timeval t;
-    static bool first = true;
 
-    gettimeofday(&t, NULL);
-    timeNow = t.tv_sec*1000 + t.tv_usec/1000;
-    if(first){
-        currentTime = timeNow;
-        first = false;
-    }
-    int DeltaTimeMillis = (int)(timeNow - currentTime);
-    currentTime = timeNow;
-
+    t2 = std::chrono::high_resolution_clock::now();
+    time = (int)(1000*std::chrono::duration_cast<std::chrono::duration<float> >(t2 - t1).count());
+    t1 = t2;
     glEnable(GL_DEPTH_TEST);
-    fireworks.Render(DeltaTimeMillis);
+    fireworks.Render(time);
     glDisable(GL_DEPTH_TEST);
+
 }
 
 void Simulation::DSGeometryPass()
@@ -214,7 +204,7 @@ void Simulation::DSGeometryPass()
 //    water.RenderWater();
 
 
-    terrain.model = glm::translate(terrain.model, glm::vec3(1250,-5000, -800));
+    terrain.model = glm::translate(terrain.model, glm::vec3(1250,-2000, -800));
 
     mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * terrain.model;
 
@@ -244,8 +234,6 @@ void Simulation::DSGeometryPass()
 void Simulation::DSStencilPass(unsigned int PointLightIndex)
 {
     m_nullTech.enable();
-    m_DSPointLightPassTech.SetPointLight(m_pointLight[PointLightIndex]);
-
 
     // Disable color/depth write and enable stencil
     m_gbuffer.BindForStencilPass();
@@ -255,7 +243,7 @@ void Simulation::DSStencilPass(unsigned int PointLightIndex)
 
     glClear(GL_STENCIL_BUFFER_BIT);
 
-    // We need the stencil test to be eglm::mat4(1.0f)nabled but we want it
+    // We need the stencil test to be eglm::mat4(1.0f) enabled but we want it
     // to succeed always. Only the depth test matters.
     glStencilFunc(GL_ALWAYS, 0, 0);
 
@@ -263,7 +251,7 @@ void Simulation::DSStencilPass(unsigned int PointLightIndex)
     glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP);
 
 
-    sphere.model = glm::translate(glm::mat4(1.0f), glm::vec3(m_pointLight[PointLightIndex].Position.x, m_pointLight[PointLightIndex].Position.y, m_pointLight[PointLightIndex].Position.z)); // MIGHT NEED TO PUT POINT LIGHT POS
+    sphere.model = glm::translate(glm::mat4(1.0f), glm::vec3(m_pointLight[PointLightIndex].Position)); // MIGHT NEED TO PUT POINT LIGHT POS
 
     float BSphereScale = CalcPointLightBSphere(m_pointLight[PointLightIndex]);
     sphere.model = glm::scale(sphere.model, glm::vec3(BSphereScale, BSphereScale, BSphereScale));
@@ -293,9 +281,8 @@ void Simulation::DSPointLightsPass(unsigned int PointLightIndex)
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
 
-    m_DSPointLightPassTech.SetPointLight(m_pointLight[PointLightIndex]);
 
-    sphere.model = glm::translate(glm::mat4(1.0f), glm::vec3(m_pointLight[PointLightIndex].Position.x, m_pointLight[PointLightIndex].Position.y, m_pointLight[PointLightIndex].Position.z)); //MIGHT NEED TO BE LIGHT POS
+    sphere.model = glm::translate(glm::mat4(1.0f), glm::vec3(m_pointLight[PointLightIndex].Position)); //MIGHT NEED TO BE LIGHT POS
 
 
     float BSphereScale = CalcPointLightBSphere(m_pointLight[PointLightIndex]);
@@ -303,6 +290,7 @@ void Simulation::DSPointLightsPass(unsigned int PointLightIndex)
 
     glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * sphere.model;
     m_DSPointLightPassTech.set("gWVP", mvp);
+    m_DSPointLightPassTech.SetPointLight(m_pointLight[PointLightIndex]);
 
     m_DSPointLightPassTech.set("gPositionMap", GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
     m_DSPointLightPassTech.set("gColorMap", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
@@ -319,12 +307,9 @@ void Simulation::DSPointLightsPass(unsigned int PointLightIndex)
 
     sphere.renderModel();
 
-
-
-
+    glDisable(GL_BLEND);
     glCullFace(GL_BACK);
 
-    glDisable(GL_BLEND);
 }
 
 float Simulation::CalcPointLightBSphere(const PointLight &Light)
@@ -354,7 +339,7 @@ void Simulation::DSDirectionalLightPass()
     glBlendFunc(GL_ONE, GL_ONE);
 
 
-    quad.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, 0.0));
+    quad.model = glm::translate(glm::mat4(1.0f), Engine::getEngine()->graphics->camera->getPos());//glm::vec3(0.0, 0.0, 0.0));
     m_DSDirLightPassTech.set("gWVP", glm::mat4(1.0f));
     m_DSDirLightPassTech.set("gPositionMap", GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
     m_DSDirLightPassTech.set("gColorMap", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
@@ -384,24 +369,24 @@ void Simulation::InitLights()
     m_dirLight.DiffuseIntensity = 0.25f;
     m_dirLight.Direction = glm::vec3(-1.0f, -1.0f, -1.0f);
 
-    m_pointLight[0].DiffuseIntensity = 30.0f;
+    m_pointLight[0].DiffuseIntensity = 20.0f;
     m_pointLight[0].Color = COLOR_RED;
-    m_pointLight[0].Position = glm::vec3(0.0f, 3.0f, 5.0f);
-    m_pointLight[0].Attenuation.Constant = .60f;
-    m_pointLight[0].Attenuation.Linear = .20f;
-    m_pointLight[0].Attenuation.Exp = .20f;
+    m_pointLight[0].Position = glm::vec3(0.0f, -3.0f, -5.0f);
+    m_pointLight[0].Attenuation.Constant = 0.f;
+    m_pointLight[0].Attenuation.Linear = 0.f;
+    m_pointLight[0].Attenuation.Exp = .25f;
 
-    m_pointLight[1].DiffuseIntensity = 30.0f;
+    m_pointLight[1].DiffuseIntensity = 20.0f;
     m_pointLight[1].Color = COLOR_CYAN;
     m_pointLight[1].Position = glm::vec3(0.0f,0.0f,5.0f);
-    m_pointLight[1].Attenuation.Constant = .60f;
-    m_pointLight[1].Attenuation.Linear = 0.2f;
-    m_pointLight[1].Attenuation.Exp = .20f;
+    m_pointLight[1].Attenuation.Constant = 0.0f;
+    m_pointLight[1].Attenuation.Linear = 0.0f;
+    m_pointLight[1].Attenuation.Exp = .25f;
 
-    m_pointLight[2].DiffuseIntensity = 30.0f;
+    m_pointLight[2].DiffuseIntensity = 20.0f;
     m_pointLight[2].Color = COLOR_GREEN;
     m_pointLight[2].Position = glm::vec3(0.0f, 0.0f, 3.0f);
-    m_pointLight[2].Attenuation.Constant = .60f;
-    m_pointLight[2].Attenuation.Linear = 0.2f;
-    m_pointLight[2].Attenuation.Exp = .2f;
+    m_pointLight[2].Attenuation.Constant = 0.f;
+    m_pointLight[2].Attenuation.Linear = 0.f;
+    m_pointLight[2].Attenuation.Exp = .25f;
 }

@@ -76,9 +76,7 @@ void Graphics::initGL()
 
     //cube = new Cube();
     simulation = new Simulation();
-    //frameBuffers = new WaterFrameBuffers();
 
-    //water = new Water(frameBuffers->getReflectionTexture());
     skybox = new Skybox();
 
 
@@ -89,7 +87,6 @@ void Graphics::initGL()
 void Graphics::tick(float dt)
 {
     //cube->tick(dt);
-    //skybox->tick(dt);
     simulation->tick(dt);
     render();
 }
@@ -100,21 +97,9 @@ void Graphics::render()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    //glDisable(GL_DEPTH_TEST);
-    //glEnable(GL_DEPTH_TEST);
-
     updateView();
     //glClear(GL_DEPTH_BUFFER_BIT);
     simulation->render();
-
-
-    /*frameBuffers->bindReflectionFrameBuffer();
-    //cube->render();
-    skybox->render();
-    frameBuffers->unbindCurrentFrameBuffer();
-
-    skybox->render();
-    water->render();*/
 
     SDL_GL_SwapWindow(window);
 }

@@ -1,4 +1,4 @@
-#version 410 core
+#version 330
 
 layout(points) in;
 layout(points) out;
@@ -14,7 +14,6 @@ out vec3 Position1;
 out vec3 Velocity1;
 out float Age1;
 
-
 uniform float gDeltaTime;
 uniform float gTime;
 uniform sampler1D gRandomTexture;
@@ -22,9 +21,9 @@ uniform float gLauncherLife;
 uniform float gShellLife;
 uniform float gSecondaryLife;
 
-float LAUNCHER = 0.0f;
-float SHELL = 1.0f;
-float SECONDARY = 2.0f;
+const float LAUNCHER = 0.0f;
+const float SHELL = 1.0f;
+const float SECONDARY = 2.0f;
 
 
 vec3 GetRandomDir(float TexCoord)
@@ -33,8 +32,6 @@ vec3 GetRandomDir(float TexCoord)
     Dir -= vec3(0.5,0.5,0.5);
     return Dir;
 }
-
-
 
 void main() {
 

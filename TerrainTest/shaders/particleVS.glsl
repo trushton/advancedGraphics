@@ -1,4 +1,4 @@
-#version 410 core
+#version 330
 
 layout(location = 0) in float Type;
 layout(location = 1) in vec3 Position;
@@ -11,7 +11,6 @@ out vec3 Velocity0;
 out float Age0;
 
 void main() {
-
     Type0 = Type;
     Position0 = Position;
     Velocity0 = Velocity;
