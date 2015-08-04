@@ -16,6 +16,7 @@
 #include "shape.h"
 #include "projector.h"
 #include "particle_system.h"
+#include "water_tech.h"
 
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
@@ -56,25 +57,24 @@ private:
 
     DSPointLightPassTech m_DSPointLightPassTech;
     DSDirLightPassTech m_DSDirLightPassTech;
-    //DSSpotLightPassTech m_DSSpotLightPassTech;
 
-    SpotLight m_spotLight;
     DirectionalLight m_dirLight;
     PointLight m_pointLight[3];
 
-    Model box, sphere, quad, cone, box2;
+    Model box, sphere, quad, box2;
     Skybox * skybox;
     Terrain terrain;
     vector<shape> shap;
     vector<projector> proj;
 
-    //glm::vec3 m_boxPositions[5];
 
     int windowWidth;
     int windowHeight;
 
     ParticleSystem fireworks;
     long long currentTime, timeNow;
+
+    water_tech water;
 
 };
 

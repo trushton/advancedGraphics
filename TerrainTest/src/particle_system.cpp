@@ -28,7 +28,7 @@ ParticleSystem::ParticleSystem()
     currTFB = 1;
 
     isFirst = true;
-    //timeT = 0;
+    timeT = 0;
     texture = NULL;
 
     ZERO_MEM(m_transformFeedback);
@@ -50,7 +50,7 @@ ParticleSystem::~ParticleSystem()
 void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
 {
     Particle Particles[MAX_PARTICLES];
-    //ZERO_MEM(Particles);
+    ZERO_MEM(Particles);
 
     Particles[0].Type = PARTICLE_TYPE_LAUNCHER;
     Particles[0].Pos = Pos;
@@ -62,9 +62,9 @@ void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
 
     for (unsigned int i = 0; i < 2 ; i++) {
         glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, m_transformFeedback[i]);
-        glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_particleBuffer[i]);
         glBindBuffer(GL_ARRAY_BUFFER, m_particleBuffer[i]);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Particles), Particles, GL_DYNAMIC_DRAW);
+        glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_particleBuffer[i]);
     }
 
     m_updateTechnique.init();
@@ -72,7 +72,7 @@ void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
     m_updateTechnique.enable();
     m_updateTechnique.set("gRandomTexture", RANDOM_TEXTURE_UNIT_INDEX);
     m_updateTechnique.set("gLauncherLife", 100.f);
-    m_updateTechnique.set("gShellLife", 5000.f);
+    m_updateTechnique.set("gShellLife", 10000.f);
     m_updateTechnique.set("gSecondaryLife", 2500.f);
 
     random_texture.InitRandomTexture(1000);
@@ -89,7 +89,6 @@ void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
 
     texture = new Texture(GL_TEXTURE_2D, "../bin/fireworks_red.jpg");
     texture->Load();
-    timeT = 0;
 }
 
 void ParticleSystem::Render(int DeltaTimeMillis)
@@ -146,11 +145,12 @@ void ParticleSystem::updateParticles(int DeltaTimeMillis)
 
 void ParticleSystem::renderParticles()
 {
-    glm::mat4 vp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view;
+    glm::mat4 vp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView();
 
     m_billboardTechnique.enable();
     m_billboardTechnique.set("gCameraPos", Engine::getEngine()->graphics->camera->getPos());
     m_billboardTechnique.set("gVP", vp);
+
     texture->Bind(COLOR_TEXTURE_UNIT);
 
 

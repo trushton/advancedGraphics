@@ -15,9 +15,9 @@ bool RandomTexture::InitRandomTexture(unsigned int Size)
 {
     glm::vec3* pRandomData = new glm::vec3[Size];
     for (unsigned int i = 0 ; i < Size ; i++) {
-        pRandomData[i].x = (float)random() / RAND_MAX;
-        pRandomData[i].y = (float)random() / RAND_MAX;
-        pRandomData[i].z = (float)random() / RAND_MAX;
+        pRandomData[i].x = (float)std::rand() / RAND_MAX;
+        pRandomData[i].y = (float)std::rand() / RAND_MAX;
+        pRandomData[i].z = (float)std::rand() / RAND_MAX;
     }
     glGenTextures(1, &m_textureObj);
     glBindTexture(GL_TEXTURE_1D, m_textureObj);

@@ -148,28 +148,16 @@ void Terrain::CreatePositionBuffer()
         //randomizes which grass blades are rendered
 //        if (activate > 0.7){
 
-            if (direction > 0.5) {
-                positions[i] = glm::vec3(vertexes[i].position.x + val * 1.25, vertexes[i].position.y * max,
-                                         vertexes[i].position.z - val);
-            }
-            else {
-                positions[i] = glm::vec3(vertexes[i].position.x - val, vertexes[i].position.y * max,
-                                         vertexes[i].position.z + val * 1.3);
-            }
-//        }
-//        else
-//        {
-//            //push onto a vector to know which will be deleted;
-//            positions[i] = glm::vec3(0,0,0);
-//            inactive.push_back(i);
-//        }
+        if (direction > 0.5) {
+            positions[i] = glm::vec3(vertexes[i].position.x + val * 1.25, vertexes[i].position.y * max,
+                                     vertexes[i].position.z - val);
+        }
+        else {
+            positions[i] = glm::vec3(vertexes[i].position.x - val, vertexes[i].position.y * max,
+                                     vertexes[i].position.z + val * 1.3);
+        }
     }
 
-//    for(uint i = 0; i < inactive.size(); i++)
-//    {
-//        positions.erase(positions.begin()+ inactive[i]);
-//    }
-//    positions.shrink_to_fit();
 
     glGenBuffers(1, &grass_VB);
     glBindBuffer(GL_ARRAY_BUFFER, grass_VB);

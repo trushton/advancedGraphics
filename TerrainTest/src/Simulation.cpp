@@ -15,30 +15,26 @@ Simulation::~Simulation()
 
 void Simulation::init()
 {
-    fireworks.InitParticleSystem(glm::vec3(0,0,0));
+    fireworks.InitParticleSystem(glm::vec3(0,1,0));
 
     windowWidth = 1600;
     windowHeight = 900;
     InitLights();
-    //InitBoxPositions();
+
     m_gbuffer.Init(windowWidth, windowHeight);
     m_DSGeomPassTech.init();
     m_DSPointLightPassTech.init();
     m_DSPointLightPassTech.SetPointLight(m_pointLight[0]);
     m_DSDirLightPassTech.init();
     m_DSDirLightPassTech.SetDirectionalLight(m_dirLight);
-    //m_DSSpotLightPassTech.init();
-    //m_DSSpotLightPassTech.SetSpotLight(m_spotLight);
     m_nullTech.init();
 
+    //water.init();
 
-
-    //object.loadModel("../bin/phoenix_ugv.md2");
     sphere.loadModel("../bin/sphere.obj");
     quad.loadModel("../bin/quad.obj");
     box.loadModel("../bin/box.obj");
-    //cone.loadModel("../bin/sphere.obj");
-    //box2.loadModel("../bin/table2.obj");
+    box2.loadModel("../bin/box.obj");
 
     skybox = new Skybox();
 
@@ -110,6 +106,8 @@ void Simulation::tick(float dt)
 //    {
 //        proj[i].model = glm::mat4(1.0f);
 //    }
+
+    m_pointLight[1].Position = Engine::getEngine()->graphics->camera->getPos();
 }
 
 void Simulation::render()
@@ -120,7 +118,7 @@ void Simulation::render()
     DSGeometryPass();
 
     skybox->render();
-
+    renderParticles();
 
 //    for(uint i = 0; i < proj.size(); i++)
 //    {
@@ -129,8 +127,10 @@ void Simulation::render()
 
 
     glEnable(GL_STENCIL_TEST);
+    renderParticles();
 
     for (unsigned int i = 0 ; i < ARRAY_SIZE_IN_ELEMENTS(m_pointLight); i++) {
+
         DSStencilPass(i);
         DSPointLightsPass(i);
     }
@@ -141,11 +141,10 @@ void Simulation::render()
 
 
     DSDirectionalLightPass();
-    //terrain.render(view, projection);
 
-    renderParticles();
 
     DSFinalPass();
+
 
 }
 
@@ -172,7 +171,6 @@ void Simulation::DSGeometryPass()
     static float scale = 0.00f;
     scale += 0.002;
     m_DSGeomPassTech.enable();
-    //m_gbuffer.BindForWriting();
     m_gbuffer.BindForGeomPass();
 
     // Only the geometry pass updates the depth buffer
@@ -183,19 +181,11 @@ void Simulation::DSGeometryPass()
 
     glEnable(GL_DEPTH_TEST);
 
-
-    // object.renderModel();
-    //for (unsigned int i = 0 ; i < ARRAY_SIZE_IN_ELEMENTS(m_boxPositions); i++) {
-    box.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, -5, 0));
-    box.model = glm::rotate(box.model, scale * 5, glm::vec3(0,1,0));
+    box.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+    //box.model = glm::rotate(box.model, scale * 5, glm::vec3(0,1,0));
     box.model = glm::scale(box.model, glm::vec3(10, 10, 10));
 
-    //box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 1000, 0));
-
-
-
     glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * box.model;
-
 
     m_DSGeomPassTech.set("gWVP", mvp);
     m_DSGeomPassTech.set("gWorld", box.model);
@@ -203,17 +193,37 @@ void Simulation::DSGeometryPass()
 
     box.renderModel();
 
+    box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(100, 0, 100));
+    box2.model = glm::scale(box2.model, glm::vec3(10, 10, 10));
+
+    mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * box2.model;
+
+    m_DSGeomPassTech.set("gWVP", mvp);
+    m_DSGeomPassTech.set("gWorld", box2.model);
+    m_DSGeomPassTech.set("gColorMap", 0);
+
+    box2.renderModel();
+
+//    mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * water.plane.model;
+//
+//
+//    m_DSGeomPassTech.set("gWVP", mvp);
+//    m_DSGeomPassTech.set("gWorld", water.plane.model);
+//    m_DSGeomPassTech.set("gColorMap", 0);
+//
+//    water.RenderWater();
+
+
     terrain.model = glm::translate(terrain.model, glm::vec3(1250,-5000, -800));
 
-
     mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * terrain.model;
-
 
     m_DSGeomPassTech.set("gWVP", mvp);
     m_DSGeomPassTech.set("gWorld", terrain.model);
     m_DSGeomPassTech.set("gColorMap", 0);
 
     terrain.render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
+
 
     for(uint i = 0; i < shap.size(); i++){
         shap[i].model = glm::translate(shap[i].model, glm::vec3(1250,-5000, -800));
@@ -228,23 +238,14 @@ void Simulation::DSGeometryPass()
         shap[i].render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
     }
 
-
-//    mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * box2.model;
-//
-//    m_DSGeomPassTech.set("gWVP", mvp);
-//    m_DSGeomPassTech.set("gWorld", box2.model);
-//    m_DSGeomPassTech.set("gColorMap", 0);
-//
-//    box2.renderModel();
-
-    //}
     glDepthMask(GL_FALSE);
-
 }
 
 void Simulation::DSStencilPass(unsigned int PointLightIndex)
 {
     m_nullTech.enable();
+    m_DSPointLightPassTech.SetPointLight(m_pointLight[PointLightIndex]);
+
 
     // Disable color/depth write and enable stencil
     m_gbuffer.BindForStencilPass();
@@ -254,7 +255,7 @@ void Simulation::DSStencilPass(unsigned int PointLightIndex)
 
     glClear(GL_STENCIL_BUFFER_BIT);
 
-    // We need the stencil test to be enabled but we want it
+    // We need the stencil test to be eglm::mat4(1.0f)nabled but we want it
     // to succeed always. Only the depth test matters.
     glStencilFunc(GL_ALWAYS, 0, 0);
 
@@ -262,7 +263,7 @@ void Simulation::DSStencilPass(unsigned int PointLightIndex)
     glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP);
 
 
-    sphere.model = glm::translate(glm::mat4(1.0f), m_pointLight[PointLightIndex].Position); // MIGHT NEED TO PUT POINT LIGHT POS
+    sphere.model = glm::translate(glm::mat4(1.0f), glm::vec3(m_pointLight[PointLightIndex].Position.x, m_pointLight[PointLightIndex].Position.y, m_pointLight[PointLightIndex].Position.z)); // MIGHT NEED TO PUT POINT LIGHT POS
 
     float BSphereScale = CalcPointLightBSphere(m_pointLight[PointLightIndex]);
     sphere.model = glm::scale(sphere.model, glm::vec3(BSphereScale, BSphereScale, BSphereScale));
@@ -273,21 +274,6 @@ void Simulation::DSStencilPass(unsigned int PointLightIndex)
     // m_DSPointLightPassTech.SetScreenSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     sphere.renderModel();
-
-/*
-        cone.model = glm::translate(glm::mat4(1.0f), m_spotLight.Position); // MIGHT NEED TO PUT POINT LIGHT POS
-
-        BSphereScale = CalcSpotLightBSphere(m_spotLight);
-        cone.model = glm::scale(cone.model, glm::vec3(10, 10, 10));
-
-        mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * cone.model;
-        m_nullTech.set("gWVP",     model = glm::translate(model, glm::vec3(0,-1,0));
-mvp);
-
-        // m_DSPointLightPassTech.SetScreenSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-
-        //cone.renderModel();
-        */
 }
 
 
@@ -296,7 +282,6 @@ void Simulation::DSPointLightsPass(unsigned int PointLightIndex)
 {
     m_gbuffer.BindForLightPass();
     m_DSPointLightPassTech.enable();
-    // m_DSSpotLightPassTech.enable();
 
     glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
     glDisable(GL_DEPTH_TEST);
@@ -305,15 +290,13 @@ void Simulation::DSPointLightsPass(unsigned int PointLightIndex)
     glBlendFunc(GL_ONE, GL_ONE);
 
 
-    //glFrontFace(GL_CW);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
 
+    m_DSPointLightPassTech.SetPointLight(m_pointLight[PointLightIndex]);
 
-    sphere.model = glm::translate(glm::mat4(1.0f), m_pointLight[PointLightIndex].Position); //MIGHT NEED TO BE LIGHT POS
+    sphere.model = glm::translate(glm::mat4(1.0f), glm::vec3(m_pointLight[PointLightIndex].Position.x, m_pointLight[PointLightIndex].Position.y, m_pointLight[PointLightIndex].Position.z)); //MIGHT NEED TO BE LIGHT POS
 
-
-    m_DSPointLightPassTech.SetPointLight(this->m_pointLight[PointLightIndex]);
 
     float BSphereScale = CalcPointLightBSphere(m_pointLight[PointLightIndex]);
     sphere.model = glm::scale(sphere.model, glm::vec3(BSphereScale, BSphereScale, BSphereScale));
@@ -338,26 +321,7 @@ void Simulation::DSPointLightsPass(unsigned int PointLightIndex)
 
 
 
-/*
 
-
-        cone.model = glm::translate(glm::mat4(1.0f), m_spotLight.Position);
-        BSphereScale = CalcSpotLightBSphere(m_spotLight);
-        cone.model = glm::scale(cone.model, glm::vec3(10, 10, 10));
-
-        mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * cone.model;
-
-        m_DSPointLightPassTech.set("gWVP", mvp);
-
-        m_DSSpotLightPassTech.set("gPositionMap", GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
-        m_DSSpotLightPassTech.set("gColorMap", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
-        m_DSSpotLightPassTech.set("gNormalMap", GBuffer::GBUFFER_TEXTURE_TYPE_NORMAL);
-        m_DSSpotLightPassTech.set("gEyeWorldPos", Engine::getEngine()->graphics->camera->getPos());
-        m_DSSpotLightPassTech.set("gMatSpecularIntensity", 1.0f);
-        m_DSSpotLightPassTech.set("gSpecularPower", 0.5f);
-        glUniform2f(m_DSSpotLightPassTech.getLocation("gScreenSize"), (float) windowWidth, (float) windowHeight);
-
-        //cone.renderModel();*/
     glCullFace(GL_BACK);
 
     glDisable(GL_BLEND);
@@ -375,16 +339,6 @@ float Simulation::CalcPointLightBSphere(const PointLight &Light)
 
 }
 
-float Simulation::CalcSpotLightBSphere(const SpotLight &Light)
-{
-    float MaxChannel = fmax(fmax(Light.Color.x, Light.Color.y), Light.Color.z);
-
-    float ret = (-Light.Attenuation.Linear + sqrtf(Light.Attenuation.Linear * Light.Attenuation.Linear - 4 * Light.Attenuation.Exp * (Light.Attenuation.Exp - 256 * MaxChannel * Light.DiffuseIntensity)))
-                /
-                2 * Light.Attenuation.Exp;
-
-    return ret;
-}
 
 void Simulation::DSDirectionalLightPass()
 {
@@ -401,8 +355,6 @@ void Simulation::DSDirectionalLightPass()
 
 
     quad.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, 0.0));
-    //glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * quad.model;
-    //m_DSDirLightPassTech.set("gWVP", mvp);
     m_DSDirLightPassTech.set("gWVP", glm::mat4(1.0f));
     m_DSDirLightPassTech.set("gPositionMap", GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
     m_DSDirLightPassTech.set("gColorMap", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
@@ -412,16 +364,11 @@ void Simulation::DSDirectionalLightPass()
     m_DSDirLightPassTech.set("gSpecularPower", 32.0f);
 
     glUniform2f(m_DSDirLightPassTech.getLocation("gScreenSize"), (float) windowWidth, (float) windowHeight);
-    //WVP.InitIdentity();
-    //m_DSDirLightPassTech.SetWVP(WVP);
+
     quad.renderModel();
 
     glDisable(GL_BLEND);
-     glCullFace(GL_BACK);
-
-    // glEnable(GL_CULL_FACE);
-
-
+    glCullFace(GL_BACK);
 }
 
 void Simulation::DSFinalPass()
@@ -432,80 +379,29 @@ void Simulation::DSFinalPass()
 
 void Simulation::InitLights()
 {
-//    m_spotLight.AmbientIntensity = 0.010f;
-//    m_spotLight.DiffuseIntensity = 0.01f;
-//    m_spotLight.Color = COLOR_RED;
-//    m_spotLight.Attenuation.Linear = 0.0f;
-//    m_spotLight.Attenuation.Constant = 0.0f;
-//    m_spotLight.Attenuation.Exp =  0.3f;
-//    m_spotLight.Position = glm::vec3(0.0, 1.5, 0.0f);
-//    m_spotLight.Direction = glm::vec3(0.0f, -1.0f, 0.0f);
-//    m_spotLight.Cutoff = 50.0f;
-
     m_dirLight.AmbientIntensity = 0.2f;
     m_dirLight.Color = COLOR_WHITE;
     m_dirLight.DiffuseIntensity = 0.25f;
     m_dirLight.Direction = glm::vec3(-1.0f, -1.0f, -1.0f);
 
-    m_pointLight[0].DiffuseIntensity = 20.0f;
+    m_pointLight[0].DiffuseIntensity = 30.0f;
     m_pointLight[0].Color = COLOR_RED;
-    m_pointLight[0].Position = glm::vec3(5.0f, 0.50f, 5.0f);
-    m_pointLight[0].Attenuation.Constant = .50f;
-    m_pointLight[0].Attenuation.Linear = .50f;
-    m_pointLight[0].Attenuation.Exp = .50f;
+    m_pointLight[0].Position = glm::vec3(0.0f, 3.0f, 5.0f);
+    m_pointLight[0].Attenuation.Constant = .60f;
+    m_pointLight[0].Attenuation.Linear = .20f;
+    m_pointLight[0].Attenuation.Exp = .20f;
 
     m_pointLight[1].DiffuseIntensity = 30.0f;
-    m_pointLight[1].Color = COLOR_BLUE;
-    m_pointLight[1].Position = glm::vec3(0.0f, 2.5f, 2.0f);
-    m_pointLight[1].Attenuation.Constant = 5.0f;
-    m_pointLight[1].Attenuation.Linear = 0.5f;
-    m_pointLight[1].Attenuation.Exp = .60f;
+    m_pointLight[1].Color = COLOR_CYAN;
+    m_pointLight[1].Position = glm::vec3(0.0f,0.0f,5.0f);
+    m_pointLight[1].Attenuation.Constant = .60f;
+    m_pointLight[1].Attenuation.Linear = 0.2f;
+    m_pointLight[1].Attenuation.Exp = .20f;
 
-    m_pointLight[2].DiffuseIntensity = 20.0f;
+    m_pointLight[2].DiffuseIntensity = 30.0f;
     m_pointLight[2].Color = COLOR_GREEN;
     m_pointLight[2].Position = glm::vec3(0.0f, 0.0f, 3.0f);
     m_pointLight[2].Attenuation.Constant = .60f;
     m_pointLight[2].Attenuation.Linear = 0.2f;
     m_pointLight[2].Attenuation.Exp = .2f;
-
-
 }
-
-
-//void Simulation::InitBoxPositions()
-//{
-//    m_boxPositions[0] = glm::vec3(0.0f, 0.0f, 0.0f);
-//    m_boxPositions[1] = glm::vec3(1.0f, 1.0f, 1.0f);
-//    m_boxPositions[2] = glm::vec3(-5.0f, -1.0f, 12.0f);
-//    m_boxPositions[3] = glm::vec3(4.0f, 4.0f, 15.0f);
-//    m_boxPositions[4] = glm::vec3(-4.0f, 2.0f, 20.0f);
-//}
-
-/*void Simulation::DSLightPass()
-    {
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
-        glClear(G    getRawValuesFromFile(fname, vecs, min, max, xres, yres, projection,x,y,width,height);
-L_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        m_gbuffer.BindForReading();
-
-        GLint HalfWidth = (GLint) (WINDOW_WIDTH / 2.0f);
-        GLint HalfHeight = (GLint) (WINDOW_HEIGHT / 2.0f);
-
-        m_gbuffer.SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
-        glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, 0, HalfWidth, HalfHeight, GL_COLOR_BUFFER_BIT,
-                          GL_LINEAR);
-
-        m_gbuffer.SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
-        glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, HalfHeight, HalfWidth, WINDOW_HEIGHT,
-                          GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
-        m_gbuffer.SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_NORMAL);
-        glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, HalfWidth, HalfHeight, WINDOW_WIDTH, WINDOW_HEIGHT,
-                          GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
-        m_gbuffer.SetReadBuffer(GBuffer::GBUFFER_TEXTURE_TYPE_TEXCOORD);
-        glBlitFramebuffer(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, HalfWidth, 0, WINDOW_WIDTH, HalfHeight,
-                          GL_COLOR_BUFFER_BIT, GL_LINEAR);
-    }*/
