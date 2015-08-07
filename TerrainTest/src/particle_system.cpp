@@ -77,8 +77,8 @@ void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
 
     m_updateTechnique.enable();
     m_updateTechnique.set("gRandomTexture", RANDOM_TEXTURE_UNIT_INDEX);
-    m_updateTechnique.set("gLauncherLife", 10000.f);
-    m_updateTechnique.set("gShellLife", 10000.f);
+    m_updateTechnique.set("gLauncherLife", 100.f);
+    m_updateTechnique.set("gShellLife", 2000.f);
     m_updateTechnique.set("gSecondaryLife", 2500.f);
 
     random_texture.InitRandomTexture(1000);
@@ -120,8 +120,8 @@ void ParticleSystem::updateParticles(int DeltaTimeMillis)
     random_texture.Bind(RANDOM_TEXTURE_UNIT);
 
     glEnable(GL_RASTERIZER_DISCARD);
-    glBindBuffer(GL_ARRAY_BUFFER, m_particleBuffer[currTFB]);
-    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, m_transformFeedback[currVB]);
+    glBindBuffer(GL_ARRAY_BUFFER, m_particleBuffer[currVB]);
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, m_transformFeedback[currTFB]);
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
