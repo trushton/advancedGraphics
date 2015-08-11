@@ -15,7 +15,7 @@ Simulation::~Simulation()
 
 void Simulation::init()
 {
-    fireworks.InitParticleSystem(glm::vec3(100,1,100));
+    fireworks.InitParticleSystem(glm::vec3(0,-11,0));
     m_pointLight.resize(3);
     windowWidth = 1600;
     windowHeight = 900;
@@ -23,10 +23,15 @@ void Simulation::init()
 
     m_gbuffer.Init(windowWidth, windowHeight);
     m_DSGeomPassTech.init();
+
     m_DSPointLightPassTech.init();
-    m_DSPointLightPassTech.SetPointLight(m_pointLight[0]);
+
+    m_DSPointLightPassTech.SetPointLight(m_pointLight[1]);
+
     m_DSDirLightPassTech.init();
+
     m_DSDirLightPassTech.SetDirectionalLight(m_dirLight);
+
     m_nullTech.init();
     InitLights();
 
@@ -51,40 +56,41 @@ void Simulation::init()
     shap[2].load("../bin/data/sitesDCEW2012/DCEWsites2013.shp");
     shap[2].createMesh(terrain.GetProjection(),terrain.GetOrigin(),glm::vec2(1,1),terrain);
 
-//    proj.resize(7);
-//
-//    proj[0].sositionMap", GBuffer::GBUFFER_TEXTURE_TYPE_POSITIOetFile("../bin/data/satellite/res.tif");
-//    proj[0].setup();
-//    proj[0].setScreenDims(windowWidth,windowHeight);
-//
-//    proj[0].setFile("../bin/data/satellite/res2.tif");
-//    proj[0].setup();
-//    proj[0].setScreenDims(windowWidth,windowHeight);
-//
-//    proj[0].setFile("../bin/data/satellite/res3.tif");
-//    proj[0].setup();
-//    proj[0].setScreenDims(windowWidth,windowHeight);
-//
-//    proj[0].setFile("../bin/data/satellite/res4.tif");
-//    proj[0].setup();
-//    proj[0].setScreenDims(windowWidth,windowHeight);
-//
-//    proj[0].setFile("../bin/data/satellite/res5.tif");
-//    proj[0].setup();
-//    proj[0].setScreenDims(windowWidth,windowHeight);
-//
-//    proj[0].setFile("../bin/data/satellite/res6.tif");
-//    proj[0].setup();
-//    proj[0].setScreenDims(windowWidth,windowHeight);
-//
-//    proj[0].setFile("../bin/data/em.1000.tif", projector::PROJECTOR_TYPE::DATA);
-//    proj[0].setup();
-//    proj[0].setScreenDims(windowWidth,windowHeight);
-//
-//    for(uint i = 0; i < proj.size(); i++)
-//    {
-//        proj[i].setToMainCoordinateSystem(terrain.GetProjection(), terrain.GetOrigin());
-//    }
+    proj.resize(7);
+
+    proj[0].setFile("../bin/data/satellite/res.tif");
+    proj[0].setup();
+    proj[0].setScreenDims(windowWidth,windowHeight);
+
+    proj[1].setFile("../bin/data/satellite/res2.tif");
+    proj[1].setup();
+    proj[1].setScreenDims(windowWidth,windowHeight);
+
+    proj[2].setFile("../bin/data/satellite/res3.tif");
+    proj[2].setup();
+    proj[2].setScreenDims(windowWidth,windowHeight);
+
+    proj[3].setFile("../bin/data/satellite/res4.tif");
+    proj[3].setup();
+    proj[3].setScreenDims(windowWidth,windowHeight);
+
+    proj[4].setFile("../bin/data/satellite/res5.tif");
+    proj[4].setup();
+    proj[4].setScreenDims(windowWidth,windowHeight);
+
+    proj[5].setFile("../bin/data/satellite/res6.tif");
+    proj[5].setup();
+    proj[5].setScreenDims(windowWidth,windowHeight);
+
+    proj[6].setmask("../bin/data/tl2p5mask.ipw.tif");
+    proj[6].setFile("../bin/data/em.1000.tif", projector::PROJECTOR_TYPE::DATA);
+    proj[6].setup();
+    proj[6].setScreenDims(windowWidth,windowHeight);
+
+    for(uint i = 0; i < proj.size(); i++)
+    {
+        proj[i].setToMainCoordinateSystem(terrain.GetProjection(), terrain.GetOrigin());
+    }
 
     t2 = t1 = std::chrono::high_resolution_clock::now();
 
@@ -102,10 +108,10 @@ void Simulation::tick(float dt)
     quad.model = glm::mat4(1.0f);
     box.model = glm::mat4(1.0f);
 
-//    for(uint i = 0; i < proj.size(); i++)
-//    {
-//        proj[i].model = glm::mat4(1.0f);
-//    }
+    for(uint i = 0; i < proj.size(); i++)
+    {
+        proj[i].model = glm::mat4(1.0f);
+    }
 
 }
 
@@ -118,27 +124,30 @@ void Simulation::render()
 
     skybox->render();
 
-//    for(uint i = 0; i < proj.size(); i++)
-//    {
-//        proj[i].render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
-//    }
+
 
 
     glEnable(GL_STENCIL_TEST);
 
     for (unsigned int i = 0 ; i < m_pointLight.size(); i++) {
-
         DSStencilPass(i);
         DSPointLightsPass(i);
+    }
+    for(uint i = 0; i < proj.size(); i++)
+    {
+        proj[i].model = glm::mat4(1.0f);
+        proj[i].render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
     }
 
     glDisable(GL_STENCIL_TEST);
 
     DSDirectionalLightPass();
 
-    renderParticles();
 
     DSFinalPass();
+
+    renderParticles();
+
 
 }
 
@@ -167,6 +176,20 @@ void Simulation::DSGeometryPass()
 
     glEnable(GL_DEPTH_TEST);
 
+
+
+    terrain.model = glm::translate(glm::mat4(1.0f), glm::vec3(1250,-2000, -800));
+//
+//    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * terrain.model;
+//
+//    m_DSGeomPassTech.set("gWVP", mvp);
+//    m_DSGeomPassTech.set("gWorld", terrain.model);
+//    m_DSGeomPassTech.set("gColorMap", 0);
+
+    terrain.render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
+
+    m_DSGeomPassTech.enable();
+
     box.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
     //box.model = glm::rotate(box.model, scale * 5, glm::vec3(0,1,0));
     box.model = glm::scale(box.model, glm::vec3(20, 20, 20));
@@ -176,6 +199,7 @@ void Simulation::DSGeometryPass()
     m_DSGeomPassTech.set("gWVP", mvp);
     m_DSGeomPassTech.set("gWorld", box.model);
     m_DSGeomPassTech.set("gColorMap", 0);
+    m_DSGeomPassTech.set("time", time);
 
     box.renderModel();
 
@@ -199,43 +223,21 @@ void Simulation::DSGeometryPass()
 //
 //    water.RenderWater();
 
-
-    terrain.model = glm::translate(terrain.model, glm::vec3(1250,-2000, -800));
-
-    mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * terrain.model;
-
-    m_DSGeomPassTech.set("gWVP", mvp);
-    m_DSGeomPassTech.set("gWorld", terrain.model);
-    m_DSGeomPassTech.set("gColorMap", 0);
-
-    terrain.render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
-
-
-    for(uint i = 0; i < shap.size(); i++){
-        shap[i].model = glm::translate(shap[i].model, glm::vec3(1250,-2000, -800));
-
-        mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * shap[i].model;
+//    for(uint i = 0; i < shap.size(); i++){
+//        shap[i].model = glm::translate(shap[i].model, glm::vec3(1250,-2000, -800));
+//
+//        mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * shap[i].model;
+//
+//
+//        m_DSGeomPassTech.set("gWVP", mvp);
+//        m_DSGeomPassTech.set("gWorld", shap[i].model);
+//        m_DSGeomPassTech.set("gColorMap", 0);
+//
+//        shap[i].render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
+//    }
 
 
-        m_DSGeomPassTech.set("gWVP", mvp);
-        m_DSGeomPassTech.set("gWorld", shap[i].model);
-        m_DSGeomPassTech.set("gColorMap", 0);
 
-        shap[i].render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
-    }
-
-    sphere.model = glm::translate(glm::mat4(1.0f), glm::vec3(100,0,100));
-
-    float BSphereScale = CalcPointLightBSphere(m_pointLight[1]);
-    sphere.model = glm::scale(sphere.model, glm::vec3(BSphereScale, BSphereScale, BSphereScale));
-
-    mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * sphere.model;
-
-    m_DSGeomPassTech.set("gWVP", mvp);
-    m_DSGeomPassTech.set("gWorld",sphere.model);
-    m_DSGeomPassTech.set("gColorMap", 0);
-
-    //sphere.renderModel();
 
     glDepthMask(GL_FALSE);
 }
@@ -252,7 +254,7 @@ void Simulation::DSStencilPass(unsigned int PointLightIndex)
 
     glClear(GL_STENCIL_BUFFER_BIT);
 
-    // We need the stencil test to be eglm::mat4(1.0f) enabled but we want it
+    // We need the stencil test to be enabled but we want it
     // to succeed always. Only the depth test matters.
     glStencilFunc(GL_ALWAYS, 0, 0);
 
@@ -260,7 +262,7 @@ void Simulation::DSStencilPass(unsigned int PointLightIndex)
     glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP);
 
     m_pointLight[PointLightIndex].Position = Engine::getEngine()->graphics->camera->getPos();
-
+    cout << "X: " << m_pointLight[PointLightIndex].Position.x << " Y: " << m_pointLight[PointLightIndex].Position.y << " Z: " << m_pointLight[PointLightIndex].Position.z << endl;
     sphere.model = glm::translate(glm::mat4(1.0f), glm::vec3(m_pointLight[PointLightIndex].Position));
 
     float BSphereScale = CalcPointLightBSphere(m_pointLight[PointLightIndex]);
@@ -281,6 +283,8 @@ void Simulation::DSPointLightsPass(unsigned int PointLightIndex)
 
     m_gbuffer.BindForLightPass();
     m_DSPointLightPassTech.enable();
+    m_DSPointLightPassTech.set("gEyeWorldPos", Engine::getEngine()->graphics->camera->getPos());
+
 
     glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
     glDisable(GL_DEPTH_TEST);
@@ -305,18 +309,16 @@ void Simulation::DSPointLightsPass(unsigned int PointLightIndex)
     m_DSPointLightPassTech.set("gPositionMap", GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
     m_DSPointLightPassTech.set("gColorMap", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
     m_DSPointLightPassTech.set("gNormalMap", GBuffer::GBUFFER_TEXTURE_TYPE_NORMAL);
-    m_DSPointLightPassTech.set("gEyeWorldPos", Engine::getEngine()->graphics->camera->getPos());
     m_DSPointLightPassTech.set("gMatSpecularIntensity", 150.0f);
     m_DSPointLightPassTech.set("gSpecularPower", 32.0f);
-
 
 
     glUniform2f(m_DSPointLightPassTech.getLocation("gScreenSize"), (float) windowWidth, (float) windowHeight);
 
     sphere.renderModel();
 
-    glDisable(GL_BLEND);
     glCullFace(GL_BACK);
+    glDisable(GL_BLEND);
 
 }
 
@@ -327,8 +329,8 @@ float Simulation::CalcPointLightBSphere(const PointLight &Light)
     float ret = (-Light.Attenuation.Linear + sqrtf(Light.Attenuation.Linear * Light.Attenuation.Linear - 4 * Light.Attenuation.Exp * (Light.Attenuation.Exp - 256 * MaxChannel * Light.DiffuseIntensity)))
                 /
                 2 * Light.Attenuation.Exp;
-    //return 10000;
-    return ret;
+    return 1000;
+    //return ret;
 }
 
 
@@ -338,7 +340,7 @@ void Simulation::DSDirectionalLightPass()
     m_DSDirLightPassTech.enable();
 
     glDisable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
+    //glCullFace(GL_FRONT);
 
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -360,7 +362,7 @@ void Simulation::DSDirectionalLightPass()
     quad.renderModel();
 
     glDisable(GL_BLEND);
-    glCullFace(GL_BACK);
+    //glCullFace(GL_BACK);
 }
 
 void Simulation::DSFinalPass()
@@ -378,22 +380,22 @@ void Simulation::InitLights()
 
     m_pointLight[0].DiffuseIntensity = 30.0f;
     m_pointLight[0].Color = COLOR_RED;
-    m_pointLight[0].Position = glm::vec3(0.0f, -3.0f, -5.0f);
-    m_pointLight[0].Attenuation.Constant = 0.f;
-    m_pointLight[0].Attenuation.Linear = 0.f;
-    m_pointLight[0].Attenuation.Exp = .35f;
+    m_pointLight[0].Position = glm::vec3(100.0f, -3.0f, 100.0f);
+    m_pointLight[0].Attenuation.Constant = .6f;
+    m_pointLight[0].Attenuation.Linear = .2f;
+    m_pointLight[0].Attenuation.Exp = .3f;
 
-    m_pointLight[1].DiffuseIntensity = 30.0f;
-    m_pointLight[1].Color = COLOR_CYAN;
+    m_pointLight[1].DiffuseIntensity = 20.0f;
+    m_pointLight[1].Color = COLOR_BLUE;
     m_pointLight[1].Position = glm::vec3(0.0f,0.0f,5.0f);
-    m_pointLight[1].Attenuation.Constant = 0.f;
-    m_pointLight[1].Attenuation.Linear = 0.f;
-    m_pointLight[1].Attenuation.Exp = .35f;
+    m_pointLight[1].Attenuation.Constant = .6f;
+    m_pointLight[1].Attenuation.Linear = .2f;
+    m_pointLight[1].Attenuation.Exp = .3f;
 
-    m_pointLight[2].DiffuseIntensity = 30.0f;
+    m_pointLight[2].DiffuseIntensity = 10.0f;
     m_pointLight[2].Color = COLOR_GREEN;
-    m_pointLight[2].Position = glm::vec3(0.0f, 0.0f, 3.0f);
-    m_pointLight[2].Attenuation.Constant = 0.f;
-    m_pointLight[2].Attenuation.Linear = 0.f;
-    m_pointLight[2].Attenuation.Exp = .35f;
+    m_pointLight[2].Position = glm::vec3(0.0f, -3.0f, 0.0f);
+    m_pointLight[2].Attenuation.Constant = .6f;
+    m_pointLight[2].Attenuation.Linear = .2f;
+    m_pointLight[2].Attenuation.Exp = .3f;
 }

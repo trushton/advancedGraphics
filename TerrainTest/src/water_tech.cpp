@@ -81,7 +81,6 @@ void water_tech::unbind()
 void water_tech::RenderWater(){
     t2 = std::chrono::high_resolution_clock::now();
     time = std::chrono::duration_cast<std::chrono::duration<float> >(t2 - t1).count();
-    enable();
     set("mvp", Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * model);
     set("time", time);
 

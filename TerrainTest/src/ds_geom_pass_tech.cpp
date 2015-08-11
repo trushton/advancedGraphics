@@ -78,6 +78,7 @@ void DSGeomPassTech::initShaderLocations()
     locations["gWVP"] = glGetUniformLocation(program, "gWVP");
     locations["gWorld"] = glGetUniformLocation(program, "gWorld");
     locations["gColorMap"] = glGetUniformLocation(program, "gColorMap");
+    locations["time"] = glGetUniformLocation(program, "time");
 
     if (locations["gWVP"]  == INVALID_UNIFORM_LOCATION ||
         locations["gWorld"] == INVALID_UNIFORM_LOCATION || locations["gColorMap"] ==INVALID_UNIFORM_LOCATION ) {

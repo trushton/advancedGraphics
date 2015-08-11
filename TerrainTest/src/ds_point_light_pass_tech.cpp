@@ -93,7 +93,6 @@ void DSPointLightPassTech::SetPointLight(const PointLight &Light)
     glUniform1f(locations["gPointLight.Base.AmbientIntensity"], Light.AmbientIntensity);
     glUniform1f(locations["gPointLight.Base.DiffuseIntensity"], Light.DiffuseIntensity);
     glUniform3f(locations["gPointLight.Position"], Light.Position.x, Light.Position.y, Light.Position.z);
-    std::cout << Light.Position.x << " " << Light.Position.y << " " << Light.Position.z << std::endl;
     glUniform1f(locations["gPointLight.Atten.Constant"], Light.Attenuation.Constant);
     glUniform1f(locations["gPointLight.Atten.Linear"], Light.Attenuation.Linear);
     glUniform1f(locations["gPointLight.Atten.Exp"], Light.Attenuation.Exp);

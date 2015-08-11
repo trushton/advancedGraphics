@@ -55,7 +55,7 @@ ParticleSystem::~ParticleSystem()
 
 void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
 {
-    Particle Particles[1000];
+    Particle Particles[MAX_PARTICLES];
     ZERO_MEM(Particles);
 
     Particles[0].Type = PARTICLE_TYPE_LAUNCHER;
@@ -73,23 +73,18 @@ void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
         glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_particleBuffer[i]);
     }
 
-    m_updateTechnique.init();
+    random_texture.InitRandomTexture(MAX_PARTICLES);
+    random_texture.Bind(RANDOM_TEXTURE_UNIT);
 
+    m_updateTechnique.init();
     m_updateTechnique.enable();
     m_updateTechnique.set("gRandomTexture", RANDOM_TEXTURE_UNIT_INDEX);
-    m_updateTechnique.set("gLauncherLife", 100.f);
+    m_updateTechnique.set("gLauncherLife", 250.f);
     m_updateTechnique.set("gShellLife", 2000.f);
     m_updateTechnique.set("gSecondaryLife", 2500.f);
 
-    random_texture.InitRandomTexture(1000);
-
-
-    random_texture.Bind(RANDOM_TEXTURE_UNIT);
-
     m_billboardTechnique.init();
-
     m_billboardTechnique.enable();
-
     m_billboardTechnique.set("gColorMap", COLOR_TEXTURE_UNIT_INDEX);
     m_billboardTechnique.set("gBillboardSize", 0.5f);
 
