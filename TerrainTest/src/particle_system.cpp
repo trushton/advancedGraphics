@@ -29,7 +29,8 @@ struct Particle
 
 ParticleSystem::ParticleSystem()
 {
-
+    m_updateTechnique = new PSUpdate();
+    m_billboardTechnique = new billboard_tech();
     currVB = 0;
     currTFB = 1;
 
@@ -58,9 +59,12 @@ void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
     Particle Particles[MAX_PARTICLES];
     ZERO_MEM(Particles);
 
-    Particles[0].Type = 0.0f;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    Particles[0].Type = PARTICLE_TYPE_LAUNCHER;
     Particles[0].Pos = Pos;
-    Particles[0].Vel = glm::vec3(0.0f, 1.0f, 0.0f);
+    Particles[0].Vel = glm::vec3(0.0f, .0001f, 0.0f);
     Particles[0].LifetimeMillis = 0.0f;
 
     glGenTransformFeedbacks(2, m_transformFeedback);
@@ -76,20 +80,22 @@ void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
     random_texture.InitRandomTexture(MAX_PARTICLES);
     random_texture.Bind(RANDOM_TEXTURE_UNIT);
 
-    m_updateTechnique.init();
-    m_updateTechnique.enable();
-    m_updateTechnique.set("gRandomTexture", RANDOM_TEXTURE_UNIT_INDEX);
-    m_updateTechnique.set("gLauncherLife", 250.f);
-    m_updateTechnique.set("gShellLife", 2000.f);
-    m_updateTechnique.set("gSecondaryLife", 2500.f);
+    m_updateTechnique->init();
+    m_updateTechnique->enable();
+    m_updateTechnique->set("gRandomTexture", RANDOM_TEXTURE_UNIT_INDEX);
+    m_updateTechnique->set("gLauncherLife", 250.f);
+    m_updateTechnique->set("gShellLife", 2000.f);
+    m_updateTechnique->set("gSecondaryLife", 2500.f);
 
-    m_billboardTechnique.init();
-    m_billboardTechnique.enable();
-    m_billboardTechnique.set("gColorMap", COLOR_TEXTURE_UNIT_INDEX);
-    m_billboardTechnique.set("gBillboardSize", 0.5f);
+    m_billboardTechnique->init();
+    m_billboardTechnique->enable();
+    m_billboardTechnique->set("gColorMap", COLOR_TEXTURE_UNIT_INDEX);
+    m_billboardTechnique->set("gBillboardSize", 0.5f);
 
     texture = new Texture(GL_TEXTURE_2D, "../bin/fireworks_red.jpg");
     texture->Load();
+
+    glBindVertexArray(0);
 
 
 }
@@ -108,9 +114,11 @@ void ParticleSystem::Render(int DeltaTimeMillis)
 
 void ParticleSystem::updateParticles(int DeltaTimeMillis)
 {
-    m_updateTechnique.enable();
-    m_updateTechnique.set("gTime", timeT);
-    m_updateTechnique.set("gDeltaTime", DeltaTimeMillis);
+    glBindVertexArray(vao);
+
+    m_updateTechnique->enable();
+    m_updateTechnique->set("gTime", timeT);
+    m_updateTechnique->set("gDeltaTime", DeltaTimeMillis);
 
     random_texture.Bind(RANDOM_TEXTURE_UNIT);
 
@@ -137,7 +145,7 @@ void ParticleSystem::updateParticles(int DeltaTimeMillis)
     }
     else {
         glDrawTransformFeedback(GL_POINTS, m_transformFeedback[currVB]);
-        cout << m_transformFeedback[currVB] << endl;
+        //cout << m_transformFeedback[currVB] << endl;
     }
 
     glEndTransformFeedback();
@@ -150,11 +158,13 @@ void ParticleSystem::updateParticles(int DeltaTimeMillis)
 
 void ParticleSystem::renderParticles()
 {
+    glBindVertexArray(vao);
+
     glm::mat4 vp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view;
 
-    m_billboardTechnique.enable();
-    m_billboardTechnique.set("gCameraPos", Engine::getEngine()->graphics->camera->getPos());
-    m_billboardTechnique.set("gVP", vp);
+    m_billboardTechnique->enable();
+    m_billboardTechnique->set("gCameraPos", Engine::getEngine()->graphics->camera->getPos());
+    m_billboardTechnique->set("gVP", vp);
 
     texture->Bind(COLOR_TEXTURE_UNIT);
 
@@ -170,4 +180,6 @@ void ParticleSystem::renderParticles()
     glDrawTransformFeedback(GL_POINTS, m_transformFeedback[currTFB]);
 
     glDisableVertexAttribArray(0);
+    glBindVertexArray(0);
+
 }

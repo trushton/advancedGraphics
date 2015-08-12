@@ -20,6 +20,11 @@ public:
     void bind();
     void unbind();
 
+private:
+    GLuint m_WVPLocation;
+    GLuint m_WorldMatrixLocation;
+    GLuint m_colorTextureUnitLocation;
+
 protected:
     void loadShaders();
     void initShaderProgram();

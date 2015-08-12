@@ -24,10 +24,7 @@ public:
 
     void enable();
 
-    //void SetPointLight(const PointLight& Lights);
 
-    Model plane;
-    void RenderWater();
 
 protected:
     void loadShaders();

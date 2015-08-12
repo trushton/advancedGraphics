@@ -96,7 +96,7 @@ void Terrain::render(glm::mat4& view, glm::mat4& projection)
     //t1=t2;
     //cout << time <<endl;
 
-    RenderGrass();
+    //RenderGrass();
 
 }
 

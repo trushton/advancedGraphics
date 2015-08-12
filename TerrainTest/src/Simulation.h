@@ -51,6 +51,8 @@ public:
 
     void renderParticles();
     void renderFlag();
+    void renderWater();
+
 
 private:
     GBuffer m_gbuffer;
@@ -78,10 +80,10 @@ private:
     std::chrono::time_point<std::chrono::high_resolution_clock> t1, t2;
     int time;
 
-    water_tech water;
+    water_tech water_program;
 
     Flag flag_program;
-    Plane flag;
+    Plane flag, water;
 
 };
 

@@ -7,9 +7,9 @@ uniform float waveHeight;
 uniform mat4 gWVP;
 uniform mat4 gWorld;
 
-in vec3 Position;
-in vec3 Normal;
-in vec2 TexCoord;
+layout (location = 0) in vec3 Position;
+layout (location = 1) in vec2 TexCoord;                                             
+layout (location = 2) in vec3 Normal;
 
 out vec3 Normal0;
 out vec2 TexCoord0;

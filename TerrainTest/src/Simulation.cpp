@@ -34,7 +34,7 @@ void Simulation::init()
     m_nullTech.init();
     InitLights();
 
-    water.init();
+
 
     sphere.loadModel("../bin/sphere.obj");
     quad.loadModel("../bin/quad.obj");
@@ -95,10 +95,14 @@ void Simulation::init()
 
 
     flag_program.init();
+    water_program.init();
 
     flag.init(flag_program, "../bin/unionJack.png", 15, 15);
     flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,0));
     flag.model = glm::rotate(flag.model, 90.0f, glm::vec3(1,1,0));
+
+    water.init(water_program, "../bin/unionJack.png", 40, 40);
+    water.model = glm::translate(glm::mat4(1.0f), glm::vec3(0,90,0));
 
     fireworks.InitParticleSystem(glm::vec3(0,-11,0));
 
@@ -139,7 +143,7 @@ void Simulation::render()
     }
     for(uint i = 0; i < proj.size(); i++)
     {
-        proj[i].model = glm::mat4(1.0f);
+        proj[i].model = glm::translate(glm::mat4(1.0f), glm::vec3(1250,-2000, -800));
         proj[i].render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
     }
 
@@ -147,10 +151,10 @@ void Simulation::render()
     glDisable(GL_STENCIL_TEST);
 
     DSDirectionalLightPass();
-    renderParticles();
 
     DSFinalPass();
 
+    renderParticles();
 
 
 }
@@ -169,8 +173,8 @@ void Simulation::DSGeometryPass()
 {
     static float scale = 0.00f;
     scale += 0.002;
-    m_DSGeomPassTech.enable();
     m_gbuffer.BindForGeomPass();
+    m_DSGeomPassTech.enable();
 
     // Only the geometry pass updates the depth buffer
 
@@ -193,6 +197,7 @@ void Simulation::DSGeometryPass()
     terrain.render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
 
     renderFlag();
+    renderWater();
 
     m_DSGeomPassTech.enable();
 
@@ -200,25 +205,25 @@ void Simulation::DSGeometryPass()
     //box.model = glm::rotate(box.model, scale * 5, glm::vec3(0,1,0));
     box.model = glm::scale(box.model, glm::vec3(20, 20, 20));
 
-    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * box.model;
+    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * box.model;
 
     m_DSGeomPassTech.set("gWVP", mvp);
     m_DSGeomPassTech.set("gWorld", box.model);
     m_DSGeomPassTech.set("gColorMap", 0);
     m_DSGeomPassTech.set("time", time);
 
-    //box.renderModel();
+    box.renderModel();
 
     box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(100, 0, 100));
     box2.model = glm::scale(box2.model, glm::vec3(10, 10, 10));
 
-    mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * box2.model;
+    mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * box2.model;
 
     m_DSGeomPassTech.set("gWVP", mvp);
     m_DSGeomPassTech.set("gWorld", box2.model);
     m_DSGeomPassTech.set("gColorMap", 0);
 
-    //box2.renderModel();
+    box2.renderModel();
 
 
 
@@ -245,7 +250,7 @@ void Simulation::renderFlag()
     static float waveTime = 0.2f, waveWidth = 0.2f, waveHeight = 4.0f, waveFreq = 0.05f;
     waveTime += waveFreq;
 
-    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * flag.model;
+    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * flag.model;
 
     flag_program.set("gWVP", mvp);
     flag_program.set("gWorld", flag.model);
@@ -256,6 +261,26 @@ void Simulation::renderFlag()
     flag_program.set("waveHeight", waveHeight);
 
     flag.render();
+}
+
+void Simulation::renderWater()
+{
+    water_program.enable();
+
+    static float waveTime = 0.2f, waveWidth = 0.2f, waveHeight = 4.0f, waveFreq = 0.05f;
+    waveTime += waveFreq;
+
+    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * water.model;
+
+    water_program.set("gWVP", mvp);
+    water_program.set("gWorld", water.model);
+    water_program.set("gColorMap", 0);
+
+    water_program.set("waveTime", waveTime);
+    water_program.set("waveWidth", waveWidth);
+    water_program.set("waveHeight", waveHeight);
+
+    water.renderWater();
 }
 
 void Simulation::DSStencilPass(unsigned int PointLightIndex)
@@ -278,12 +303,12 @@ void Simulation::DSStencilPass(unsigned int PointLightIndex)
     glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP);
 
     m_pointLight[PointLightIndex].Position = Engine::getEngine()->graphics->camera->getPos();
-    cout << "X: " << m_pointLight[PointLightIndex].Position.x << " Y: " << m_pointLight[PointLightIndex].Position.y << " Z: " << m_pointLight[PointLightIndex].Position.z << endl;
+    //cout << "X: " << m_pointLight[PointLightIndex].Position.x << " Y: " << m_pointLight[PointLightIndex].Position.y << " Z: " << m_pointLight[PointLightIndex].Position.z << endl;
     sphere.model = glm::translate(glm::mat4(1.0f), m_pointLight[PointLightIndex].Position);
 
     float BSphereScale = CalcPointLightBSphere(m_pointLight[PointLightIndex]);
     sphere.model = glm::scale(sphere.model, glm::vec3(BSphereScale, BSphereScale, BSphereScale));
-    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * sphere.model;
+    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * sphere.model;
     m_nullTech.set("gWVP", mvp);
 
     // m_DSPointLightPassTech.SetScreenSize(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -316,7 +341,7 @@ void Simulation::DSPointLightsPass(unsigned int PointLightIndex)
     float BSphereScale = CalcPointLightBSphere(m_pointLight[PointLightIndex]);
     sphere.model = glm::scale(sphere.model, glm::vec3(BSphereScale, BSphereScale, BSphereScale));
 
-    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * sphere.model;
+    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * sphere.model;
 
     m_DSPointLightPassTech.SetPointLight(m_pointLight[PointLightIndex]);
     m_DSPointLightPassTech.set("gWVP", mvp);
@@ -365,7 +390,7 @@ void Simulation::DSDirectionalLightPass()
     glBlendFunc(GL_ONE, GL_ONE);
 
 
-    quad.model = glm::translate(glm::mat4(1.0f), Engine::getEngine()->graphics->camera->getPos());
+    quad.model = glm::mat4(1.0f);
     m_DSDirLightPassTech.set("gWVP", glm::mat4(1.0f));
     m_DSDirLightPassTech.set("gPositionMap", GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
     m_DSDirLightPassTech.set("gColorMap", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);

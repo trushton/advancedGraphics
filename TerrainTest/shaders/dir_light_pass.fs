@@ -1,4 +1,10 @@
-    #version 330
+#version 330
+
+in VS_OUT{
+    vec3 FragPos;
+    vec3 Normal;
+    vec3 TexCoords;
+} fs_in;
 
 struct BaseLight
 {

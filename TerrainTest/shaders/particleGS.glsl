@@ -26,6 +26,7 @@ const float SHELL = 1.0f;
 const float SECONDARY = 2.0f;
 
 
+
 vec3 GetRandomDir(float TexCoord)
 {
     vec3 Dir = texture(gRandomTexture, TexCoord).xyz;

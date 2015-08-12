@@ -31,13 +31,15 @@ class ParticleSystem {
 
         GLuint m_particleBuffer[2];
         GLuint m_transformFeedback[2];
+        GLuint vao;
 
-        billboard_tech m_billboardTechnique;
-        PSUpdate m_updateTechnique;
+        billboard_tech *m_billboardTechnique;
+        PSUpdate *m_updateTechnique;
 
         RandomTexture random_texture;
         Texture* texture;
         int timeT;
+
 };
 
 #endif	/* PARTICLE_SYSTEM_H */

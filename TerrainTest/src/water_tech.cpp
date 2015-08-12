@@ -22,8 +22,7 @@ void water_tech::init(){
     //create the VAO
     glUseProgram(program);
 
-    plane.loadModel("../bin/plane.obj");
-    plane.model = glm::mat4(1.0f);
+
 }
 
 void water_tech::enable(){
@@ -62,22 +61,13 @@ void water_tech::initShaderProgram() {
 void water_tech::initShaderLocations()
 {
     glUseProgram(program);
-    locations["vs_pos"] = glGetAttribLocation(program, "vs_pos");
-    locations["vs_norm"] = glGetAttribLocation(program, "vs_norm");
-    locations["vs_uv"] = glGetAttribLocation(program, "vs_uv");
+    locations["Position"] = glGetAttribLocation(program, "Position");
+    locations["Normal"] = glGetAttribLocation(program, "Normal");
+    locations["TexCoord"] = glGetAttribLocation(program, "TexCoord");
 
-    locations["mvp"] = glGetUniformLocation(program, "mvp");
-    locations["modelMatrix"] = glGetUniformLocation(program, "modelMatrix");
-    locations["light_dir"] = glGetUniformLocation(program, "light_dir");
-    locations["cameraPos"] = glGetUniformLocation(program, "cameraPos");
-    locations["specularIntensity"] = glGetUniformLocation(program, "specularIntensity");
-    locations["specularPower"] = glGetUniformLocation(program, "specularPower");
-    locations["ambientIntensity"] = glGetUniformLocation(program, "ambientIntensity");
-    locations["diffuseIntensity"] = glGetUniformLocation(program, "diffuseIntensity");
-    locations["pointLightPos"] = glGetUniformLocation(program, "pointLightPos");
-    locations["spotLightDir"] = glGetUniformLocation(program, "spotLightDir");
-    locations["tex"] = glGetUniformLocation(program, "tex");
-    //locations["gColorMap"] = glGetUniformLocation(program, "gColorMap");
+    locations["gWVP"] = glGetUniformLocation(program, "gWVP");
+    locations["gWorld"] = glGetUniformLocation(program, "gWorld");
+    locations["gColorMap"] = glGetUniformLocation(program, "gColorMap");
 
     locations["waveTime"] = glGetUniformLocation(program, "waveTime");
     locations["waveWidth"] = glGetUniformLocation(program, "waveWidth");
@@ -93,14 +83,4 @@ void water_tech::bind()
 void water_tech::unbind()
 {
 
-}
-
-void water_tech::RenderWater(){
-    glUseProgram(program);
-    t2 = std::chrono::high_resolution_clock::now();
-    time = std::chrono::duration_cast<std::chrono::duration<float> >(t2 - t1).count();
-    //set("mvp", Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * model);
-    //set("time", time);
-
-    plane.renderModel();
 }

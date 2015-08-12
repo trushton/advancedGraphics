@@ -12,6 +12,7 @@
 #include "Program.h"
 #include "Texture.h"
 #include "Flag.h"
+#include "water_tech.h"
 #include <GL/glew.h>
 #include <iostream>
 
@@ -22,8 +23,12 @@ class Plane {
         virtual ~Plane();
 
         virtual void init(Flag prog, const string textureFile, int pWidth, int pHeight);
+        virtual void init(water_tech prog, const string textureFile, int pWidth, int pHeight);
+
         virtual void tick(float dt);
         virtual void render();
+        virtual void renderWater();
+
         virtual void scale(float scaler);
 
         glm::mat4 model;
@@ -33,12 +38,13 @@ private:
 
         vector<unsigned int> indices;
         Flag program;
-        Texture *texture;
+        water_tech waterProg;
+        Texture *Tex;
         int width, height;
         vector<Vertex> geometry;
         string textureFile;
         GLuint vio;
-        GLuint vbo, vao, m_Buffers[4];
+        GLuint vbo, vao;
         float density;
 };
 
