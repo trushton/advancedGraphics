@@ -102,3 +102,11 @@ GLuint Program::loadShader(const char *fileName, GLenum shaderType)
 
     return shader;
 }
+
+void Program::bind(){
+
+}
+
+void Program::unbind(){
+
+}

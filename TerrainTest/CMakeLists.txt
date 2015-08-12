@@ -14,7 +14,8 @@ add_executable(TerrainTest ${SOURCE_FILES} src/skybox.cpp src/skybox.h src/Engin
                 src/ds_spot_light_pass_tech.cpp src/ds_spot_light_pass_tech.h src/lights.h src/Terrain.cpp src/Terrain.h src/gishandler.cpp src/gishandler.h
                 src/buffer.cpp src/buffer.h src/renderer.cpp src/renderer.h src/TerrainShader.cpp src/TerrainShader.h src/shape.cpp src/shape.h
                 src/projector.cpp src/projector.h src/billboard_tech.cpp src/billboard_tech.h src/particle_system.cpp src/particle_system.h
-                src/ps_update_tech.cpp src/ps_update_tech.h src/RandomTexture.cpp src/RandomTexture.h src/Texture.cpp src/Texture.h src/grass_tech.cpp src/grass_tech.h src/water_tech.cpp src/water_tech.h src/pbuffer.cpp src/pbuffer.h)
+                src/ps_update_tech.cpp src/ps_update_tech.h src/RandomTexture.cpp src/RandomTexture.h src/Texture.cpp src/Texture.h src/grass_tech.cpp src/grass_tech.h
+                src/water_tech.cpp src/water_tech.h src/pbuffer.cpp src/pbuffer.h src/Plane.cpp src/Plane.h src/Flag.cpp src/Flag.h)
 
 INCLUDE(FindPkgConfig)
 include(FindGLEW)

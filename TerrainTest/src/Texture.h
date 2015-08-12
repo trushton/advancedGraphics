@@ -10,11 +10,12 @@ public:
     Texture(GLenum TextureTarget, const std::string& FileName);
     void Load();
     void Bind(GLenum TextureUnit);
+    Magick::Image* m_pImage;
+    Magick::Blob m_blob;
+
 private:
     std::string m_fileName;
     GLenum m_textureTarget;
     GLuint m_textureObj;
-    Magick::Image* m_pImage;
-    Magick::Blob m_blob;
 };
 #endif	/* TEXTURE_H */

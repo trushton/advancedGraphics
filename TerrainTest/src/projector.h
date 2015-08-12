@@ -78,8 +78,8 @@ public:
         transform->Transform(1,&x,&y);
         transform->Transform(1,&xright,&ybottom);
 
-        double XRES = (xright-x) / width;
-        double YRES = (y - ybottom) / height;
+        //double XRES = (xright-x) / width;
+       // double YRES = (y - ybottom) / height;
 
         SetDimensions((xright-x),(y - ybottom));
         x = x - mainorigin.x;

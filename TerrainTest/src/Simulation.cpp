@@ -94,6 +94,12 @@ void Simulation::init()
 
     t2 = t1 = std::chrono::high_resolution_clock::now();
 
+
+    flag_program.init();
+
+    flag.init(flag_program, "../bin/flag.jpg", 15, 15);
+    flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,0));
+    flag.model = glm::rotate(flag.model, 60.0f, glm::vec3(1,0,0));
 }
 
 void Simulation::tick(float dt)
@@ -120,6 +126,8 @@ void Simulation::render()
     m_gbuffer.StartFrame();
 
 
+
+
     DSGeometryPass();
 
     skybox->render();
@@ -144,6 +152,8 @@ void Simulation::render()
     DSDirectionalLightPass();
 
 
+
+
     DSFinalPass();
 
     renderParticles();
@@ -154,7 +164,7 @@ void Simulation::render()
 void Simulation::renderParticles()
 {
     t2 = std::chrono::high_resolution_clock::now();
-    time = (int)(1000*std::chrono::duration_cast<std::chrono::duration<float> >(t2 - t1).count());
+    time = (int)(1000*std::chrono::duration_cast<std::chrono::duration<float>>(t2 - t1).count());
     t1 = t2;
     glEnable(GL_DEPTH_TEST);
     fireworks.Render(time);
@@ -188,7 +198,10 @@ void Simulation::DSGeometryPass()
 
     terrain.render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
 
+    renderFlag();
+
     m_DSGeomPassTech.enable();
+
 
     box.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
     //box.model = glm::rotate(box.model, scale * 5, glm::vec3(0,1,0));
@@ -214,14 +227,7 @@ void Simulation::DSGeometryPass()
 
     box2.renderModel();
 
-//    mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * water.plane.model;
-//
-//
-//    m_DSGeomPassTech.set("gWVP", mvp);
-//    m_DSGeomPassTech.set("gWorld", water.plane.model);
-//    m_DSGeomPassTech.set("gColorMap", 0);
-//
-//    water.RenderWater();
+
 
 //    for(uint i = 0; i < shap.size(); i++){
 //        shap[i].model = glm::translate(shap[i].model, glm::vec3(1250,-2000, -800));
@@ -236,10 +242,27 @@ void Simulation::DSGeometryPass()
 //        shap[i].render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
 //    }
 
-
-
-
     glDepthMask(GL_FALSE);
+}
+
+void Simulation::renderFlag()
+{
+    flag_program.enable();
+
+    static float waveTime = 0.2f, waveWidth = 0.2f, waveHeight = 3.0f, waveFreq = 0.05f;
+    waveTime += waveFreq;
+
+    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * flag.model;
+
+    flag_program.set("gWVP", mvp);
+    flag_program.set("gWorld", flag.model);
+    flag_program.set("gColorMap", 0);
+
+    flag_program.set("waveTime", waveTime);
+    flag_program.set("waveWidth", waveWidth);
+    flag_program.set("waveHeight", waveHeight);
+
+    flag.render();
 }
 
 void Simulation::DSStencilPass(unsigned int PointLightIndex)
@@ -316,6 +339,8 @@ void Simulation::DSPointLightsPass(unsigned int PointLightIndex)
     glUniform2f(m_DSPointLightPassTech.getLocation("gScreenSize"), (float) windowWidth, (float) windowHeight);
 
     sphere.renderModel();
+
+
 
     glCullFace(GL_BACK);
     glDisable(GL_BLEND);

@@ -7,7 +7,8 @@
 struct Vertex
     {
         GLfloat position[3];
-        GLfloat color[3];
+        GLfloat normal[3];
+        GLfloat texture[3];
     };
 
 struct textureVertex

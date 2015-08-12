@@ -17,6 +17,8 @@
 #include "projector.h"
 #include "particle_system.h"
 #include "water_tech.h"
+#include "Plane.h"
+#include "Flag.h"
 
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
@@ -48,6 +50,7 @@ public:
     void DSLightPass();
 
     void renderParticles();
+    void renderFlag();
 
 private:
     GBuffer m_gbuffer;
@@ -76,6 +79,9 @@ private:
     int time;
 
     water_tech water;
+
+    Flag flag_program;
+    Plane flag;
 
 };
 
