@@ -15,7 +15,7 @@ Plane::~Plane(){
 void Plane::init(Flag prog, const string textureFile, int pWidth, int pHeight)
 {
     program = prog;
-    density = 1.0f;
+    density = 0.10f;
     width = pWidth;
     height = pHeight;
     texture = new Texture(GL_TEXTURE_2D, textureFile.c_str());

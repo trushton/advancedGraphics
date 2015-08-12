@@ -99,7 +99,7 @@ void Simulation::init()
 
     flag.init(flag_program, "../bin/flag.jpg", 15, 15);
     flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,0));
-    flag.model = glm::rotate(flag.model, 60.0f, glm::vec3(1,0,0));
+    flag.model = glm::rotate(flag.model, 90.0f, glm::vec3(1,1,0));
 }
 
 void Simulation::tick(float dt)
@@ -125,15 +125,9 @@ void Simulation::render()
 {
     m_gbuffer.StartFrame();
 
-
-
-
     DSGeometryPass();
 
     skybox->render();
-
-
-
 
     glEnable(GL_STENCIL_TEST);
 
@@ -147,16 +141,14 @@ void Simulation::render()
         proj[i].render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
     }
 
+
     glDisable(GL_STENCIL_TEST);
 
     DSDirectionalLightPass();
-
-
-
+    renderParticles();
 
     DSFinalPass();
 
-    renderParticles();
 
 
 }
@@ -214,7 +206,7 @@ void Simulation::DSGeometryPass()
     m_DSGeomPassTech.set("gColorMap", 0);
     m_DSGeomPassTech.set("time", time);
 
-    box.renderModel();
+    //box.renderModel();
 
     box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(100, 0, 100));
     box2.model = glm::scale(box2.model, glm::vec3(10, 10, 10));
@@ -225,7 +217,7 @@ void Simulation::DSGeometryPass()
     m_DSGeomPassTech.set("gWorld", box2.model);
     m_DSGeomPassTech.set("gColorMap", 0);
 
-    box2.renderModel();
+    //box2.renderModel();
 
 
 
@@ -249,7 +241,7 @@ void Simulation::renderFlag()
 {
     flag_program.enable();
 
-    static float waveTime = 0.2f, waveWidth = 0.2f, waveHeight = 3.0f, waveFreq = 0.05f;
+    static float waveTime = 0.2f, waveWidth = 0.2f, waveHeight = 4.0f, waveFreq = 0.05f;
     waveTime += waveFreq;
 
     glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * flag.model;
