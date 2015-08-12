@@ -182,7 +182,4 @@ void Terrain::RenderGrass()
 
     glDrawArrays(GL_POINTS, 0, positions.size());
     glDisableVertexAttribArray(0);
-
-
-
 }

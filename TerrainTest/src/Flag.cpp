@@ -74,16 +74,6 @@ void Flag::initShaderLocations()
 
     locations["gWVP"] = glGetUniformLocation(program, "gWVP");
     locations["gWorld"] = glGetUniformLocation(program, "gWorld");
-//    locations["light_dir"] = glGetUniformLocation(program, "light_dir");
-//    locations["cameraPos"] = glGetUniformLocation(program, "cameraPos");
-//    locations["specularIntensity"] = glGetUniformLocation(program, "specularIntensity");
-//    locations["specularPower"] = glGetUniformLocation(program, "specularPower");
-//    locations["ambientIntensity"] = glGetUniformLocation(program, "ambientIntensity");
-//    locations["diffuseIntensity"] = glGetUniformLocation(program, "diffuseIntensity");
-//    locations["pointLightPos"] = glGetUniformLocation(program, "pointLightPos");
-//    locations["spotLightDir"] = glGetUniformLocation(program, "spotLightDir");
-//    locations["tex"] = glGetUniformLocation(program, "tex");
-    //locations["gColorMap"] = glGetUniformLocation(program, "gColorMap");
     locations["gColorMap"] = glGetUniformLocation(program, "gColorMap");
 
     locations["waveTime"] = glGetUniformLocation(program, "waveTime");

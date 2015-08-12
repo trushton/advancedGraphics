@@ -10,7 +10,6 @@ layout (location = 2) out vec3 NormalOut;
 layout (location = 3) out vec3 TexCoordOut;
 
 uniform sampler2D gColorMap;
-vec3 original = WorldPos0;
 
 void main()
 {

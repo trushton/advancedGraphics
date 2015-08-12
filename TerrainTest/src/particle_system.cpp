@@ -58,9 +58,9 @@ void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
     Particle Particles[MAX_PARTICLES];
     ZERO_MEM(Particles);
 
-    Particles[0].Type = PARTICLE_TYPE_LAUNCHER;
+    Particles[0].Type = 0.0f;
     Particles[0].Pos = Pos;
-    Particles[0].Vel = glm::vec3(0.0f, 0.0001f, 0.0f);
+    Particles[0].Vel = glm::vec3(0.0f, 1.0f, 0.0f);
     Particles[0].LifetimeMillis = 0.0f;
 
     glGenTransformFeedbacks(2, m_transformFeedback);
@@ -150,7 +150,7 @@ void ParticleSystem::updateParticles(int DeltaTimeMillis)
 
 void ParticleSystem::renderParticles()
 {
-    glm::mat4 vp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView();
+    glm::mat4 vp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view;
 
     m_billboardTechnique.enable();
     m_billboardTechnique.set("gCameraPos", Engine::getEngine()->graphics->camera->getPos());

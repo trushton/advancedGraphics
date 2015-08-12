@@ -15,7 +15,6 @@ Simulation::~Simulation()
 
 void Simulation::init()
 {
-    fireworks.InitParticleSystem(glm::vec3(0,-11,0));
     m_pointLight.resize(3);
     windowWidth = 1600;
     windowHeight = 900;
@@ -97,9 +96,12 @@ void Simulation::init()
 
     flag_program.init();
 
-    flag.init(flag_program, "../bin/flag.jpg", 15, 15);
+    flag.init(flag_program, "../bin/unionJack.png", 15, 15);
     flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,0));
     flag.model = glm::rotate(flag.model, 90.0f, glm::vec3(1,1,0));
+
+    fireworks.InitParticleSystem(glm::vec3(0,-11,0));
+
 }
 
 void Simulation::tick(float dt)
@@ -158,9 +160,9 @@ void Simulation::renderParticles()
     t2 = std::chrono::high_resolution_clock::now();
     time = (int)(1000*std::chrono::duration_cast<std::chrono::duration<float>>(t2 - t1).count());
     t1 = t2;
-    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_DEPTH_TEST);
     fireworks.Render(time);
-    glDisable(GL_DEPTH_TEST);
+    //glDisable(GL_DEPTH_TEST);
 }
 
 void Simulation::DSGeometryPass()
@@ -193,7 +195,6 @@ void Simulation::DSGeometryPass()
     renderFlag();
 
     m_DSGeomPassTech.enable();
-
 
     box.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
     //box.model = glm::rotate(box.model, scale * 5, glm::vec3(0,1,0));
@@ -278,11 +279,10 @@ void Simulation::DSStencilPass(unsigned int PointLightIndex)
 
     m_pointLight[PointLightIndex].Position = Engine::getEngine()->graphics->camera->getPos();
     cout << "X: " << m_pointLight[PointLightIndex].Position.x << " Y: " << m_pointLight[PointLightIndex].Position.y << " Z: " << m_pointLight[PointLightIndex].Position.z << endl;
-    sphere.model = glm::translate(glm::mat4(1.0f), glm::vec3(m_pointLight[PointLightIndex].Position));
+    sphere.model = glm::translate(glm::mat4(1.0f), m_pointLight[PointLightIndex].Position);
 
     float BSphereScale = CalcPointLightBSphere(m_pointLight[PointLightIndex]);
     sphere.model = glm::scale(sphere.model, glm::vec3(BSphereScale, BSphereScale, BSphereScale));
-
     glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * sphere.model;
     m_nullTech.set("gWVP", mvp);
 
@@ -298,7 +298,6 @@ void Simulation::DSPointLightsPass(unsigned int PointLightIndex)
 
     m_gbuffer.BindForLightPass();
     m_DSPointLightPassTech.enable();
-    m_DSPointLightPassTech.set("gEyeWorldPos", Engine::getEngine()->graphics->camera->getPos());
 
 
     glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
@@ -321,6 +320,7 @@ void Simulation::DSPointLightsPass(unsigned int PointLightIndex)
 
     m_DSPointLightPassTech.SetPointLight(m_pointLight[PointLightIndex]);
     m_DSPointLightPassTech.set("gWVP", mvp);
+    m_DSPointLightPassTech.set("gEyeWorldPos", Engine::getEngine()->graphics->camera->getPos());
     m_DSPointLightPassTech.set("gPositionMap", GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
     m_DSPointLightPassTech.set("gColorMap", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
     m_DSPointLightPassTech.set("gNormalMap", GBuffer::GBUFFER_TEXTURE_TYPE_NORMAL);
@@ -395,12 +395,12 @@ void Simulation::InitLights()
     m_dirLight.DiffuseIntensity = 0.25f;
     m_dirLight.Direction = glm::vec3(-1.0f, -1.0f, -1.0f);
 
-    m_pointLight[0].DiffuseIntensity = 30.0f;
-    m_pointLight[0].Color = COLOR_RED;
-    m_pointLight[0].Position = glm::vec3(100.0f, -3.0f, 100.0f);
-    m_pointLight[0].Attenuation.Constant = .6f;
-    m_pointLight[0].Attenuation.Linear = .2f;
-    m_pointLight[0].Attenuation.Exp = .3f;
+//    m_pointLight[0].DiffuseIntensity = 30.0f;
+//    m_pointLight[0].Color = COLOR_RED;
+//    m_pointLight[0].Position = glm::vec3(100.0f, -3.0f, 100.0f);
+//    m_pointLight[0].Attenuation.Constant = .6f;
+//    m_pointLight[0].Attenuation.Linear = .2f;
+//    m_pointLight[0].Attenuation.Exp = .3f;
 
     m_pointLight[1].DiffuseIntensity = 20.0f;
     m_pointLight[1].Color = COLOR_BLUE;
