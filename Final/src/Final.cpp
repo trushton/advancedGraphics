@@ -41,6 +41,19 @@ void Final::init()
 
     terrain.SetFile("../bin/data/drycreek2.tif");
     terrain.setup();
+
+    flag_program.init();
+    water_program.init();
+
+    flag.init(flag_program, "../bin/unionJack.png", 15, 15);
+    flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,0));
+    flag.model = glm::rotate(flag.model, 90.0f, glm::vec3(1,1,0));
+
+    water.init(water_program, "../bin/flag.jpg", 15, 15);
+    water.model = glm::translate(glm::mat4(1.0f), glm::vec3(5,5,0));
+    water.model = glm::rotate(water.model, 90.0f, glm::vec3(1,1,0));
+
+
     fireworks.initWithPos(glm::vec3(0,-11,0));
 
     t2 = t1 = std::chrono::high_resolution_clock::now();
@@ -96,6 +109,47 @@ void Final::renderParticles()
 }
 
 
+void Final::renderFlag()
+{
+    flag_program.enable();
+
+    static float waveTime = 0.2f, waveWidth = 0.2f, waveHeight = 4.0f, waveFreq = 0.05f;
+    waveTime += waveFreq;
+
+    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * flag.model;
+
+    flag_program.set("gWVP", mvp);
+    flag_program.set("gWorld", flag.model);
+    flag_program.set("gColorMap", 0);
+
+    flag_program.set("waveTime", waveTime);
+    flag_program.set("waveWidth", waveWidth);
+    flag_program.set("waveHeight", waveHeight);
+
+    flag.render();
+}
+
+void Final::renderWater()
+{
+    water_program.enable();
+
+    static float waveTime = 0.2f, waveWidth = 0.2f, waveHeight = 4.0f, waveFreq = 0.05f;
+    waveTime += waveFreq;
+
+    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * water.model;
+
+    water_program.set("gWVP", mvp);
+    water_program.set("gWorld", water.model);
+    water_program.set("gColorMap", 0);
+
+    water_program.set("waveTime", waveTime);
+    water_program.set("waveWidth", waveWidth);
+    water_program.set("waveHeight", waveHeight);
+
+    water.renderWater();
+}
+
+
 void Final::DSGeometryPass()
 {
     m_gbuffer.BindForGeomPass();
@@ -119,8 +173,8 @@ void Final::DSGeometryPass()
 
     terrain.render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
 
-//    renderFlag();
-//    renderWater();
+    renderFlag();
+    renderWater();
 
     m_DSGeomPassTech.enable();
 

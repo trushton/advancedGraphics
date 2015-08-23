@@ -55,8 +55,8 @@ public:
     void DSLightPass();
 
     void renderParticles();
-//    void renderFlag();
-//    void renderWater();
+    void renderFlag();
+    void renderWater();
 
 private:
     GBuffer m_gbuffer;
