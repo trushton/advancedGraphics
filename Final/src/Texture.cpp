@@ -1,28 +1,59 @@
 #include <iostream>
 #include "Texture.h"
-Texture::Texture(GLenum TextureTarget, const std::string& FileName)
+#include "Engine.h"
+#include <FreeImagePlus.h>
+
+
+Texture::Texture(GLenum type)
+        : target(type)
 {
-    m_textureTarget = TextureTarget;
-    m_fileName = FileName;
-    m_pImage = NULL;
 }
-void Texture::Load()
+
+Texture::Texture(const std::string& fileName, GLenum type)
+        : file_name(fileName), target(type)
 {
-    try {
-        m_pImage = new Magick::Image(m_fileName);
-        m_pImage->write(&m_blob, "RGBA");
-    }
-    catch (Magick::Error& Error) {
-        std::cout << "Error loading texture '" << m_fileName << "': " << Error.what() << std::endl;
-    }
-    glGenTextures(1, &m_textureObj);
-    glBindTexture(m_textureTarget, m_textureObj);
-    glTexImage2D(m_textureTarget, 0, GL_RGB, m_pImage->columns(), m_pImage->rows(), -0.5, GL_RGBA, GL_UNSIGNED_BYTE, m_blob.data());
-    glTexParameterf(m_textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(m_textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    init();
 }
-void Texture::Bind(GLenum TextureUnit)
+
+Texture::~Texture()
 {
-    glActiveTexture(TextureUnit);
-    glBindTexture(m_textureTarget, m_textureObj);
+
+}
+
+void Texture::init()
+{
+    fipImage image;
+    if(image.load(file_name.c_str())) {
+        if(image.getImageType() == FIT_UNKNOWN) {
+            std::cerr << "Unknown image type for texture: " << file_name << std::endl;
+            return;
+        }
+
+        image.convertTo32Bits();
+
+        glGenTextures(1, &textureID);
+
+        glBindTexture(target, textureID);
+        glTexParameterf(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        //glTexParameterf(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+
+        if(target == GL_TEXTURE_2D) {
+            glTexImage2D(target, 0, GL_RGBA, image.getWidth(), image.getHeight(),
+                         0, GL_BGRA, GL_UNSIGNED_BYTE, (void*) image.accessPixels());
+        }
+        else {
+            glTexImage1D(target, 0, GL_RGBA, image.getWidth(), 0,
+                         GL_BGRA, GL_UNSIGNED_BYTE, (void*) image.accessPixels());
+        }
+
+        glBindTexture(target, 0);
+    }
+}
+
+void Texture::bind(GLenum textureUnit)
+{
+    glActiveTexture(textureUnit);
+    glBindTexture(target, textureID);
 }

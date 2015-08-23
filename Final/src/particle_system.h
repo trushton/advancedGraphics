@@ -8,38 +8,48 @@
 #include "RandomTexture.h"
 #include "Texture.h"
 
+#include "ParticleSystemRender.h"
+#include "ParticleSystemUpdate.h"
+#include <glm/vec3.hpp>
 
+struct Particle
+{
+    float type;
+    glm::vec3 pos;
+    glm::vec3 vel;
+    float lifetime;
+    glm::vec3 color;
+};
 
+class ParticleUpdateProgram;
+class ParticleRenderProgram;
+class Texture;
 
+class ParticleSystem
+{
+public:
+    ParticleSystem();
 
-class ParticleSystem {
+    ~ParticleSystem();
 
-    public:
-        ParticleSystem();
-        ~ParticleSystem();
-        void InitParticleSystem(const glm::vec3 Pos);
-        void Render(int DeltaTimeMillis);
+    void initWithPos(const glm::vec3 &pos);
 
-    private:
-        void updateParticles(int DeltaTimeMillis);
-        void renderParticles();
+    void renderWithDT(float dt);
 
-        bool isFirst;
+private:
+    void updateParticles(float dt);
 
-        unsigned int currVB;
-        unsigned int currTFB;
+    void renderParticles();
 
-        GLuint m_particleBuffer[2];
-        GLuint m_transformFeedback[2];
-        GLuint vao;
+    bool isFirst;
+    unsigned int currVB, currTFB;
+    GLuint particleBuffer[2], transformFeedback[2], vao;
+    float time;
 
-        billboard_tech *m_billboardTechnique;
-        PSUpdate *m_updateTechnique;
+    ParticleUpdateProgram * update;
+    ParticleRenderProgram * render;
 
-        RandomTexture random_texture;
-        Texture* texture;
-        int timeT;
-
+    Texture *texture, *random_texture, *alphaTexture;
 };
 
 #endif	/* PARTICLE_SYSTEM_H */

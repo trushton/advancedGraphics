@@ -4,18 +4,21 @@
 #include <string>
 #include <GL/glew.h>
 #include <ImageMagick/Magick++.h>
-class Texture
-{
-public:
-    Texture(GLenum TextureTarget, const std::string& FileName);
-    void Load();
-    void Bind(GLenum TextureUnit);
-    Magick::Image* m_pImage;
-    Magick::Blob m_blob;
+#include <string>
 
-private:
-    std::string m_fileName;
-    GLenum m_textureTarget;
-    GLuint m_textureObj;
+
+class Texture {
+public:
+    Texture(GLenum type);
+    Texture(const std::string& fileName, GLenum type);
+    virtual ~Texture();
+
+    virtual void init();
+    virtual void bind(GLenum textureUnit);
+
+protected:
+    std::string file_name;
+    GLenum target;
+    GLuint textureID;
 };
 #endif	/* TEXTURE_H */

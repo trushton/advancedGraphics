@@ -19,133 +19,121 @@
 #define RANDOM_TEXTURE_UNIT GL_TEXTURE3
 #define RANDOM_TEXTURE_UNIT_INDEX 3
 
-struct Particle
-{
-    float Type;
-    glm::vec3 Pos;
-    glm::vec3 Vel;
-    float LifetimeMillis;
-};
-
 ParticleSystem::ParticleSystem()
 {
-    m_updateTechnique = new PSUpdate();
-    m_billboardTechnique = new billboard_tech();
     currVB = 0;
     currTFB = 1;
 
     isFirst = true;
-    timeT = 0;
-    texture = NULL;
+    time = 0;
 
-    ZERO_MEM(m_transformFeedback);
-    ZERO_MEM(m_particleBuffer);
+    update = new ParticleUpdateProgram();
+    render = new ParticleRenderProgram();
+
 
 }
 
 ParticleSystem::~ParticleSystem()
 {
-    SAFE_DELETE(texture);
-    if (m_transformFeedback[0] != 0) {
-        glDeleteTransformFeedbacks(2, m_transformFeedback);
-    }
-    if (m_particleBuffer[0] != 0) {
-        glDeleteBuffers(2, m_particleBuffer);
-    }
+
 }
 
-void ParticleSystem::InitParticleSystem(const glm::vec3 Pos)
+void ParticleSystem::initWithPos(const glm::vec3 &pos)
 {
-    Particle Particles[MAX_PARTICLES];
-    ZERO_MEM(Particles);
+    Particle particles[MAX_PARTICLES];
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    Particles[0].Type = PARTICLE_TYPE_LAUNCHER;
-    Particles[0].Pos = Pos;
-    Particles[0].Vel = glm::vec3(0.0f, .0001f, 0.0f);
-    Particles[0].LifetimeMillis = 0.0f;
+    particles[0].type = PARTICLE_TYPE_LAUNCHER;
+    particles[0].pos = pos;
+    particles[0].vel = glm::vec3(0.0f, 0.0001f, 0.0f);
+    particles[0].lifetime = 0.0f;
+    particles[0].color = glm::vec3(0.0,0.5,1.0);
 
-    glGenTransformFeedbacks(2, m_transformFeedback);
-    glGenBuffers(2, m_particleBuffer);
 
-    for (unsigned int i = 0; i < 2 ; i++) {
-        glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, m_transformFeedback[i]);
-        glBindBuffer(GL_ARRAY_BUFFER, m_particleBuffer[i]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Particles), Particles, GL_DYNAMIC_DRAW);
-        glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, m_particleBuffer[i]);
+    glGenTransformFeedbacks(2, transformFeedback);
+    glGenBuffers(2, particleBuffer);
+
+    for (int i = 0; i < 2; i++)
+    {
+        glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, transformFeedback[i]);
+        glBindBuffer(GL_ARRAY_BUFFER, particleBuffer[i]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(particles), particles, GL_DYNAMIC_DRAW);
+        glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, particleBuffer[i]);
     }
 
-    random_texture.InitRandomTexture(MAX_PARTICLES);
-    random_texture.Bind(RANDOM_TEXTURE_UNIT);
+    texture = new Texture("../bin/fireworks_red.jpg", GL_TEXTURE_2D);
+    alphaTexture = new Texture("../bin/fireworks_red.jpg", GL_TEXTURE_2D);
 
-    m_updateTechnique->init();
-    m_updateTechnique->enable();
-    m_updateTechnique->set("gRandomTexture", RANDOM_TEXTURE_UNIT_INDEX);
-    m_updateTechnique->set("gLauncherLife", 250.f);
-    m_updateTechnique->set("gShellLife", 2000.f);
-    m_updateTechnique->set("gSecondaryLife", 2500.f);
+    random_texture = new RandomTexture(MAX_PARTICLES, GL_TEXTURE_1D);
 
-    m_billboardTechnique->init();
-    m_billboardTechnique->enable();
-    m_billboardTechnique->set("gColorMap", COLOR_TEXTURE_UNIT_INDEX);
-    m_billboardTechnique->set("gBillboardSize", 0.5f);
+    update->enable();
+    update->set("random_texture", RANDOM_TEXTURE_UNIT_INDEX);
+    update->set("launcher_lifetime", 25000.0f);
+    update->set("shell_lifetime", 1500.0f);
+    update->set("secondary_shell_lifetime", 2500.0f);
 
-    texture = new Texture(GL_TEXTURE_2D, "../bin/fireworks_red.jpg");
-    texture->Load();
+    render->enable();
+    render->set("color_map", COLOR_TEXTURE_UNIT_INDEX);
+    //render->set("alpha_map", 2);
+
+
+    render->set("billboard_size", 2.0f);
 
     glBindVertexArray(0);
 
-
 }
 
-void ParticleSystem::Render(int DeltaTimeMillis)
+void ParticleSystem::renderWithDT(float dt)
 {
-    timeT += DeltaTimeMillis;
-    cout << "total time: " << timeT << " |  DeltaTime: " << DeltaTimeMillis << endl;
-    updateParticles(DeltaTimeMillis);
+    time += (dt * 1000.0f);
+
+    updateParticles(dt);
     renderParticles();
 
     currVB = currTFB;
     currTFB = (currTFB + 1) & 0x1;
-
 }
 
-void ParticleSystem::updateParticles(int DeltaTimeMillis)
+void ParticleSystem::updateParticles(float dt)
 {
     glBindVertexArray(vao);
+    update->enable();
+    update->set("time", time);
+    update->set("dt", dt * 1000.0f);
 
-    m_updateTechnique->enable();
-    m_updateTechnique->set("gTime", timeT);
-    m_updateTechnique->set("gDeltaTime", DeltaTimeMillis);
+    glm::vec3 color(((rand()%11) / 10.0f), ((rand()%11) / 10.0f), ((rand()%11) / 10.0f));
 
-    random_texture.Bind(RANDOM_TEXTURE_UNIT);
+    update->set("particleColor", color);
 
+    random_texture->bind(RANDOM_TEXTURE_UNIT);
     glEnable(GL_RASTERIZER_DISCARD);
-    glBindBuffer(GL_ARRAY_BUFFER, m_particleBuffer[currVB]);
-    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, m_transformFeedback[currTFB]);
+    glBindBuffer(GL_ARRAY_BUFFER, particleBuffer[currVB]);
+    glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, transformFeedback[currTFB]);
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
+    glEnableVertexAttribArray(4);
 
-    glVertexAttribPointer(0,1,GL_FLOAT,GL_FALSE,sizeof(Particle), 0); // type
-    glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,sizeof(Particle),(const GLvoid*) 4); // position
-    glVertexAttribPointer(2,3,GL_FLOAT,GL_FALSE,sizeof(Particle),(const GLvoid*) 16); // velocity
-    glVertexAttribPointer(3,1,GL_FLOAT,GL_FALSE,sizeof(Particle),(const GLvoid*) 28); // lifetime
+    glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void *) 0); // type
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void *) 4); // position
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void *) 16); // velocity
+    glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void *) 28); // lifetime
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void *) 32); // Color
 
     glBeginTransformFeedback(GL_POINTS);
 
-    if (isFirst) {
+    if (isFirst)
+    {
         glDrawArrays(GL_POINTS, 0, 1);
         isFirst = false;
-
     }
-    else {
-        glDrawTransformFeedback(GL_POINTS, m_transformFeedback[currVB]);
-        //cout << m_transformFeedback[currVB] << endl;
+    else
+    {
+        glDrawTransformFeedback(GL_POINTS, transformFeedback[currVB]);
     }
 
     glEndTransformFeedback();
@@ -154,32 +142,42 @@ void ParticleSystem::updateParticles(int DeltaTimeMillis)
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(2);
     glDisableVertexAttribArray(3);
+    glDisableVertexAttribArray(4);
+
+
 }
 
 void ParticleSystem::renderParticles()
 {
     glBindVertexArray(vao);
+    auto vp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view;
 
-    glm::mat4 vp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view;
+    render->enable();
+    render->set("camera_pos", Engine::getEngine()->graphics->camera->getPos());
+    render->set("vp", vp);
 
-    m_billboardTechnique->enable();
-    m_billboardTechnique->set("gCameraPos", Engine::getEngine()->graphics->camera->getPos());
-    m_billboardTechnique->set("gVP", vp);
 
-    texture->Bind(COLOR_TEXTURE_UNIT);
+    if (texture)
+    {
+        texture->bind(COLOR_TEXTURE_UNIT);
+    }
 
+    if(alphaTexture)
+    {
+        alphaTexture->bind(GL_TEXTURE2);
+    }
 
     glDisable(GL_RASTERIZER_DISCARD);
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_particleBuffer[currTFB]);
-
+    glBindBuffer(GL_ARRAY_BUFFER, particleBuffer[currTFB]);
     glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(4);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (const GLvoid*)4); // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void *) 4);  // position
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void *) 32); // Color
 
-    glDrawTransformFeedback(GL_POINTS, m_transformFeedback[currTFB]);
-
+    glDrawTransformFeedback(GL_POINTS, transformFeedback[currTFB]);
     glDisableVertexAttribArray(0);
-    glBindVertexArray(0);
+    glDisableVertexAttribArray(4);
 
+    glBindVertexArray(0);
 }

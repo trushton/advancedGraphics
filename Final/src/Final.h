@@ -54,7 +54,7 @@ public:
     void InitBoxPositions();
     void DSLightPass();
 
-//    void renderParticles();
+    void renderParticles();
 //    void renderFlag();
 //    void renderWater();
 

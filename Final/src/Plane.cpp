@@ -18,7 +18,7 @@ void Plane::init(Flag prog, const string textureFile, int pWidth, int pHeight)
     density = 0.10f;
     width = pWidth;
     height = pHeight;
-    Tex = new Texture(GL_TEXTURE_2D, textureFile.c_str());
+    Tex = new Texture(textureFile.c_str(), GL_TEXTURE_2D);
 
     Vertex vert;
 
@@ -87,7 +87,7 @@ void Plane::init(water_tech prog, const string textureFile, int pWidth, int pHei
     density = 0.10f;
     width = pWidth;
     height = pHeight;
-    Tex = new Texture(GL_TEXTURE_2D, textureFile.c_str());
+    Tex = new Texture( textureFile.c_str(), GL_TEXTURE_2D);
 
     Vertex vert;
 
@@ -165,7 +165,7 @@ void Plane::render()
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
 
-    Tex->Bind(GL_TEXTURE0);
+    Tex->bind(GL_TEXTURE0);
     //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture->m_pImage->columns(), texture->m_pImage->rows(), -0.5, GL_RGBA, GL_UNSIGNED_BYTE,texture->m_blob.data());
 
 
@@ -188,7 +188,7 @@ void Plane::renderWater()
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
 
-    Tex->Bind(GL_TEXTURE0);
+    Tex->bind(GL_TEXTURE0);
     //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture->m_pImage->columns(), texture->m_pImage->rows(), -0.5, GL_RGBA, GL_UNSIGNED_BYTE,texture->m_blob.data());
 
 

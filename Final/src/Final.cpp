@@ -39,9 +39,9 @@ void Final::init()
 
     skybox = new Skybox();
 
-//    terrain.SetFile("../bin/data/drycreek2.tif");
-//    terrain.setup();
-    fireworks.InitParticleSystem(glm::vec3(0,-11,0));
+    terrain.SetFile("../bin/data/drycreek2.tif");
+    terrain.setup();
+    fireworks.initWithPos(glm::vec3(0,-11,0));
 
     t2 = t1 = std::chrono::high_resolution_clock::now();
 }
@@ -83,10 +83,17 @@ void Final::render()
 
     DSFinalPass();
 
-    //renderParticles();
 }
 
-
+void Final::renderParticles()
+{
+    t2 = std::chrono::high_resolution_clock::now();
+    time = (int)(1000*std::chrono::duration_cast<std::chrono::duration<float>>(t2 - t1).count());
+    t1 = t2;
+    //glEnable(GL_DEPTH_TEST);
+    fireworks.renderWithDT(time*1000);
+    //glDisable(GL_DEPTH_TEST);
+}
 
 
 void Final::DSGeometryPass()
@@ -101,6 +108,21 @@ void Final::DSGeometryPass()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_DEPTH_TEST);
+
+    terrain.model = glm::translate(glm::mat4(1.0f), glm::vec3(1250,-2000, -800));
+//
+//    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * terrain.model;
+//
+//    m_DSGeomPassTech.set("gWVP", mvp);
+//    m_DSGeomPassTech.set("gWorld", terrain.model);
+//    m_DSGeomPassTech.set("gColorMap", 0);
+
+    terrain.render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
+
+//    renderFlag();
+//    renderWater();
+
+    m_DSGeomPassTech.enable();
 
     //box2
     box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(100, 0, 100));
@@ -128,7 +150,9 @@ void Final::DSGeometryPass()
 
     box.renderModel();
 
+    renderParticles();
 
+    m_DSGeomPassTech.enable();
 
     glDepthMask(GL_FALSE);
 
