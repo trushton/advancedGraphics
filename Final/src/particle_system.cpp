@@ -70,7 +70,7 @@ void ParticleSystem::initWithPos(const glm::vec3 &pos)
 
     update->enable();
     update->set("random_texture", RANDOM_TEXTURE_UNIT_INDEX);
-    update->set("launcher_lifetime", 25000.0f);
+    update->set("launcher_lifetime", 2500.0f);
     update->set("shell_lifetime", 1500.0f);
     update->set("secondary_shell_lifetime", 2500.0f);
 
@@ -87,7 +87,7 @@ void ParticleSystem::initWithPos(const glm::vec3 &pos)
 
 void ParticleSystem::renderWithDT(float dt)
 {
-    time += (dt * 1000.0f);
+    time += (dt);
 
     updateParticles(dt);
     renderParticles();
@@ -101,7 +101,7 @@ void ParticleSystem::updateParticles(float dt)
     glBindVertexArray(vao);
     update->enable();
     update->set("time", time);
-    update->set("dt", dt * 1000.0f);
+    update->set("dt", dt);
 
     glm::vec3 color(((rand()%11) / 10.0f), ((rand()%11) / 10.0f), ((rand()%11) / 10.0f));
 

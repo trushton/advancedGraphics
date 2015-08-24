@@ -104,7 +104,7 @@ void Final::renderParticles()
     time = (int)(1000*std::chrono::duration_cast<std::chrono::duration<float>>(t2 - t1).count());
     t1 = t2;
     //glEnable(GL_DEPTH_TEST);
-    fireworks.renderWithDT(time*1000);
+    fireworks.renderWithDT(time);
     //glDisable(GL_DEPTH_TEST);
 }
 
@@ -202,11 +202,10 @@ void Final::DSGeometryPass()
     m_DSGeomPassTech.set("gColorMap", 0);
     m_DSGeomPassTech.set("time", time);
 
-    box.renderModel();
+    //box.renderModel();
 
     renderParticles();
 
-    m_DSGeomPassTech.enable();
 
     glDepthMask(GL_FALSE);
 
