@@ -31,8 +31,7 @@ void water_tech::enable(){
 
 void water_tech::loadShaders()
 {
-    shaders[0] = loadShader("../shaders/flag.vs", GL_VERTEX_SHADER);
-    //shaders[1] = loadShader("../shaders/waterGS.glsl", GL_GEOMETRY_SHADER);
+    shaders[0] = loadShader("../shaders/waterVS.glsl", GL_VERTEX_SHADER);
     shaders[1] = loadShader("../shaders/flag.fs", GL_FRAGMENT_SHADER);
 }
 

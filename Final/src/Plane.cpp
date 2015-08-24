@@ -15,7 +15,7 @@ Plane::~Plane(){
 void Plane::init(Flag prog, const string textureFile, int pWidth, int pHeight)
 {
     program = prog;
-    density = 0.10f;
+    density = .05f;
     width = pWidth;
     height = pHeight;
     Tex = new Texture(textureFile.c_str(), GL_TEXTURE_2D);
@@ -84,7 +84,7 @@ void Plane::init(Flag prog, const string textureFile, int pWidth, int pHeight)
 void Plane::init(water_tech prog, const string textureFile, int pWidth, int pHeight)
 {
     waterProg = prog;
-    density = 0.10f;
+    density = 0.2f;
     width = pWidth;
     height = pHeight;
     Tex = new Texture( textureFile.c_str(), GL_TEXTURE_2D);
@@ -131,11 +131,11 @@ void Plane::init(water_tech prog, const string textureFile, int pWidth, int pHei
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * geometry.size(), geometry.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * geometry.size(), geometry.data(), GL_DYNAMIC_DRAW);
 
     glGenBuffers(1,&vio);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vio);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)* indices.size(), indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)* indices.size(), indices.data(), GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(program.getLocation("Position"),

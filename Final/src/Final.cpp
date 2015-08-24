@@ -94,7 +94,7 @@ void Final::render()
 
     DSDirectionalLightPass();
 
-    renderParticles();
+    //renderParticles();
 
     DSFinalPass();
 
@@ -176,7 +176,7 @@ void Final::DSGeometryPass()
     terrain.render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
 
     renderFlag();
-    //renderWater();
+    renderWater();
 
     m_DSGeomPassTech.enable();
 
