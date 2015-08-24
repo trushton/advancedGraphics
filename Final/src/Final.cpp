@@ -73,8 +73,8 @@ void Final::render()
     m_gbuffer.StartFrame();
 
     DSGeometryPass();
-
     skybox->render();
+
 
     glEnable(GL_STENCIL_TEST);
 
@@ -93,6 +93,8 @@ void Final::render()
     glDisable(GL_STENCIL_TEST);
 
     DSDirectionalLightPass();
+
+    renderParticles();
 
     DSFinalPass();
 
@@ -204,7 +206,6 @@ void Final::DSGeometryPass()
 
     //box.renderModel();
 
-    renderParticles();
 
 
     glDepthMask(GL_FALSE);

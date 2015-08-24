@@ -6,12 +6,12 @@
 
 Skybox::Skybox()
 {
-    m_fileNames[0] = "../bin/skybox/posx.jpg";
-    m_fileNames[1] = "../bin/skybox/negx.jpg";
-    m_fileNames[3] = "../bin/skybox/posy.jpg";
-    m_fileNames[2] = "../bin/skybox/negy.jpg";
-    m_fileNames[4] = "../bin/skybox/posz.jpg";
-    m_fileNames[5] = "../bin/skybox/negz.jpg";
+    m_fileNames[0] = "../bin/skybox/hw_lagoon/lagoon_ft.tga";
+    m_fileNames[1] = "../bin/skybox/hw_lagoon/lagoon_bk.tga";
+    m_fileNames[3] = "../bin/skybox/hw_lagoon/lagoon_up.tga";
+    m_fileNames[2] = "../bin/skybox/hw_lagoon/lagoon_dn.tga";
+    m_fileNames[4] = "../bin/skybox/hw_lagoon/lagoon_rt.tga";
+    m_fileNames[5] = "../bin/skybox/hw_lagoon/lagoon_lf.tga";
 
     init();
 }

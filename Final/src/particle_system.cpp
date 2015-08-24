@@ -70,7 +70,7 @@ void ParticleSystem::initWithPos(const glm::vec3 &pos)
 
     update->enable();
     update->set("random_texture", RANDOM_TEXTURE_UNIT_INDEX);
-    update->set("launcher_lifetime", 2500.0f);
+    update->set("launcher_lifetime", 250.0f);
     update->set("shell_lifetime", 1500.0f);
     update->set("secondary_shell_lifetime", 2500.0f);
 
