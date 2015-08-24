@@ -21,7 +21,7 @@ void main(void)
     v.y += cos(waveWidth * v.x + waveTime) * waveHeight * TexCoord.x;
 
     gl_Position = gWVP * v;
-    TexCoord0 = normalize(TexCoord);
+    TexCoord0 = TexCoord;
 
     WorldPos0 = (gWorld * vec4(Position,1.0)).xyz;
     Normal0 = (gWorld * vec4(Normal, 0.0)).xyz;

@@ -49,7 +49,7 @@ void Final::init()
     flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,0));
     flag.model = glm::rotate(flag.model, 90.0f, glm::vec3(1,1,0));
 
-    water.init(water_program, "../bin/flag.jpg", 15, 15);
+    water.init(water_program, "../bin/unionJack.jpg", 15, 15);
     water.model = glm::translate(glm::mat4(1.0f), glm::vec3(5,5,0));
     water.model = glm::rotate(water.model, 90.0f, glm::vec3(1,1,0));
 
@@ -174,7 +174,7 @@ void Final::DSGeometryPass()
     terrain.render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
 
     renderFlag();
-    renderWater();
+    //renderWater();
 
     m_DSGeomPassTech.enable();
 

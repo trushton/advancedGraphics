@@ -142,11 +142,11 @@ void Plane::init(water_tech prog, const string textureFile, int pWidth, int pHei
                           3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex,position));
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(program.getLocation("TexCoord"),
+    glVertexAttribPointer(program.getLocation("Normal"),
                           3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex,normal));
 
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(program.getLocation("Normal"),
+    glVertexAttribPointer(program.getLocation("TexCoord"),
                           2, GL_FLOAT, GL_FALSE, sizeof(Vertex),  (void*)offsetof(Vertex,texture));
 }
 
@@ -169,7 +169,7 @@ void Plane::render()
     //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture->m_pImage->columns(), texture->m_pImage->rows(), -0.5, GL_RGBA, GL_UNSIGNED_BYTE,texture->m_blob.data());
 
 
-    glDrawElements(GL_TRIANGLE_STRIP, indices.size(), GL_UNSIGNED_INT, (void*)0);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
