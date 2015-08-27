@@ -18,7 +18,7 @@ out vec3 WorldPos0;
 void main(void)
 {
     vec4 v = vec4(Position,1.0);
-    v.y += cos(waveWidth * v.x + waveTime) * waveHeight * TexCoord.x;
+    v.y += cos(waveWidth * (v.z) + waveTime) * waveHeight * TexCoord.x;
 
     gl_Position = gWVP * v;
     TexCoord0 = TexCoord;

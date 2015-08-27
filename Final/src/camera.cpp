@@ -15,7 +15,7 @@ Camera::Camera(Engine *eng)
 
 
     RotatedX = RotatedY = RotatedZ = 0.0f;
-    movementSpeed = 0.5f;
+    movementSpeed = 1.0f;
 }
 
 void Camera::Move(glm::vec3 Direction)

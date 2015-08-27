@@ -23,6 +23,7 @@
 #include "Plane.h"
 #include "Flag.h"
 #include "skybox.h"
+#include "waterPlane.h"
 
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
@@ -85,9 +86,9 @@ private:
     int time;
 
     water_tech water_program;
-
+    waterPlane water;
     Flag flag_program;
-    Plane flag, water;
+    Plane flag;
 
 };
 

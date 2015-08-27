@@ -31,7 +31,7 @@ void water_tech::enable(){
 
 void water_tech::loadShaders()
 {
-    shaders[0] = loadShader("../shaders/waterVS.glsl", GL_VERTEX_SHADER);
+    shaders[0] = loadShader("../shaders/waterVS.vs", GL_VERTEX_SHADER);
     shaders[1] = loadShader("../shaders/flag.fs", GL_FRAGMENT_SHADER);
 }
 
@@ -63,6 +63,8 @@ void water_tech::initShaderLocations()
     locations["Position"] = glGetAttribLocation(program, "Position");
     locations["Normal"] = glGetAttribLocation(program, "Normal");
     locations["TexCoord"] = glGetAttribLocation(program, "TexCoord");
+    locations["time"] = glGetAttribLocation(program, "time");
+
 
     locations["gWVP"] = glGetUniformLocation(program, "gWVP");
     locations["gWorld"] = glGetUniformLocation(program, "gWorld");

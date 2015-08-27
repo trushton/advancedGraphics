@@ -14,7 +14,7 @@ add_executable(Final ${SOURCE_FILES} src/Final.cpp src/Final.h src/skybox.cpp sr
                 src/buffer.cpp src/buffer.h src/renderer.cpp src/renderer.h src/TerrainShader.cpp src/TerrainShader.h src/shape.cpp src/shape.h
                 src/projector.cpp src/projector.h src/billboard_tech.cpp src/billboard_tech.h src/particle_system.cpp src/particle_system.h
                 src/ps_update_tech.cpp src/ps_update_tech.h src/Texture.cpp src/Texture.h src/RandomTexture.cpp src/RandomTexture.h  src/grass_tech.cpp src/grass_tech.h
-                src/water_tech.cpp src/water_tech.h src/pbuffer.cpp src/pbuffer.h src/Plane.cpp src/Plane.h src/Flag.cpp src/Flag.h src/ParticleSystemUpdate.cpp src/ParticleSystemUpdate.h src/ParticleSystemRender.cpp src/ParticleSystemRender.h)
+                src/water_tech.cpp src/water_tech.h src/pbuffer.cpp src/pbuffer.h src/Plane.cpp src/Plane.h src/Flag.cpp src/Flag.h src/ParticleSystemUpdate.cpp src/ParticleSystemUpdate.h src/ParticleSystemRender.cpp src/ParticleSystemRender.h src/waterPlane.cpp src/waterPlane.h)
 
 INCLUDE(FindPkgConfig)
 include(FindGLEW)

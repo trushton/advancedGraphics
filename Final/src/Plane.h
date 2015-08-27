@@ -23,11 +23,9 @@ class Plane {
         virtual ~Plane();
 
         virtual void init(Flag prog, const string textureFile, int pWidth, int pHeight);
-        virtual void init(water_tech prog, const string textureFile, int pWidth, int pHeight);
 
         virtual void tick(float dt);
         virtual void render();
-        virtual void renderWater();
 
         virtual void scale(float scaler);
 
@@ -38,7 +36,6 @@ private:
 
         vector<unsigned int> indices;
         Flag program;
-        water_tech waterProg;
         Texture *Tex;
         int width, height;
         vector<Vertex> geometry;

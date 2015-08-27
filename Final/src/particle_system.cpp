@@ -71,7 +71,7 @@ void ParticleSystem::initWithPos(const glm::vec3 &pos)
     update->enable();
     update->set("random_texture", RANDOM_TEXTURE_UNIT_INDEX);
     update->set("launcher_lifetime", 250.0f);
-    update->set("shell_lifetime", 1500.0f);
+    update->set("shell_lifetime", 5000.0f);
     update->set("secondary_shell_lifetime", 2500.0f);
 
     render->enable();
@@ -162,10 +162,10 @@ void ParticleSystem::renderParticles()
         texture->bind(COLOR_TEXTURE_UNIT);
     }
 
-    if(alphaTexture)
-    {
-        alphaTexture->bind(GL_TEXTURE2);
-    }
+//    if(alphaTexture)
+//    {
+//        alphaTexture->bind(GL_TEXTURE2);
+//    }
 
     glDisable(GL_RASTERIZER_DISCARD);
     glBindBuffer(GL_ARRAY_BUFFER, particleBuffer[currTFB]);

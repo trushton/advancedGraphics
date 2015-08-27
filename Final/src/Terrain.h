@@ -43,6 +43,7 @@ public:
 
     void CreatePositionBuffer();
     void RenderGrass();
+    float time;
 
 private:
     renderer Renderer;
@@ -65,7 +66,6 @@ private:
     vector<glm::vec3> positions;
     GLuint grass_VB;
     std::chrono::time_point<std::chrono::high_resolution_clock> t1, t2;
-    float time;
 
 };
 

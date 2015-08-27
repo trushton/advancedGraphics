@@ -13,7 +13,6 @@
 class water_tech : public Program
 {
 public:
-    glm::mat4 model;
     water_tech();
 
     void init();
