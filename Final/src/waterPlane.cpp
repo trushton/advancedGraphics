@@ -15,7 +15,7 @@ waterPlane::~waterPlane(){
 void waterPlane::init(water_tech prog, const string textureFile, int pWidth, int pHeight)
 {
     program = prog;
-    density = 2.0f;
+    density = 100.0f;
     width = pWidth;
     height = pHeight;
     Tex = new Texture(textureFile.c_str(), GL_TEXTURE_2D);

@@ -34,27 +34,31 @@ void Final::init()
 
     sphere.loadModel("../bin/sphere.obj");
     quad.loadModel("../bin/quad.obj");
-    box.loadModel("../bin/objects/flagpole.obj");
-    box2.loadModel("../bin/objects/untitled.obj");
+    box.loadModel("../bin/objects/flagpole2.obj");
+    box2.loadModel("../bin/tutorial.obj");
 
     skybox = new Skybox();
 
-    terrain.SetFile("../bin/data/drycreek2.tif");
-    terrain.setup();
+    //terrain.SetFile("../bin/data/drycreek2.tif");
+    //terrain.setup();
 
     flag_program.init();
     water_program.init();
+    water_program2.init();
 
-    flag.init(flag_program, "../bin/unionJack.png", 15, 15);
-    flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(170,165,40));
+    flag.init(flag_program, "../bin/unionJack.png", 30, 30);
+    flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(-1030, 1950, -460));
     flag.model = glm::rotate(flag.model, 80.0f, glm::vec3(1,0,0));
 
-    water.init(water_program, "../bin/water.jpg", 500, 500);
-    water.model = glm::translate(glm::mat4(1.0f), glm::vec3(-300,25, -100));
+    water.init(water_program, "../bin/water.jpg", 3000, 3000);
+    water.model = glm::translate(glm::mat4(1.0f), glm::vec3(-5000, 130, 2100));
+    water2.init(water_program2, "../bin/water.jpg", 3000, 3000);
+    water2.model = glm::translate(glm::mat4(1.0f), glm::vec3(-265, 120, -5050));
+
     //water.model = glm::rotate(water.model, 90.0f, glm::vec3(1,1,0));
 
 
-    fireworks.initWithPos(glm::vec3(170,140,40));
+    fireworks.initWithPos(glm::vec3(-1030, 1945, -460));
 
     t2 = t1 = std::chrono::high_resolution_clock::now();
     time = 0;
@@ -139,7 +143,6 @@ void Final::renderWater()
     waveTime += waveFreq;
 
     glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * water.model;
-
     water_program.set("gWVP", mvp);
     water_program.set("gWorld", water.model);
     water_program.set("gColorMap", 0);
@@ -149,6 +152,25 @@ void Final::renderWater()
     water_program.set("waveWidth", waveWidth);
     water_program.set("waveHeight", waveHeight);
     water.render();
+}
+
+void Final::renderWater2()
+{
+    water_program2.enable();
+
+    static float waveTime = 0.2f, waveWidth = 0.2f, waveHeight = 4.0f, waveFreq = 0.05f;
+    waveTime += waveFreq;
+
+    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * water2.model;
+    water_program2.set("gWVP", mvp);
+    water_program2.set("gWorld", water2.model);
+    water_program2.set("gColorMap", 0);
+    water_program2.set("time", terrain.time);
+
+    water_program2.set("waveTime", waveTime);
+    water_program2.set("waveWidth", waveWidth);
+    water_program2.set("waveHeight", waveHeight);
+    water2.render();
 }
 
 
@@ -165,7 +187,7 @@ void Final::DSGeometryPass()
 
     glEnable(GL_DEPTH_TEST);
 
-    terrain.model = glm::translate(glm::mat4(1.0f), glm::vec3(1250,-2000, -800));
+    //terrain.model = glm::translate(glm::mat4(1.0f), glm::vec3(1250,-2000, -800));
 //
 //    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * terrain.model;
 //
@@ -173,16 +195,17 @@ void Final::DSGeometryPass()
 //    m_DSGeomPassTech.set("gWorld", terrain.model);
 //    m_DSGeomPassTec.4*((cos(waveWidth * pos.x + waveTime)*waveHeight + sin(waveWidth * pos.z + waveTime) * waveHeight))h.set("gColorMap", 0);
 
-    terrain.render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
+    //terrain.render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
 
     renderFlag();
     renderWater();
+    renderWater2();
 
     m_DSGeomPassTech.enable();
 
     //box2
-    box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(100, 0, 100));
-    box2.model = glm::scale(box2.model, glm::vec3(30, 30, 30));
+    box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+    box2.model = glm::scale(box2.model, glm::vec3(10, 10, 10));
 
     glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * box2.model;
 
@@ -194,8 +217,8 @@ void Final::DSGeometryPass()
 
     //box1
 
-    box.model = glm::translate(glm::mat4(1.0f), glm::vec3(170,140,40));
-    box.model = glm::scale(box.model, glm::vec3(1, 1, 1));
+    box.model = glm::translate(glm::mat4(1.0f), glm::vec3(-1030, 1850, -460));
+    box.model = glm::scale(box.model, glm::vec3(1, 3, 1));
 
     glm::mat4 mvp2 = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * box.model;
 

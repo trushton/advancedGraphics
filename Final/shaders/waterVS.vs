@@ -90,7 +90,7 @@ void main() {
 	direction[3] = vec2(-0.4, -0.6);
 
 	vec4 pos = vec4(Position, 1.0);
-	pos.y += .3*((cos(waveWidth * pos.x + waveTime)*waveHeight + sin(waveWidth * pos.z + waveTime) * waveHeight)) ;
+	pos.y += 2*((cos(waveWidth * pos.x + waveTime)*waveHeight + sin(waveWidth * pos.z + waveTime) * waveHeight)) ;
 
     Normal0 = (gWorld * vec4(waveNormal(pos.x, pos.z), 0.0)).xyz;
     TexCoord0 = TexCoord;
