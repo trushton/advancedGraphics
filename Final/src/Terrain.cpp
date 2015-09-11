@@ -1,135 +1,353 @@
+//
+// Created by trushton on 9/11/15.
+//
+#define GLM_FORCE_RADIANS
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "Terrain.h"
-#include "buffer.h"
-#include "renderer.h"
+#include "Engine.h"
 #include "graphics.h"
 
-Terrain::Terrain()
-{
-    model = glm::mat4(1);
-}
-
-Terrain::Terrain(string filename)
-{
+Terrain::Terrain(glm::vec3 scale, std::string filename){
+    renderScale = scale;
     fname = filename;
-    model = glm::mat4(1);
 }
 
-void Terrain::setup()
-{
+Terrain::Terrain(){};
+
+void Terrain::init(){
+
+}
+
+bool Terrain::initialize(){
     t1 = std::chrono::high_resolution_clock::now();
 
-    double x,y;
-    getRawValuesFromFile(fname, vecs, min, max, xres, yres, projection,x,y,width,height);
-    origin.x = x;
-    origin.y = y;
-    end.x = x + xres * (width);
-    end.y = y - yres * (height);
-    char* test = &projection[0];
-    sr.importFromWkt(&test);
-    createMesh(vecs, xres, yres, max, indices, vertexes);
+    //load and compile shaders
+    loadShaders();
 
-    Renderer.init();
-    Renderer.addShader(GL_VERTEX_SHADER,"../shaders/terrain.vert");
-    Renderer.addShader(GL_FRAGMENT_SHADER,"../shaders/terrain.frag");
-    cout << Renderer.compile() << endl;
-    cout << Renderer.link() << endl;
+    //link all shaders together
+    initShaderProgram();
+
+    //get the variables from the shaders
+    initShaderLocations();
+
+    texture.resize(5);
+    texture[0] = new Texture("../bin/objects/Rocky Desert.jpg", GL_TEXTURE_2D);
+    texture[1] = new Texture("../bin/objects/Rocky Desert.jpg", GL_TEXTURE_2D);
+    texture[2] = new Texture("../bin/objects/Rocky Desert.jpg", GL_TEXTURE_2D);
+    texture[3] = new Texture("../bin/objects/Rocky Desert.jpg", GL_TEXTURE_2D);
+    texture[4] = new Texture("../bin/objects/Rocky Desert.jpg", GL_TEXTURE_2D);
+
+
+    //create the VAO
+    glUseProgram(program);
+
+    //build the terrain
+    return buildTerrain();
+}
+
+void Terrain::enable(){
+    glUseProgram(program);
+}
+
+void Terrain::loadShaders() {
+    shaders[0] = loadShader("../shaders/terrain_vertex.glsl", GL_VERTEX_SHADER);
+    shaders[1] = loadShader("../shaders/terrain_fragment.glsl", GL_FRAGMENT_SHADER);
+}
+
+void Terrain::initShaderProgram() {
+    program = glCreateProgram();
+    glAttachShader(program, shaders[0]);
+    glAttachShader(program, shaders[1]);
+
+    glLinkProgram(program);
+
+    GLint shader_status;
+    glGetProgramiv(program, GL_LINK_STATUS, &shader_status);
+    if (!shader_status)
+    {
+        std::cerr << "Unable to create shadevoid grass_tech::initShaderLocations()";
+
+        char buffer[512];
+        glGetProgramInfoLog(program, 512, NULL, buffer); // inserts the error into the buffer
+        std::cerr << buffer << std::endl;
+
+        exit(1);
+    }
+}
+
+void Terrain::initShaderLocations()
+{
+    glUseProgram(program);
+
+    locations["time"] = glGetUniformLocation(program, "time");
+
+    locations["TextureLocations[0]"] = glGetUniformLocation(program, "gSampler[0]");
+    locations["TextureLocations[1]"] = glGetUniformLocation(program, "gSampler[1]");
+    locations["TextureLocations[2]"] = glGetUniformLocation(program, "gSampler[2]");
+    locations["TextureLocations[3]"] = glGetUniformLocation(program, "gSampler[3]");
+    locations["TextureLocations[4]"] = glGetUniformLocation(program, "gSampler[4]");
+
+    locations["RenderHeight"] = glGetUniformLocation(program, "fRenderHeight");
+    locations["MaxTextureU"] = glGetUniformLocation(program, "fMaxTextureU");
+    locations["MaxTextureV"] = glGetUniformLocation(program, "fMaxTextureV");
+    locations["HeightmapScale"] = glGetUniformLocation(program, "HeightmapScaleMatrix");
+    locations["ProjMatrix"] = glGetUniformLocation(program, "matrices.projMatrix");
+    locations["ViewMatrix"] = glGetUniformLocation(program, "matrices.viewMatrix");
+    locations["ModelMatrix"] = glGetUniformLocation(program, "matrices.modelMatrix");
+    locations["NormalMatrix"] = glGetUniformLocation(program, "matrices.normalMatrix");
+
+    locations["Color"] = glGetUniformLocation(program, "vColor");
+
+
+}
+
+bool Terrain::buildTerrain() {
+    try{
+        m_image.read(fname);
+        m_image.write(&m_blob, "RGBA");
+    }
+    catch(Magick::Error& Error){
+        std::cout << "Error loading texture in terrain '" << fname << "': " << Error.what() << std::endl;
+        return false;
+    }
+
+    irows = m_image.rows();
+    icols = m_image.columns();
+
+    uint ptr_inc = m_image.depth() == 24 ? 3 : 1;
+    uint rowStep = ptr_inc * icols;
+
+    // Build Vertex and textures
+    std::vector<std::vector<glm::vec3>> vVertexData(irows, std::vector<glm::vec3>(icols));
+    std::vector<std::vector<glm::vec2>> vCoordsData(irows, std::vector<glm::vec2>(icols));
+
+    float fTextureU = float(icols)*0.1f;
+    float fTextureV = float(irows)*0.1f;
+
+    const void* data = m_blob.data();
+
+    for(int i = 0; i < irows; i++)
+    {
+        for(int j = 0; j < icols; j++)
+        {
+            float fScaleC = float(j)/float(icols-1);
+            float fScaleR = float(i)/float(irows-1);
+
+            float fVertexHeight = float(*(static_cast<int const *>(data) + rowStep * i + j * ptr_inc))/65535.0f;
+            //printf("The Height: %.5f\n", -fVertexHeight/255.0f);
+
+            vVertexData[i][j] = glm::vec3(-0.5f+fScaleC, 1-(-fVertexHeight/255.0f), -0.5f+fScaleR);
+            vCoordsData[i][j] = glm::vec2(fTextureU*fScaleC, fTextureV*fScaleR);
+        }
+    }
+
+    // Build normals
+    std::vector< std::vector<glm::vec3> > vNormals[2];
+    for(int i = 0; i < 2; i++)
+    {
+        vNormals[i] = std::vector< std::vector<glm::vec3> >(irows-1, std::vector<glm::vec3>(icols-1));
+    }
+
+    for(int i = 0; i < irows-1; i++)
+    {
+        for(int j = 0; j < icols-1; j++)
+        {
+            glm::vec3 vTriangle0[] = { vVertexData[i][j], vVertexData[i+1][j], vVertexData[i+1][j+1]};
+            glm::vec3 vTriangle1[] = { vVertexData[i+1][j+1], vVertexData[i][j+1], vVertexData[i][j]};
+
+            glm::vec3 vTriangleNorm0 = glm::cross(vTriangle0[0]-vTriangle0[1], vTriangle0[1]-vTriangle0[2]);
+            glm::vec3 vTriangleNorm1 = glm::cross(vTriangle1[0]-vTriangle1[1], vTriangle1[1]-vTriangle1[2]);
+
+            vNormals[0][i][j] = glm::normalize(vTriangleNorm0);
+            vNormals[1][i][j] = glm::normalize(vTriangleNorm1);
+        }
+    }
+
+    // Sum Normals, and normalize
+    std::vector< std::vector<glm::vec3> > vFinalNormals = std::vector< std::vector<glm::vec3> >(irows, std::vector<glm::vec3>(icols));
+
+    for(int i = 0; i < irows; i++)
+    {
+        for(int j = 0; j < icols; j++)
+        {
+            glm::vec3 vFinalNormal = glm::vec3(0.0f, 0.0f, 0.0f);
+
+            // Look for upper-left triangles
+            if(j != 0 && i != 0)
+            {
+                for(int k = 0; k < 2; k++)
+                {
+                    vFinalNormal += vNormals[k][i-1][j-1];
+                }
+            }
+
+            // Look for upper-right triangles
+            if(i != 0 && j != icols-1)
+            {
+                vFinalNormal += vNormals[0][i-1][j];
+            }
+
+            // Look for bottom-right triangles
+            if(i != irows-1 && j != icols-1)
+            {
+                for(int k = 0; k < 2; k++)
+                {
+                    vFinalNormal += vNormals[k][i][j];
+                }
+            }
+
+            // Look for bottom-left triangles
+            if(i != irows-1 && j != 0)
+            {
+                vFinalNormal += vNormals[1][i][j-1];
+            }
+
+            vFinalNormal = glm::normalize(vFinalNormal);
+            vFinalNormals[i][j] = vFinalNormal;
+        }
+    }
+
+    // Build the buffer
+
+    for(int i = 0; i < irows; i++)
+    {
+        for(int j = 0; j < icols; j++)
+        {
+            Vertices.push_back(GLM_Vertex(glm::vec3(vVertexData[i][j].x , vVertexData[i][j].y , vVertexData[i][j].z ),
+                                          vCoordsData[i][j],
+                                          vFinalNormals[i][j],
+                                          glm::vec3(0, 0, 0)));
+        }
+    }
+
+    //int iPrimitiveRestartIndex = irows * icols;
+
+    printf("irows: %i, icols: %i\n", irows, icols);
+    for(int i = 0; i < irows-1; i++)
+    {
+        for(int j = 0; j < icols-1; j++)
+        {
+            /* 
+             //printf("Indicies: ");
+             for(int k = 0; k < 2; k++)
+             { 
+               int iRow = i+(1-k); 
+               int iIndex = iRow*icols+j; 
+               Indices.push_back((unsigned int)iIndex);
+               //printf("%d, ", iIndex);
+             }
+             */
+            if(j == 0 || j == 1 || j == icols-1 || j == icols-2)
+            {
+                //printf("%i, %i, %i, %i, %i, %i\n", (i * irows)+j+1, (i * irows)+j, ((1+i) * irows)+j+1, ((1+i) * irows)+j+2, (i * irows)+j+1, ((1+i) * irows)+j+1);
+            }
+            Indices.push_back((i * irows)+j+1);
+            Indices.push_back((i * irows)+j);
+            Indices.push_back(((1+i) * irows)+j);
+
+            Indices.push_back(((1+i) * irows)+j);
+            Indices.push_back(((1+i) * irows)+j+1);
+            Indices.push_back((i * irows)+j+1);
+
+            // Restart triangle strips
+            //printf("%d\n", iPrimitiveRestartIndex);
+            //Indices.push_back((unsigned int)iPrimitiveRestartIndex);
+
+        }
+    }
+
+    isize = Indices.size(); //((irows-1)*icols*2 + irows-1);
+
+    // Add vertex and indices's buffer
+    glGenBuffers(1, &VB);
+    glBindBuffer(GL_ARRAY_BUFFER, VB);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLM_Vertex) * Vertices.size(), &Vertices[0], GL_STATIC_DRAW);
+
+    glGenBuffers(1, &IB);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IB);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * Indices.size(), &Indices[0], GL_STATIC_DRAW);
+
+
     grass.init();
     CreatePositionBuffer();
-
-    glGenBuffers(ARRAY_SIZE_IN_ELEMENTS(m_Buffers), m_Buffers);
-
-    terrainpoints.generateBuffer(GL_ARRAY_BUFFER);
-    terrainpoints.bindBuffer();
-    // bind data buf.allocateBufferData(sizeof(Vertices),Vertices,GL_STATIC_DRAW);
-    terrainpoints.allocateBufferData(sizeof(TerrainVertex)*vertexes.size(), &vertexes[0], GL_STATIC_DRAW);
-
-    elements.generateBuffer(GL_ELEMENT_ARRAY_BUFFER);
-    elements.bindBuffer();
-    elements.allocateBufferData(sizeof(int)*indices.size(), &indices[0], GL_STATIC_DRAW);
-
-//    // Generate and populate the buffers with vertex attributes and the indices
-//    glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[POS_VB]);
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexes[0]) * vertexes.size(), &vertexes[0], GL_STATIC_DRAW);
-//    glEnableVertexAttribArray(0);
-//    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-//
-//
-//    glBindBuffer(GL_ARRAY_BUFFER, m_Buffers[NORMAL_VB]);
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(vecs[0]) * vecs.size(), &vecs[0], GL_STATIC_DRAW);
-//    glEnableVertexAttribArray(1);
-//    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-//
-//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Buffers[INDEX_BUFFER]);
-//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), &indices[0], GL_STATIC_DRAW);
+    return true;
 
 }
 
-void Terrain::update(float dt)
+void Terrain::render(float dt)
 {
-}
-
-void Terrain::render(glm::mat4& view, glm::mat4& projection)
-{
-    Renderer.useProgram();
-
-    elements.bindBuffer();
-    terrainpoints.bindBuffer();
-    Renderer.enableVertexAttribPointer("poses");
-    Renderer.enableVertexAttribPointer("TexCoord");
-    Renderer.enableVertexAttribPointer("Normal");
-    Renderer.setGLVertexAttribPointer("poses", 3, GL_FLOAT, GL_FALSE, sizeof(TerrainVertex), (void*)offsetof(TerrainVertex, position));
-    Renderer.setGLVertexAttribPointer("Normal", 3, GL_FLOAT, GL_FALSE, sizeof(TerrainVertex), (void*)offsetof(TerrainVertex, normal));
-    Renderer.setGLVertexAttribPointer("TexCoord", 2, GL_FLOAT, GL_TRUE, sizeof(TerrainVertex), (void*)offsetof(TerrainVertex, uv));
-
-
-    glm::mat4 mvp = projection * view * model;
-    Renderer.setUniformMatrix4x4("mvp", mvp);
-    Renderer.setUniformMatrix4x4("model", model);
-    Renderer.setUniformFloat("Max", max);
-    Renderer.setUniformFloat("Min", min);
-
-    Renderer.render(indices.size());
-
-
     t2 = std::chrono::high_resolution_clock::now();
     time = std::chrono::duration_cast<std::chrono::duration<float> >(t2 - t1).count();
-    //t1=t2;
-    //cout << time <<endl;
+    // Model view Projection Normal
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+
+    set("ProjMatrix", Engine::getEngine()->graphics->projection);
+    set("ViewMatrix", Engine::getEngine()->graphics->view);
+    set("ModelMatrix", model);
+    set("NormalMatrix", glm::mat4(1.0f));
+
+
+
+    // Render Scale and Stuff
+    set("RenderHeight", renderScale.y);
+    set("MaxTextureU", float(icols)*0.1f);
+    set("MaxTextureV", float(irows)*0.1f);
+    set("HeightmapScale", glm::scale(glm::mat4(1.0), glm::vec3(renderScale)));
+    set("Color", glm::vec4(1.0f,1.0f,1.0f,1.0f));
+
+//    // Set Light
+//    spin += dt * M_PI / 2;
+//    SetLight();
+
+    // Texture Data
+    glUniform1i(TextureLocations[0], 0);
+    glUniform1i(TextureLocations[1], 1);
+    glUniform1i(TextureLocations[2], 2);
+    glUniform1i(TextureLocations[3], 3);
+    glUniform1i(TextureLocations[4], 4);
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(3);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VB);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLM_Vertex), 0);                 // position
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLM_Vertex), (const GLvoid*)12); // texture coordinate
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(GLM_Vertex), (const GLvoid*)20); // normal
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(GLM_Vertex), (const GLvoid*)32); // tangent
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IB);
+
+    texture[0]->bind(GL_TEXTURE0);
+    texture[1]->bind(GL_TEXTURE1);
+    texture[2]->bind(GL_TEXTURE2);
+    texture[3]->bind(GL_TEXTURE3);
+    texture[4]->bind(GL_TEXTURE4);
+
+    glEnable(GL_PRIMITIVE_RESTART);
+    glPrimitiveRestartIndex(irows*icols);
+    glDrawElements(GL_TRIANGLES, isize, GL_UNSIGNED_INT, 0);
+
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
+    glDisableVertexAttribArray(3);
+    glDisable(GL_CULL_FACE);
 
     RenderGrass();
-
-}
-
-
-void Terrain::SetFile(string filename)
-{
-    fname = filename;
-}
-
-// The point must be in utm and in the same zone.
-float Terrain::SampleTerrain(glm::vec2 point)
-{
-
-    // Calculate the normalized points
-    auto normalized = (point-origin)/(end-origin);
-    //normalized.y *= -1;
-    cout << origin.y << " " << end.y << endl;
-    cout << width << " " << height << endl;
-    cout << "NORMALIZED X: " << normalized.x << " NORMALIZED Y: " << normalized.y << endl;
-    if(normalized.x < 1 && normalized.x >= 0 && normalized.y < 1 && normalized.y >= 0)
-    {
-        int locx = (width-1) * normalized.x;
-        int locy = (height-1) * normalized.y;
-        //cout << locx << " " << locy << endl;
-        return vecs[locx][locy];
-    }
-    return -1;
 }
 
 void Terrain::CreatePositionBuffer()
 {
     grass.enable();
-    positions.resize(vertexes.size());
+    positions.resize(Vertices.size());
     vector<int> inactive;
     float maxDisplacement = 10.0f;
     float direction;
@@ -140,7 +358,7 @@ void Terrain::CreatePositionBuffer()
     std::srand(std::time(0));
 
 
-    for(uint i = 0; i < vertexes.size(); i++) {
+    for(uint i = 0; i < Vertices.size(); i++) {
         val = maxDisplacement * ((float) std::rand() / RAND_MAX);
         direction = (float) std::rand() / RAND_MAX;
 //        activate = (float) std::rand() / RAND_MAX;
@@ -149,12 +367,12 @@ void Terrain::CreatePositionBuffer()
 //        if (activate > 0.7){
 
         if (direction > 0.5) {
-            positions[i] = glm::vec3(vertexes[i].position.x + val * 1.25, vertexes[i].position.y * max,
-                                     vertexes[i].position.z - val);
+            positions[i] = renderScale * glm::vec3(Vertices[i].position.x + val * 1.25, Vertices[i].position.y,
+                                     Vertices[i].position.z - val);
         }
         else {
-            positions[i] = glm::vec3(vertexes[i].position.x - val, vertexes[i].position.y * max,
-                                     vertexes[i].position.z + val * 1.3);
+            positions[i] = renderScale * glm::vec3(Vertices[i].position.x - val, Vertices[i].position.y,
+                                     Vertices[i].position.z + val * 1.3);
         }
     }
 
@@ -182,4 +400,15 @@ void Terrain::RenderGrass()
 
     glDrawArrays(GL_POINTS, 0, positions.size());
     glDisableVertexAttribArray(0);
+}
+
+
+void Terrain::bind()
+{
+
+}
+
+void Terrain::unbind()
+{
+
 }

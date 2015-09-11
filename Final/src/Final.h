@@ -15,15 +15,13 @@
 #include "Engine.h"
 #include "graphics.h"
 #include "lights.h"
-#include "Terrain.h"
-#include "shape.h"
-#include "projector.h"
 #include "particle_system.h"
 #include "water_tech.h"
 #include "Plane.h"
 #include "Flag.h"
 #include "skybox.h"
 #include "waterPlane.h"
+#include "Terrain.h"
 
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
@@ -75,9 +73,8 @@ private:
 
     Model box, sphere, quad, box2;
     Skybox * skybox;
-    Terrain terrain;
-    vector<shape> shap;
-    vector<projector> proj;
+    Terrain *terrain;
+
 
 
     int windowWidth;

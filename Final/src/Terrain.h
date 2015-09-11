@@ -1,72 +1,83 @@
-#include "gishandler.h"
+//
+// Created by trushton on 9/11/15.
+//
+
+#ifndef FINAL_TERRAIN_H
+#define FINAL_TERRAIN_H
 #include <string>
+#include <iostream>
 #include <vector>
-#include "Model.h"
-#include "GBuffer.h"
-#include "buffer.h"
-#include "renderer.h"
-#include "Engine.h"
-#include "grass_tech.h"
 #include <chrono>
-#include <ctime>
+#include "Texture.h"
+#include "Vertex.h"
 
-using namespace std;
+#include "Program.h"
+#include "grass_tech.h"
 
-#ifndef _TERRAIN_H_
-#define _TERRAIN_H_
-
-// A Terrain class for loading DEMs from GIS data with GDAL
-class Terrain : public Model
-{
+class Terrain : public Program {
 public:
     glm::mat4 model;
-
-
+    Terrain(glm::vec3 scale, std::string filename);
     Terrain();
-    Terrain(string filename);
 
-    //void SampleTerrain();
-    void setup();
-    void update(float dt);
-    void render(glm::mat4& view, glm::mat4& projection);
-    //void cleanup();
-    void SetFile(string filename);
-    float SampleTerrain(glm::vec2 point);
-    glm::vec2 GetOrigin()
-    {
-        return origin;
-    };
-    OGRSpatialReference* GetProjection()
-    {
-        return &sr;
-    }
+    void init();
+    bool initialize();
+    bool buildTerrain();
+    void render(float dt);
+
+    void bind();
+
+    void unbind();
+
+    void enable();
+
+    //void SetPointLight(const PointLight& Lights);
+
+    glm::vec3 location, renderScale;
+    std::string fname;
+    float time;
 
     void CreatePositionBuffer();
     void RenderGrass();
-    float time;
 
-private:
-    renderer Renderer;
-    float** terrainData;
-    buffer elements;
-    buffer terrainpoints;
-    string fname, projection;
-    float min, max, xres, yres;
-    vector<vector<float>> vecs;
-    vector<TerrainVertex> vertexes;
-    vector<int> indices;
-    OGRSpatialReference sr;
-    glm::vec2 origin;
-    glm::vec2 end;
-    int width,height;
+protected:
+    void loadShaders();
+
+    void initShaderProgram();
+
+    void initShaderLocations();
+
+    std::vector<Texture*> texture;
+    GLint TextureLocations[5];
+    GLint Color;
+
+    Magick::Image m_image;
+    Magick::Blob m_blob;
+    int irows, icols, isize;
+
+    GLuint VB;
+    GLuint IB;
+    std::vector<GLM_Vertex> Vertices;
+    std::vector<unsigned int> Indices;
+
+
+    GLint RenderHeight;
+    GLint MaxTextureU;
+    GLint MaxTextureV;
+    GLint HeightmapScale;
+    GLint ProjMatrix;
+    GLint ViewMatrix;
+    GLint ModelMatrix;
+    GLint NormalMatrix;
+
+    std::chrono::time_point<std::chrono::high_resolution_clock> t1, t2;
 
     GLuint m_Buffers[3];
     grass_tech grass;
 
-    vector<glm::vec3> positions;
+    std::vector<glm::vec3> positions;
     GLuint grass_VB;
-    std::chrono::time_point<std::chrono::high_resolution_clock> t1, t2;
-
 };
 
-#endif
+
+#endif //FINAL_TERRAIN_H

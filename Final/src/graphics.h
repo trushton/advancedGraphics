@@ -13,7 +13,6 @@
 //#include "cube.h"
 #include "skybox.h"
 #include "camera.h"
-#include "Terrain.h"
 //#include "water.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -71,7 +70,6 @@ private:
     //Simulation * simulation;
     Final *final;
         WaterFrameBuffers * frameBuffers;
-    Terrain terrain;
 
 
 };

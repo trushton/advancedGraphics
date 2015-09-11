@@ -7,6 +7,7 @@
 Final::Final()
 {
     init();
+
 }
 
 Final::~Final()
@@ -35,12 +36,14 @@ void Final::init()
     sphere.loadModel("../bin/sphere.obj");
     quad.loadModel("../bin/quad.obj");
     box.loadModel("../bin/objects/flagpole2.obj");
-    box2.loadModel("../bin/tutorial.obj");
+    //box2.loadModel("../bin/tutorial.obj");
 
     skybox = new Skybox();
 
     //terrain.SetFile("../bin/data/drycreek2.tif");
     //terrain.setup();
+    terrain = new Terrain(glm::vec3(1000,300,1000), "../bin/terrain/output.jpg");
+    terrain->initialize();
 
     flag_program.init();
     water_program.init();
@@ -88,18 +91,13 @@ void Final::render()
         DSPointLightsPass(i);
     }
 
-//    for(uint i = 0; i < proj.size(); i++)
-//    {
-//        proj[i].model = glm::translate(glm::mat4(1.0f), glm::vec3(1250,-2000, -800));
-//        proj[i].render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
-//    }
-
 
     glDisable(GL_STENCIL_TEST);
 
     DSDirectionalLightPass();
 
     renderParticles();
+
 
     DSFinalPass();
 
@@ -146,7 +144,7 @@ void Final::renderWater()
     water_program.set("gWVP", mvp);
     water_program.set("gWorld", water.model);
     water_program.set("gColorMap", 0);
-    water_program.set("time", terrain.time);
+    water_program.set("time", terrain->time);
 
     water_program.set("waveTime", waveTime);
     water_program.set("waveWidth", waveWidth);
@@ -165,7 +163,7 @@ void Final::renderWater2()
     water_program2.set("gWVP", mvp);
     water_program2.set("gWorld", water2.model);
     water_program2.set("gColorMap", 0);
-    water_program2.set("time", terrain.time);
+    water_program2.set("time", terrain->time);
 
     water_program2.set("waveTime", waveTime);
     water_program2.set("waveWidth", waveWidth);
@@ -196,24 +194,35 @@ void Final::DSGeometryPass()
 //    m_DSGeomPassTec.4*((cos(waveWidth * pos.x + waveTime)*waveHeight + sin(waveWidth * pos.z + waveTime) * waveHeight))h.set("gColorMap", 0);
 
     //terrain.render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
+    terrain->enable();
+    terrain->model = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,0));
+    terrain->render(terrain->time);
+
 
     renderFlag();
     renderWater();
     renderWater2();
 
+
+//    //box2
+//    box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, -200, 0));
+//    box2.model = glm::scale(box2.model, glm::vec3(1, 1, 1));
+//
+//    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * box2.model;
+//
+//    m_DSGeomPassTech.set("gWVP", mvp);
+//    m_DSGeomPassTech.set("gWorld", box2.model);
+//    m_DSGeomPassTech.set("gColorMap", 0);
+//
+//    box2.renderModel();
+
+
     m_DSGeomPassTech.enable();
+//    m_DSGeomPassTech.set("gWVP", mvp);
+//    m_DSGeomPassTech.set("gWorld", terrain.model);
+//    m_DSGeomPassTech.set("gColorMap", 0);
 
-    //box2
-    box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, -200, 0));
-    box2.model = glm::scale(box2.model, glm::vec3(1, 1, 1));
 
-    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * box2.model;
-
-    m_DSGeomPassTech.set("gWVP", mvp);
-    m_DSGeomPassTech.set("gWorld", box2.model);
-    m_DSGeomPassTech.set("gColorMap", 0);
-
-    box2.renderModel();
 
     //box1
 
@@ -227,7 +236,7 @@ void Final::DSGeometryPass()
     m_DSGeomPassTech.set("gColorMap", 0);
     m_DSGeomPassTech.set("time", time);
 
-    box.renderModel();
+    //box.renderModel();
 
 
 
@@ -322,6 +331,8 @@ float Final::CalcPointLightBSphere(const PointLight &Light)
 
 void Final::DSDirectionalLightPass()
 {
+    static float spin = 0.02;
+    spin += 0.02;
     m_gbuffer.BindForLightPass();
     m_DSDirLightPassTech.enable();
 
@@ -335,6 +346,7 @@ void Final::DSDirectionalLightPass()
 
 
     quad.model = glm::mat4(1.0f);
+    m_dirLight.Direction = glm::vec3(cos(spin), -1, sin(spin));
     m_DSDirLightPassTech.set("gWVP", glm::mat4(1.0f));
     m_DSDirLightPassTech.set("gPositionMap", GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
     m_DSDirLightPassTech.set("gColorMap", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
