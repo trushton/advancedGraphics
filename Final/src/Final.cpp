@@ -47,7 +47,7 @@ void Final::init()
     water_program2.init();
 
     flag.init(flag_program, "../bin/unionJack.png", 30, 30);
-    flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(-1030, 1950, -460));
+    flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(-5, 65, 15));
     flag.model = glm::rotate(flag.model, 80.0f, glm::vec3(1,0,0));
 
     water.init(water_program, "../bin/water.jpg", 3000, 3000);
@@ -58,7 +58,7 @@ void Final::init()
     //water.model = glm::rotate(water.model, 90.0f, glm::vec3(1,1,0));
 
 
-    fireworks.initWithPos(glm::vec3(-1030, 1945, -460));
+    fireworks.initWithPos(glm::vec3(-5, 0, 15));
 
     t2 = t1 = std::chrono::high_resolution_clock::now();
     time = 0;
@@ -204,8 +204,8 @@ void Final::DSGeometryPass()
     m_DSGeomPassTech.enable();
 
     //box2
-    box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
-    box2.model = glm::scale(box2.model, glm::vec3(10, 10, 10));
+    box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, -200, 0));
+    box2.model = glm::scale(box2.model, glm::vec3(1, 1, 1));
 
     glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * box2.model;
 
@@ -217,7 +217,7 @@ void Final::DSGeometryPass()
 
     //box1
 
-    box.model = glm::translate(glm::mat4(1.0f), glm::vec3(-1030, 1850, -460));
+    box.model = glm::translate(glm::mat4(1.0f), glm::vec3(-5, -15, 15));
     box.model = glm::scale(box.model, glm::vec3(1, 3, 1));
 
     glm::mat4 mvp2 = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * box.model;
@@ -254,7 +254,6 @@ void Final::DSStencilPass(unsigned int PointLightIndex)
     glStencilOpSeparate(GL_BACK, GL_KEEP, GL_INCR_WRAP, GL_KEEP);
     glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_DECR_WRAP, GL_KEEP);
 
-    m_pointLight[PointLightIndex].Position = Engine::getEngine()->graphics->camera->getPos();
     sphere.model = glm::translate(glm::mat4(1.0f), m_pointLight[PointLightIndex].Position);
 
     float BSphereScale = CalcPointLightBSphere(m_pointLight[PointLightIndex]);
@@ -366,11 +365,19 @@ void Final::InitLights()
     m_dirLight.Direction = glm::vec3(-1.0f, -1.0f, -1.0f);
 
     PointLight temp;
-    temp.DiffuseIntensity = 100.9f;
+    temp.DiffuseIntensity = 0.9f;
     temp.Color = COLOR_BLUE;
-    temp.Position = glm::vec3(0.0f,0.0f,5.0f);
+    temp.Position = glm::vec3(0.0f,0.0f,15.0f);
     temp.Attenuation.Constant = .6f;
     temp.Attenuation.Linear = .5f;
     temp.Attenuation.Exp = .3f;
     m_pointLight.push_back(temp);
+//
+//    temp.Color = COLOR_RED;
+//    temp.Position = glm::vec3(0.0f,5.0f,5.0f);
+//    m_pointLight.push_back(temp);
+//
+//    temp.Color = COLOR_WHITE;
+//    temp.Position = glm::vec3(5.0f,10.0f,0.0f);
+//    m_pointLight.push_back(temp);
 }
