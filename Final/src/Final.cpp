@@ -42,7 +42,7 @@ void Final::init()
 
     //terrain.SetFile("../bin/data/drycreek2.tif");
     //terrain.setup();
-    terrain = new Terrain(glm::vec3(1000,300,1000), "../bin/terrain/output.jpg");
+    terrain = new Terrain(glm::vec3(1000,1000,1000), "../bin/terrain/output.jpg");
     terrain->initialize();
 
     flag_program.init();
@@ -58,7 +58,7 @@ void Final::init()
     water2.init(water_program2, "../bin/water.jpg", 3000, 3000);
     water2.model = glm::translate(glm::mat4(1.0f), glm::vec3(-265, 120, -5050));
 
-    //water.model = glm::rotate(water.model, 90.0f, glm::vec3(1,1,0));
+    //water.model = glm::rotate(water.model, 90.0f, glm::vvWorldPos.ec3(1,1,0));
 
 
     fireworks.initWithPos(glm::vec3(-5, 0, 15));
@@ -85,7 +85,6 @@ void Final::render()
 
 
     glEnable(GL_STENCIL_TEST);
-
     for (unsigned int i = 0 ; i < m_pointLight.size(); i++) {
         DSStencilPass(i);
         DSPointLightsPass(i);

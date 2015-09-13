@@ -46,7 +46,7 @@ void main()
   vec4 vTexColor = vec4(0.0);
   float fScale = vWorldPos.y/fRenderHeight;
 
-  const float fRange1 = 0.15f; 
+  const float fRange1 = 0.15f;
   const float fRange2 = 0.3f; 
   const float fRange3 = 0.65f; 
   const float fRange4 = 0.85f; 

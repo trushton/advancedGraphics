@@ -32,11 +32,11 @@ bool Terrain::initialize(){
     initShaderLocations();
 
     texture.resize(5);
-    texture[0] = new Texture("../bin/objects/Rocky Desert.jpg", GL_TEXTURE_2D);
-    texture[1] = new Texture("../bin/objects/Rocky Desert.jpg", GL_TEXTURE_2D);
-    texture[2] = new Texture("../bin/objects/Rocky Desert.jpg", GL_TEXTURE_2D);
-    texture[3] = new Texture("../bin/objects/Rocky Desert.jpg", GL_TEXTURE_2D);
-    texture[4] = new Texture("../bin/objects/Rocky Desert.jpg", GL_TEXTURE_2D);
+    texture[0] = new Texture("../bin/terrain/sand.jpg", GL_TEXTURE_2D);
+    texture[1] = new Texture("../bin/terrain/sand_grass_02.jpg", GL_TEXTURE_2D);
+    texture[2] = new Texture("../bin/terrain/rock_2_4w.jpg", GL_TEXTURE_2D);
+    texture[3] = new Texture("../bin/terrain/fungus.dds", GL_TEXTURE_2D);
+    texture[4] = new Texture("../bin/terrain/path.jpg", GL_TEXTURE_2D);
 
 
     //create the VAO
@@ -214,6 +214,8 @@ bool Terrain::buildTerrain() {
     {
         for(int j = 0; j < icols; j++)
         {
+
+
             Vertices.push_back(GLM_Vertex(glm::vec3(vVertexData[i][j].x , vVertexData[i][j].y , vVertexData[i][j].z ),
                                           vCoordsData[i][j],
                                           vFinalNormals[i][j],
@@ -298,19 +300,25 @@ void Terrain::render(float dt)
     set("RenderHeight", renderScale.y);
     set("MaxTextureU", float(icols)*0.1f);
     set("MaxTextureV", float(irows)*0.1f);
-    set("HeightmapScale", glm::scale(glm::mat4(1.0), glm::vec3(renderScale)));
+    set("HeightmapScale", glm::scale(glm::mat4(1.0), glm::vec3(glm::vec3(5,1,5)*renderScale)));
     set("Color", glm::vec4(1.0f,1.0f,1.0f,1.0f));
 
 //    // Set Light
 //    spin += dt * M_PI / 2;
 //    SetLight();
 
+    texture[0]->bind(GL_TEXTURE0);
+    texture[1]->bind(GL_TEXTURE1);
+    texture[2]->bind(GL_TEXTURE2);
+    texture[3]->bind(GL_TEXTURE3);
+    texture[4]->bind(GL_TEXTURE4);
+
     // Texture Data
-    glUniform1i(TextureLocations[0], 0);
-    glUniform1i(TextureLocations[1], 1);
-    glUniform1i(TextureLocations[2], 2);
-    glUniform1i(TextureLocations[3], 3);
-    glUniform1i(TextureLocations[4], 4);
+    set("TextureLocations[0]", 0);
+    set("TextureLocations[1]", 1);
+    set("TextureLocations[2]", 2);
+    set("TextureLocations[3]", 3);
+    set("TextureLocations[4]", 4);
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
@@ -325,11 +333,7 @@ void Terrain::render(float dt)
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IB);
 
-    texture[0]->bind(GL_TEXTURE0);
-    texture[1]->bind(GL_TEXTURE1);
-    texture[2]->bind(GL_TEXTURE2);
-    texture[3]->bind(GL_TEXTURE3);
-    texture[4]->bind(GL_TEXTURE4);
+
 
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(irows*icols);
@@ -367,11 +371,11 @@ void Terrain::CreatePositionBuffer()
 //        if (activate > 0.7){
 
         if (direction > 0.5) {
-            positions[i] = renderScale * glm::vec3(Vertices[i].position.x + val * 1.25, Vertices[i].position.y,
+            positions[i] = renderScale.y * glm::vec3(Vertices[i].position.x + val * 1.25, Vertices[i].position.y,
                                      Vertices[i].position.z - val);
         }
         else {
-            positions[i] = renderScale * glm::vec3(Vertices[i].position.x - val, Vertices[i].position.y,
+            positions[i] = renderScale.y * glm::vec3(Vertices[i].position.x - val, Vertices[i].position.y,
                                      Vertices[i].position.z + val * 1.3);
         }
     }
