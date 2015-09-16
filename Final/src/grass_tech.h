@@ -2,6 +2,7 @@
 #define TERRAINTEST_GRASS_TECH_H
 #include "Program.h"
 #include "lights.h"
+#include "Texture.h"
 #include <iostream>
 #include <chrono>
 
@@ -20,7 +21,7 @@ class grass_tech : public Program
         void enable();
 
         //void SetPointLight(const PointLight& Lights);
-
+        Texture* tex;
     protected:
         void loadShaders();
 

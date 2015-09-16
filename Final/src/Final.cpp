@@ -42,7 +42,7 @@ void Final::init()
 
     //terrain.SetFile("../bin/data/drycreek2.tif");
     //terrain.setup();
-    terrain = new Terrain(glm::vec3(1000,1000,1000), "../bin/terrain/output.jpg");
+    terrain = new Terrain(glm::vec3(2000,400,2000), "../bin/terrain/world.jpg");
     terrain->initialize();
 
     flag_program.init();

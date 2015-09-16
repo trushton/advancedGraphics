@@ -16,6 +16,8 @@ void grass_tech::init(){
     //get the variables from the shaders
     initShaderLocations();
 
+    tex = new Texture("../bin/unionjack.png", GL_TEXTURE_2D);
+
 
     //create the VAO
     glUseProgram(program);
@@ -62,6 +64,9 @@ void grass_tech::initShaderLocations()
     locations["gVP"] = glGetUniformLocation(program, "gVP");
     locations["gCameraPos"] = glGetUniformLocation(program, "gCameraPos");
     locations["time"] = glGetUniformLocation(program, "time");
+    locations["gColorMap"] = glGetUniformLocation(program, "gColorMap");
+
+
 }
 
 

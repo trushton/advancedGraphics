@@ -300,7 +300,7 @@ void Terrain::render(float dt)
     set("RenderHeight", renderScale.y);
     set("MaxTextureU", float(icols)*0.1f);
     set("MaxTextureV", float(irows)*0.1f);
-    set("HeightmapScale", glm::scale(glm::mat4(1.0), glm::vec3(glm::vec3(5,1,5)*renderScale)));
+    set("HeightmapScale", glm::scale(glm::mat4(1.0), renderScale));
     set("Color", glm::vec4(1.0f,1.0f,1.0f,1.0f));
 
 //    // Set Light
@@ -356,7 +356,7 @@ void Terrain::CreatePositionBuffer()
     float maxDisplacement = 10.0f;
     float direction;
     float val;
-    //float activate;
+    float activate;
 
     //seed random number generator
     std::srand(std::time(0));
@@ -365,18 +365,21 @@ void Terrain::CreatePositionBuffer()
     for(uint i = 0; i < Vertices.size(); i++) {
         val = maxDisplacement * ((float) std::rand() / RAND_MAX);
         direction = (float) std::rand() / RAND_MAX;
-//        activate = (float) std::rand() / RAND_MAX;
+        activate = (float) std::rand() / RAND_MAX;
 
         //randomizes which grass blades are rendered
-//        if (activate > 0.7){
+        if (activate < 0.2) {
 
-        if (direction > 0.5) {
-            positions[i] = renderScale.y * glm::vec3(Vertices[i].position.x + val * 1.25, Vertices[i].position.y,
-                                     Vertices[i].position.z - val);
-        }
-        else {
-            positions[i] = renderScale.y * glm::vec3(Vertices[i].position.x - val, Vertices[i].position.y,
-                                     Vertices[i].position.z + val * 1.3);
+            if (direction > 0.5) {
+                positions[i] = glm::vec3(Vertices[i].position.x * renderScale.x + val * 1.25,
+                                         Vertices[i].position.y * renderScale.y,
+                                         Vertices[i].position.z * renderScale.z - val);
+            }
+            else {
+                positions[i] = glm::vec3(Vertices[i].position.x * renderScale.x - val,
+                                         Vertices[i].position.y * renderScale.y,
+                                         Vertices[i].position.z * renderScale.z + val * 1.3);
+            }
         }
     }
 
@@ -394,9 +397,14 @@ void Terrain::RenderGrass()
     glm::mat4 vp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view;
     glm::vec3 camPos = Engine::getEngine()->graphics->camera->getPos();
     grass.set("model", model);
+
     grass.set("gVP", vp);
     grass.set("gCameraPos", camPos);
     grass.set("time", time);
+    grass.set("gColorMap", 0);
+    grass.tex->bind(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE0);
+
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, grass_VB);
