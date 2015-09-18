@@ -53,6 +53,7 @@ public:
     glm::mat4 view, projection;
 
     Camera * camera;
+    Final *final;
 
 
 private:
@@ -68,7 +69,6 @@ private:
     Skybox * skybox;
     Water * water;
     //Simulation * simulation;
-    Final *final;
         WaterFrameBuffers * frameBuffers;
 
 

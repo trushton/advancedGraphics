@@ -16,7 +16,7 @@ void grass_tech::init(){
     //get the variables from the shaders
     initShaderLocations();
 
-    tex = new Texture("../bin/unionjack.png", GL_TEXTURE_2D);
+    tex = new Texture("../bin/terrain/grass.png", GL_TEXTURE_2D);
 
 
     //create the VAO

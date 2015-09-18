@@ -50,13 +50,13 @@ void Final::init()
     water_program2.init();
 
     flag.init(flag_program, "../bin/unionJack.png", 30, 30);
-    flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(-5, 65, 15));
-    flag.model = glm::rotate(flag.model, 80.0f, glm::vec3(1,0,0));
+    flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(-5, 565, 15));
+    flag.model = glm::rotate(flag.model, 4.697f, glm::vec3(1,0,0));
 
-    water.init(water_program, "../bin/water.jpg", 3000, 3000);
-    water.model = glm::translate(glm::mat4(1.0f), glm::vec3(-5000, 130, 2100));
-    water2.init(water_program2, "../bin/water.jpg", 3000, 3000);
-    water2.model = glm::translate(glm::mat4(1.0f), glm::vec3(-265, 120, -5050));
+    //water.init(water_program, "../bin/water.jpg", 300, 300);
+    //water.model = glm::translate(glm::mat4(1.0f), glm::vec3(-575, 75, -130));
+    //water2.init(water_program2, "../bin/water.jpg", 3000, 3000);
+    //water2.model = glm::translate(glm::mat4(1.0f), glm::vec3(-265, 120, -5050));
 
     //water.model = glm::rotate(water.model, 90.0f, glm::vvWorldPos.ec3(1,1,0));
 
@@ -184,13 +184,7 @@ void Final::DSGeometryPass()
 
     glEnable(GL_DEPTH_TEST);
 
-    //terrain.model = glm::translate(glm::mat4(1.0f), glm::vec3(1250,-2000, -800));
-//
-//    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view * terrain.model;
-//
-//    m_DSGeomPassTech.set("gWVP", mvp);
-//    m_DSGeomPassTech.set("gWorld", terrain.model);
-//    m_DSGeomPassTec.4*((cos(waveWidth * pos.x + waveTime)*waveHeight + sin(waveWidth * pos.z + waveTime) * waveHeight))h.set("gColorMap", 0);
+
 
     //terrain.render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
     terrain->enable();
@@ -199,11 +193,11 @@ void Final::DSGeometryPass()
 
 
     renderFlag();
-    renderWater();
-    renderWater2();
+    //renderWater();
+    //renderWater2();
 
 
-//    //box2
+    //box2
 //    box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, -200, 0));
 //    box2.model = glm::scale(box2.model, glm::vec3(1, 1, 1));
 //
@@ -225,7 +219,7 @@ void Final::DSGeometryPass()
 
     //box1
 
-    box.model = glm::translate(glm::mat4(1.0f), glm::vec3(-5, -15, 15));
+    box.model = glm::translate(glm::mat4(1.0f), glm::vec3(-5, 500, 15));
     box.model = glm::scale(box.model, glm::vec3(1, 3, 1));
 
     glm::mat4 mvp2 = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * box.model;
@@ -235,7 +229,7 @@ void Final::DSGeometryPass()
     m_DSGeomPassTech.set("gColorMap", 0);
     m_DSGeomPassTech.set("time", time);
 
-    //box.renderModel();
+    box.renderModel();
 
 
 

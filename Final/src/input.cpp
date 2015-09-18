@@ -182,6 +182,14 @@ void Input::handleMovementKeys()
         //mouseEnabled = !mouseEnabled;
 
     }
+    if(isPressed(SDLK_TAB)){
+        static float angle = 0.0f;
+        static float total = 0.0f;
+        angle += 0.0001;
+        engine->graphics->final->flag.model = glm::rotate(engine->graphics->final->flag.model, angle, glm::vec3(1,0,0));
+        total += angle;
+        cout << total << endl;
+    }
 
 
     //User requests quit

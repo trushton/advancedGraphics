@@ -58,6 +58,7 @@ public:
     void renderWater();
     void renderWater2();
 
+    Plane flag;
 
 private:
     GBuffer m_gbuffer;
@@ -87,7 +88,6 @@ private:
     water_tech water_program, water_program2, water_program3;
     waterPlane water, water2, water3;
     Flag flag_program;
-    Plane flag;
 
 };
 
