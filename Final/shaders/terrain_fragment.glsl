@@ -5,7 +5,7 @@ smooth in vec3 vNormal;
 smooth in vec3 vWorldPos; 
 smooth in vec4 vEyeSpacePos;
 
-uniform sampler2D gSampler[5]; 
+uniform sampler2D gSampler[6];
 uniform sampler2D shadowMap; 
 
 uniform vec4 vColor; 
@@ -46,10 +46,11 @@ void main()
   vec4 vTexColor = vec4(0.0);
   float fScale = vWorldPos.y/fRenderHeight;
 
-  const float fRange1 = 0.15f;
-  const float fRange2 = 0.3f; 
-  const float fRange3 = 0.65f; 
-  const float fRange4 = 0.85f; 
+  const float fRange1 = 0.3f;
+  const float fRange2 = 0.35f;
+  const float fRange3 = 0.4f;
+  const float fRange4 = 0.60f;
+  const float fRange5 = 0.85f;
 
 
   if(fScale >= 0.0 && fScale <= fRange1)
@@ -66,10 +67,10 @@ void main()
 
     vTexColor += texture(gSampler[0], vTexCoord)*fScale; 
     vTexColor += texture(gSampler[1], vTexCoord)*fScale2; 
-  } 
+  }
   else if(fScale <= fRange3)
   {
-    vTexColor = texture(gSampler[1], vTexCoord); 
+    vTexColor = texture(gSampler[1], vTexCoord);
   }
   else if(fScale <= fRange4) 
   { 
@@ -81,18 +82,28 @@ void main()
 
     vTexColor += texture(gSampler[1], vTexCoord)*fScale; 
     vTexColor += texture(gSampler[2], vTexCoord)*fScale2;       
-  } 
-  else
-  {
-    vTexColor = texture(gSampler[2], vTexCoord); 
+  }
+  else if(fScale <= fRange5)
+    {
+      fScale -= fRange4;
+      fScale /= (fRange5-fRange4);
+
+      float fScale2 = fScale;
+      fScale = 1.0-fScale;
+
+      vTexColor += texture(gSampler[2], vTexCoord)*fScale;
+      vTexColor += texture(gSampler[3], vTexCoord)*fScale2;
+    }
+  else{
+      vTexColor = texture(gSampler[3], vTexCoord);
   }
 
   vec2 vPathCoord = vec2(vTexCoord.x/fMaxTextureU, vTexCoord.y/fMaxTextureV); 
-  vec4 vPathIntensity = texture(gSampler[4], vPathCoord);
+  vec4 vPathIntensity = texture(gSampler[5], vPathCoord);
   fScale = vPathIntensity.x; 
 
-  vec4 vPathColor = texture(gSampler[3], vTexCoord);  
-  vec4 vFinalTexColor = fScale * vTexColor + (1-fScale) * vPathColor; 
+  vec4 vPathColor = texture(gSampler[4], vTexCoord);
+  vec4 vFinalTexColor = fScale * vTexColor + (1-fScale) * vPathColor;
 
   vec4 vMixedColor = vFinalTexColor * vColor; 
 

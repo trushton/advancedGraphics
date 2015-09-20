@@ -42,7 +42,7 @@ void Final::init()
 
     //terrain.SetFile("../bin/data/drycreek2.tif");
     //terrain.setup();
-    terrain = new Terrain(glm::vec3(2000,400,2000), "../bin/terrain/world.jpg");
+    terrain = new Terrain(glm::vec3(5000,1500,5000), "../bin/terrain/output.jpg");
     terrain->initialize();
 
     flag_program.init();
@@ -54,7 +54,7 @@ void Final::init()
     flag.model = glm::rotate(flag.model, 4.697f, glm::vec3(1,0,0));
 
     //water.init(water_program, "../bin/water.jpg", 300, 300);
-    //water.model = glm::translate(glm::mat4(1.0f), glm::vec3(-575, 75, -130));
+    //water.model = glm::translate(glm::mat4(1.0f), glm::vec3(310, 460, 370));
     //water2.init(water_program2, "../bin/water.jpg", 3000, 3000);
     //water2.model = glm::translate(glm::mat4(1.0f), glm::vec3(-265, 120, -5050));
 

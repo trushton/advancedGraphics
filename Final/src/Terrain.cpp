@@ -31,12 +31,13 @@ bool Terrain::initialize(){
     //get the variables from the shaders
     initShaderLocations();
 
-    texture.resize(5);
+    texture.resize(6);
     texture[0] = new Texture("../bin/terrain/sand.jpg", GL_TEXTURE_2D);
-    texture[1] = new Texture("../bin/terrain/sand_grass_02.jpg", GL_TEXTURE_2D);
-    texture[2] = new Texture("../bin/terrain/rock_2_4w.jpg", GL_TEXTURE_2D);
-    texture[3] = new Texture("../bin/terrain/fungus.dds", GL_TEXTURE_2D);
-    texture[4] = new Texture("../bin/terrain/path.jpg", GL_TEXTURE_2D);
+    texture[1] = new Texture("../bin/terrain/grassTex.jpg", GL_TEXTURE_2D);
+    texture[2] = new Texture("../bin/terrain/forest.jpg", GL_TEXTURE_2D);
+    texture[3] = new Texture("../bin/terrain/rock_2_4w.jpg", GL_TEXTURE_2D);
+    texture[4] = new Texture("../bin/terrain/stone.jpg", GL_TEXTURE_2D);
+    texture[5] = new Texture("../bin/terrain/path2.jpg", GL_TEXTURE_2D);
 
 
     //create the VAO
@@ -87,6 +88,8 @@ void Terrain::initShaderLocations()
     locations["TextureLocations[2]"] = glGetUniformLocation(program, "gSampler[2]");
     locations["TextureLocations[3]"] = glGetUniformLocation(program, "gSampler[3]");
     locations["TextureLocations[4]"] = glGetUniformLocation(program, "gSampler[4]");
+    locations["TextureLocations[5]"] = glGetUniformLocation(program, "gSampler[5]");
+
 
     locations["RenderHeight"] = glGetUniformLocation(program, "fRenderHeight");
     locations["MaxTextureU"] = glGetUniformLocation(program, "fMaxTextureU");
@@ -312,6 +315,7 @@ void Terrain::render(float dt)
     texture[2]->bind(GL_TEXTURE2);
     texture[3]->bind(GL_TEXTURE3);
     texture[4]->bind(GL_TEXTURE4);
+    texture[5]->bind(GL_TEXTURE5);
 
     // Texture Data
     set("TextureLocations[0]", 0);
@@ -319,6 +323,8 @@ void Terrain::render(float dt)
     set("TextureLocations[2]", 2);
     set("TextureLocations[3]", 3);
     set("TextureLocations[4]", 4);
+    set("TextureLocations[5]", 5);
+
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
@@ -345,7 +351,7 @@ void Terrain::render(float dt)
     glDisableVertexAttribArray(3);
     glDisable(GL_CULL_FACE);
 
-    RenderGrass();
+    //RenderGrass();
 }
 
 void Terrain::CreatePositionBuffer()
