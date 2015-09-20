@@ -42,7 +42,7 @@ void Final::init()
 
     //terrain.SetFile("../bin/data/drycreek2.tif");
     //terrain.setup();
-    terrain = new Terrain(glm::vec3(5000,1500,5000), "../bin/terrain/output.jpg");
+    terrain = new Terrain(glm::vec3(1000,300,1000), "../bin/terrain/output.jpg");
     terrain->initialize();
 
     flag_program.init();
@@ -50,7 +50,7 @@ void Final::init()
     water_program2.init();
 
     flag.init(flag_program, "../bin/unionJack.png", 30, 30);
-    flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(-5, 565, 15));
+    flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(430, 345, 390));
     flag.model = glm::rotate(flag.model, 4.697f, glm::vec3(1,0,0));
 
     //water.init(water_program, "../bin/water.jpg", 300, 300);
@@ -219,7 +219,7 @@ void Final::DSGeometryPass()
 
     //box1
 
-    box.model = glm::translate(glm::mat4(1.0f), glm::vec3(-5, 500, 15));
+    box.model = glm::translate(glm::mat4(1.0f), glm::vec3(430, 260, 390));
     box.model = glm::scale(box.model, glm::vec3(1, 3, 1));
 
     glm::mat4 mvp2 = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * box.model;

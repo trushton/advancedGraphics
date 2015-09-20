@@ -351,7 +351,7 @@ void Terrain::render(float dt)
     glDisableVertexAttribArray(3);
     glDisable(GL_CULL_FACE);
 
-    //RenderGrass();
+    RenderGrass();
 }
 
 void Terrain::CreatePositionBuffer()
@@ -408,6 +408,7 @@ void Terrain::RenderGrass()
     grass.set("gCameraPos", camPos);
     grass.set("time", time);
     grass.set("gColorMap", 0);
+    grass.set("renderScale", renderScale);
     grass.tex->bind(GL_TEXTURE0);
     glActiveTexture(GL_TEXTURE0);
 

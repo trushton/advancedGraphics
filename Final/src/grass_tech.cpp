@@ -65,6 +65,7 @@ void grass_tech::initShaderLocations()
     locations["gCameraPos"] = glGetUniformLocation(program, "gCameraPos");
     locations["time"] = glGetUniformLocation(program, "time");
     locations["gColorMap"] = glGetUniformLocation(program, "gColorMap");
+    locations["renderScale"] = glGetUniformLocation(program, "renderScale");
 
 
 }
