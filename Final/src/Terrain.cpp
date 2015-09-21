@@ -359,10 +359,10 @@ void Terrain::CreatePositionBuffer()
     grass.enable();
     positions.resize(Vertices.size());
     vector<int> inactive;
-    float maxDisplacement = 10.0f;
+    float maxDisplacement = 0.0f;
     float direction;
     float val;
-    float activate;
+    //float activate;
 
     //seed random number generator
     std::srand(std::time(0));
@@ -371,10 +371,10 @@ void Terrain::CreatePositionBuffer()
     for(uint i = 0; i < Vertices.size(); i++) {
         val = maxDisplacement * ((float) std::rand() / RAND_MAX);
         direction = (float) std::rand() / RAND_MAX;
-        activate = (float) std::rand() / RAND_MAX;
+        //activate = (float) std::rand() / RAND_MAX;
 
         //randomizes which grass blades are rendered
-        if (activate < 0.2) {
+        //if (activate < 0.2) {
 
             if (direction > 0.5) {
                 positions[i] = glm::vec3(Vertices[i].position.x * renderScale.x + val * 1.25,
@@ -386,7 +386,7 @@ void Terrain::CreatePositionBuffer()
                                          Vertices[i].position.y * renderScale.y,
                                          Vertices[i].position.z * renderScale.z + val * 1.3);
             }
-        }
+        //}
     }
 
 
@@ -408,9 +408,12 @@ void Terrain::RenderGrass()
     grass.set("gCameraPos", camPos);
     grass.set("time", time);
     grass.set("gColorMap", 0);
+    grass.set("gPathMap", 1);
     grass.set("renderScale", renderScale);
+    grass.set("fMaxTextureU", float(icols)*0.1f);
+    grass.set("fMaxTextureV", float(irows)*0.1f);
     grass.tex->bind(GL_TEXTURE0);
-    glActiveTexture(GL_TEXTURE0);
+    grass.pathTex->bind(GL_TEXTURE1);
 
     glEnableVertexAttribArray(0);
 

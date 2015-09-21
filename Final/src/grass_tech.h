@@ -22,6 +22,7 @@ class grass_tech : public Program
 
         //void SetPointLight(const PointLight& Lights);
         Texture* tex;
+        Texture* pathTex;
     protected:
         void loadShaders();
 

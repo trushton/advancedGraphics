@@ -8,14 +8,23 @@ uniform mat4 gVP;
 uniform vec3 gCameraPos;
 uniform float time;
 uniform vec3 renderScale;
+uniform sampler2D gPathMap;
 uniform sampler2D gColorMap;
+uniform float fMaxTextureU;
+uniform float fMaxTextureV;
 
 out vec3 Color;
 out vec2 TexCoord;
 
 void main() {
     vec3 Pos = gl_in[0].gl_Position.xyz;
-    if(Pos.y / renderScale.y <= 0.6 && Pos.y / renderScale.y >= 0.35){
+    vec2 vPathCoord = vec2(Pos.x/fMaxTextureV, Pos.z/fMaxTextureU);
+    vec4 vPathIntensity = texture(gPathMap, vPathCoord);
+    vec2 pathTex = vec2(vPathCoord.x, vPathCoord.y);
+    vec4 vPathColor = texture(gColorMap, pathTex);
+    float fscale = vPathIntensity.x;
+
+    if(Pos.y / renderScale.y <= 0.6 && Pos.y / renderScale.y >= 0.35 ){
         vec3 toCamera = normalize(gCameraPos - Pos);
         vec3 up = vec3(0.0,1.0,0.0);
         vec3 right = cross(toCamera, up);

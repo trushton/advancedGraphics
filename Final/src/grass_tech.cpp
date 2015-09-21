@@ -17,7 +17,7 @@ void grass_tech::init(){
     initShaderLocations();
 
     tex = new Texture("../bin/terrain/grass.png", GL_TEXTURE_2D);
-
+    pathTex = new Texture("../bin/terrain/path2.jpg", GL_TEXTURE_2D);
 
     //create the VAO
     glUseProgram(program);
@@ -65,7 +65,11 @@ void grass_tech::initShaderLocations()
     locations["gCameraPos"] = glGetUniformLocation(program, "gCameraPos");
     locations["time"] = glGetUniformLocation(program, "time");
     locations["gColorMap"] = glGetUniformLocation(program, "gColorMap");
+    locations["gPathMap"] = glGetUniformLocation(program, "gPathMap");
     locations["renderScale"] = glGetUniformLocation(program, "renderScale");
+    locations["fMaxTextureU"] = glGetUniformLocation(program, "fMaxTextureU");
+    locations["fMaxTextureV"] = glGetUniformLocation(program, "fMaxTextureV");
+
 
 
 }
