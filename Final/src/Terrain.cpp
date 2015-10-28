@@ -37,7 +37,8 @@ bool Terrain::initialize(){
     texture[2] = new Texture("../bin/terrain/forest.jpg", GL_TEXTURE_2D);
     texture[3] = new Texture("../bin/terrain/rock_2_4w.jpg", GL_TEXTURE_2D);
     texture[4] = new Texture("../bin/terrain/stone.jpg", GL_TEXTURE_2D);
-    texture[5] = new Texture("../bin/terrain/path2.jpg", GL_TEXTURE_2D);
+    texture[5] = new Texture("../bin/terrain/path3.jpg", GL_TEXTURE_2D);
+    grassPath = new Texture("../bin/terrain/path3.jpg", GL_TEXTURE_2D);
 
 
     //create the VAO
@@ -273,8 +274,8 @@ bool Terrain::buildTerrain() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IB);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * Indices.size(), &Indices[0], GL_STATIC_DRAW);
 
-
     grass.init();
+    ReadPath();
     CreatePositionBuffer();
     return true;
 
@@ -375,16 +376,16 @@ void Terrain::CreatePositionBuffer()
 
         //randomizes which grass blades are rendered
         //if (activate < 0.2) {
-
-            if (direction > 0.5) {
-                positions[i] = glm::vec3(Vertices[i].position.x * renderScale.x + val * 1.25,
+            cout << "pathPos r: " << pathPos[i].x << endl;
+            if (direction > 0.5 && pathPos[i].x == 255) {
+                positions[i] = glm::vec3(Vertices[i].position.x * renderScale.x + val *1.3 ,
                                          Vertices[i].position.y * renderScale.y,
-                                         Vertices[i].position.z * renderScale.z - val);
+                                         Vertices[i].position.z * renderScale.z - val*1.3);
             }
-            else {
-                positions[i] = glm::vec3(Vertices[i].position.x * renderScale.x - val,
+            else if(pathPos[i].x == 255)  {
+                positions[i] = glm::vec3(Vertices[i].position.x * renderScale.x -val*1.25,
                                          Vertices[i].position.y * renderScale.y,
-                                         Vertices[i].position.z * renderScale.z + val * 1.3);
+                                         Vertices[i].position.z * renderScale.z +val*1.2);
             }
         //}
     }
@@ -394,6 +395,38 @@ void Terrain::CreatePositionBuffer()
     glBindBuffer(GL_ARRAY_BUFFER, grass_VB);
     glBufferData(GL_ARRAY_BUFFER, sizeof(positions[0]) * positions.size(), &positions[0], GL_STATIC_DRAW);
 }
+
+void Terrain::ReadPath() {
+    fipImage path;
+    RGBQUAD pixel;
+    uint height, width;
+
+
+    path.load("../bin/terrain/path3.jpg");
+    path.convertTo32Bits();
+    height = path.getHeight();
+    width = path.getWidth();
+
+    //build position and color vectors
+
+    for (uint i = 0; i < height; i++) {
+        for (uint j = 0; j < width; j++) {
+            path.getPixelColor(i, j, &pixel);
+            float r, g, b;
+            r = pixel.rgbRed;
+            g = pixel.rgbGreen;
+            b=  pixel.rgbBlue;
+            //outs << r << " " << g << " " << b << endl;
+
+            pathPos.push_back(glm::vec3(r,g,b));
+
+            cout << "POS: " << i << "|" << j << " COLOR: " << pathPos[pathPos.size()-1].x << " " << pathPos[pathPos.size()-1].y << " " <<pathPos[pathPos.size()-1].z  << endl;
+        }
+    }
+
+
+}
+
 
 void Terrain::RenderGrass()
 {
@@ -410,8 +443,8 @@ void Terrain::RenderGrass()
     grass.set("gColorMap", 0);
     grass.set("gPathMap", 1);
     grass.set("renderScale", renderScale);
-    grass.set("fMaxTextureU", float(icols)*0.1f);
-    grass.set("fMaxTextureV", float(irows)*0.1f);
+    grass.set("fMaxTextureU", float(icols));
+    grass.set("fMaxTextureV", float(irows));
     grass.tex->bind(GL_TEXTURE0);
     grass.pathTex->bind(GL_TEXTURE1);
 

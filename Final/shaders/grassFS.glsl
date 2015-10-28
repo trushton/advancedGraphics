@@ -9,7 +9,8 @@ out vec4 FragColor;
 void main() {
 
     FragColor = vec4(texture(gColorMap, TexCoord).xyz, 1.0);
-    if(FragColor.r == 0 && FragColor.g == 0 && FragColor.b == 0){
-        discard;
-    }
+        if(FragColor.r == 0 && FragColor.g == 0 && FragColor.b == 0){
+            discard;
+        }
+
 }

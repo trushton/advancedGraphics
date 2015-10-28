@@ -10,6 +10,7 @@
 #include <chrono>
 #include "Texture.h"
 #include "Vertex.h"
+#include <fstream>
 
 #include "Program.h"
 #include "grass_tech.h"
@@ -36,9 +37,12 @@ public:
     glm::vec3 location, renderScale;
     std::string fname;
     float time;
+    Texture* grassPath;
+
 
     void CreatePositionBuffer();
     void RenderGrass();
+    void ReadPath();
 
 protected:
     void loadShaders();
@@ -59,6 +63,7 @@ protected:
     GLuint IB;
     std::vector<GLM_Vertex> Vertices;
     std::vector<unsigned int> Indices;
+    std::vector<glm::vec3> pathPos;
 
 
     GLint RenderHeight;
