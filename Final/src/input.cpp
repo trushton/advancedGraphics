@@ -17,8 +17,7 @@ Input::~Input()
 }
 
 void Input::init() {
-    SDL_SetRelativeMouseMode(SDL_TRUE);
-
+    SDL_SetRelativeMouseMode(SDL_FALSE);
     resetKeyPresses();
 }
 

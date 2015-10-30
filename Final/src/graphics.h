@@ -63,6 +63,7 @@ private:
     std::map<std::string, Program*> programs;
 
     SDL_Window *window;
+    int windowWidth, windowHeight;
     SDL_GLContext gl_context;
 
     Cube * cube;

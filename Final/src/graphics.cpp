@@ -23,7 +23,8 @@ Graphics::~Graphics()
 void Graphics::init()
 {
 
-    int windowWidth = 1600, windowHeight = 900;
+    windowWidth = 1600;
+    windowHeight = 900;
     //int windowWidth = 1600, windowHeight = 900;
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
@@ -34,6 +35,7 @@ void Graphics::init()
 
     window = SDL_CreateWindow("Deferred Shading With Terrain2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight,
                               SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+
 
     if (!window)
     {
@@ -46,6 +48,11 @@ void Graphics::init()
     std::cout << glGetString(GL_VERSION) << std::endl;
 
     SDL_GL_SetSwapInterval(1);
+
+    SDL_Cursor* cursor;
+    cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
+    SDL_SetCursor(cursor);
+    SDL_WarpMouseInWindow(window, windowWidth/2, windowHeight/2);
 
     initGL();
 }
@@ -81,12 +88,12 @@ void Graphics::initGL()
 
 
 
-
 }
 
 void Graphics::tick(float dt)
 {
     //cube->tick(dt);
+
     final->tick(dt);
     render();
 }

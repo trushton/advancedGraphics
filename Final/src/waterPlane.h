@@ -35,7 +35,7 @@ public:
 private:
     void calcNormal(int x, int z, Vertex& vert);
 
-    vector<unsigned int> indices;
+    vector<GLsizei> indices;
     water_tech program;
     Texture *Tex;
     int width, height;

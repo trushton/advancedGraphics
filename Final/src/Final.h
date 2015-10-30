@@ -57,6 +57,7 @@ public:
     void renderFlag();
     void renderWater();
     void renderWater2();
+    void DrawBMP(SDL_Surface* MouseImage, int mouseX, int mouseY);
 
     Plane flag;
 

@@ -376,7 +376,6 @@ void Terrain::CreatePositionBuffer()
 
         //randomizes which grass blades are rendered
         //if (activate < 0.2) {
-            cout << "pathPos r: " << pathPos[i].x << endl;
             if (direction > 0.5 && pathPos[i].x == 255) {
                 positions[i] = glm::vec3(Vertices[i].position.x * renderScale.x + val *1.3 ,
                                          Vertices[i].position.y * renderScale.y,
@@ -420,7 +419,6 @@ void Terrain::ReadPath() {
 
             pathPos.push_back(glm::vec3(r,g,b));
 
-            cout << "POS: " << i << "|" << j << " COLOR: " << pathPos[pathPos.size()-1].x << " " << pathPos[pathPos.size()-1].y << " " <<pathPos[pathPos.size()-1].z  << endl;
         }
     }
 

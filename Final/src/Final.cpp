@@ -46,8 +46,8 @@ void Final::init()
     terrain->initialize();
 
     flag_program.init();
-    water_program.init();
-    water_program2.init();
+    //water_program.init();
+    //water_program2.init();
 
     flag.init(flag_program, "../bin/unionJack.png", 30, 30);
     flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(430, 345, 390));
@@ -58,7 +58,7 @@ void Final::init()
     //water2.init(water_program2, "../bin/water.jpg", 3000, 3000);
     //water2.model = glm::translate(glm::mat4(1.0f), glm::vec3(-265, 120, -5050));
 
-    //water.model = glm::rotate(water.model, 90.0f, glm::vvWorldPos.ec3(1,1,0));
+    //water.model = glm::rotate(water.model, 90.0f, glm::vec3(1,1,0));
 
 
     fireworks.initWithPos(glm::vec3(-5, 0, 15));
@@ -75,6 +75,7 @@ void Final::tick(float dt)
     box2.model = glm::mat4(1.0f);
 
 }
+
 
 void Final::render()
 {
@@ -154,7 +155,6 @@ void Final::renderWater()
 void Final::renderWater2()
 {
     water_program2.enable();
-
     static float waveTime = 0.2f, waveWidth = 0.2f, waveHeight = 4.0f, waveFreq = 0.05f;
     waveTime += waveFreq;
 
@@ -164,9 +164,11 @@ void Final::renderWater2()
     water_program2.set("gColorMap", 0);
     water_program2.set("time", terrain->time);
 
+
     water_program2.set("waveTime", waveTime);
     water_program2.set("waveWidth", waveWidth);
     water_program2.set("waveHeight", waveHeight);
+
     water2.render();
 }
 
