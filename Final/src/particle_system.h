@@ -35,6 +35,7 @@ public:
     void initWithPos(const glm::vec3 &pos);
 
     void renderWithDT(float dt);
+    glm::vec3 initialPosition;
 
 private:
     void updateParticles(float dt);

@@ -17,6 +17,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Final.h"
+#include "MousePicker.h"
 //#include "water_frame_buffers.h"
 
 
@@ -54,6 +55,7 @@ public:
 
     Camera * camera;
     Final *final;
+    int windowWidth, windowHeight;
 
 
 private:
@@ -63,7 +65,6 @@ private:
     std::map<std::string, Program*> programs;
 
     SDL_Window *window;
-    int windowWidth, windowHeight;
     SDL_GLContext gl_context;
 
     Cube * cube;

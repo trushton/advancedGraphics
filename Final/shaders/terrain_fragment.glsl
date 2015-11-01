@@ -98,7 +98,7 @@ void main()
       vTexColor = texture(gSampler[3], vTexCoord);
   }
 
-  vec2 vPathCoord = vec2(vTexCoord.x/fMaxTextureU, vTexCoord.y/fMaxTextureV); 
+  vec2 vPathCoord = vec2((vTexCoord.x)/fMaxTextureU, (vTexCoord.y)/fMaxTextureV);
   vec4 vPathIntensity = texture(gSampler[5], vPathCoord);
   fScale = vPathIntensity.x; 
 

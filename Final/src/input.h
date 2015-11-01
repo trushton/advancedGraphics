@@ -12,7 +12,7 @@
 #define RELEASED false;
 
 class Engine;
-
+class Final;
 class Input
 {
 public:

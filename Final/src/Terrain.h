@@ -38,12 +38,11 @@ public:
     std::string fname;
     float time;
     Texture* grassPath;
-
+    std::vector<GLM_Vertex> Vertices;
 
     void CreatePositionBuffer();
     void RenderGrass();
     void ReadPath();
-
 protected:
     void loadShaders();
 
@@ -61,7 +60,6 @@ protected:
 
     GLuint VB;
     GLuint IB;
-    std::vector<GLM_Vertex> Vertices;
     std::vector<unsigned int> Indices;
     std::vector<glm::vec3> pathPos;
 

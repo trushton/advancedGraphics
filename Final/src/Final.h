@@ -13,6 +13,7 @@
 #include "ds_spot_light_pass_tech.h"
 #include "Technique.h"
 #include "Engine.h"
+#include "SDL.h"
 #include "graphics.h"
 #include "lights.h"
 #include "particle_system.h"
@@ -22,10 +23,11 @@
 #include "skybox.h"
 #include "waterPlane.h"
 #include "Terrain.h"
+#include "MousePicker.h"
 
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
-
+class MousePicker;
 class Final {
 
 public:
@@ -60,6 +62,9 @@ public:
     void DrawBMP(SDL_Surface* MouseImage, int mouseX, int mouseY);
 
     Plane flag;
+    ParticleSystem fireworks;
+    MousePicker* picker;
+
 
 private:
     GBuffer m_gbuffer;
@@ -82,7 +87,6 @@ private:
     int windowWidth;
     int windowHeight;
 
-    ParticleSystem fireworks;
     std::chrono::time_point<std::chrono::high_resolution_clock> t1, t2;
     int time;
 

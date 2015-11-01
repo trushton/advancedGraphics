@@ -41,7 +41,7 @@ ParticleSystem::~ParticleSystem()
 void ParticleSystem::initWithPos(const glm::vec3 &pos)
 {
     Particle particles[MAX_PARTICLES];
-
+    initialPosition = pos;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 

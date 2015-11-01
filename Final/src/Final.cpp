@@ -46,20 +46,21 @@ void Final::init()
     terrain->initialize();
 
     flag_program.init();
-    //water_program.init();
+    water_program.init();
     //water_program2.init();
 
     flag.init(flag_program, "../bin/unionJack.png", 30, 30);
     flag.model = glm::translate(glm::mat4(1.0f), glm::vec3(430, 345, 390));
     flag.model = glm::rotate(flag.model, 4.697f, glm::vec3(1,0,0));
 
-    //water.init(water_program, "../bin/water.jpg", 300, 300);
-    //water.model = glm::translate(glm::mat4(1.0f), glm::vec3(310, 460, 370));
+    water.init(water_program, "../bin/water.jpg", 400, 400);
+    water.model = glm::translate(glm::mat4(1.0f), glm::vec3(-130, 97, -110));
     //water2.init(water_program2, "../bin/water.jpg", 3000, 3000);
     //water2.model = glm::translate(glm::mat4(1.0f), glm::vec3(-265, 120, -5050));
 
     //water.model = glm::rotate(water.model, 90.0f, glm::vec3(1,1,0));
 
+    picker = new MousePicker(Engine::getEngine()->graphics->projection, Engine::getEngine()->graphics->camera->getView(), windowWidth, windowHeight, terrain);
 
     fireworks.initWithPos(glm::vec3(-5, 0, 15));
 
@@ -79,6 +80,7 @@ void Final::tick(float dt)
 
 void Final::render()
 {
+
     m_gbuffer.StartFrame();
 
     DSGeometryPass();
@@ -101,6 +103,10 @@ void Final::render()
 
     DSFinalPass();
 
+    picker->update();
+    cout << picker->CurrentRay.x << " " << picker->CurrentRay.y << " " << picker->CurrentRay.z << endl;
+
+    //cout << picker->CurrentRay.x << " " << picker->CurrentRay.y << " " << picker->CurrentRay.z << endl;
 }
 
 void Final::renderParticles()
@@ -137,7 +143,7 @@ void Final::renderWater()
 {
     water_program.enable();
 
-    static float waveTime = 0.2f, waveWidth = 0.2f, waveHeight = 4.0f, waveFreq = 0.05f;
+    static float waveTime = 0.2f, waveWidth = .05f, waveHeight = 2.0f, waveFreq = 0.05f;
     waveTime += waveFreq;
 
     glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * water.model;
@@ -195,7 +201,7 @@ void Final::DSGeometryPass()
 
 
     renderFlag();
-    //renderWater();
+    renderWater();
     //renderWater2();
 
 
@@ -379,12 +385,12 @@ void Final::InitLights()
     temp.Attenuation.Linear = .5f;
     temp.Attenuation.Exp = .3f;
     m_pointLight.push_back(temp);
-//
-//    temp.Color = COLOR_RED;
-//    temp.Position = glm::vec3(0.0f,5.0f,5.0f);
-//    m_pointLight.push_back(temp);
-//
-//    temp.Color = COLOR_WHITE;
-//    temp.Position = glm::vec3(5.0f,10.0f,0.0f);
-//    m_pointLight.push_back(temp);
+
+    temp.Color = COLOR_RED;
+    temp.Position = glm::vec3(0.0f,5.0f,5.0f);
+    m_pointLight.push_back(temp);
+
+    temp.Color = COLOR_WHITE;
+    temp.Position = glm::vec3(5.0f,10.0f,0.0f);
+    m_pointLight.push_back(temp);
 }

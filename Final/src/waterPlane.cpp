@@ -100,9 +100,7 @@ void waterPlane::render()
     Tex->bind(GL_TEXTURE0);
     //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Tex->m_pImage->columns(), texture->m_pImage->rows(), -0.5, GL_RGBA, GL_UNSIGNED_BYTE,texture->m_blob.data());
 
-    cout << "breaks here" << endl;
     glDrawElements(GL_TRIANGLE_STRIP, indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
-    cout << "or i guess not" << endl;
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);

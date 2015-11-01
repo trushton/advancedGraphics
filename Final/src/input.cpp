@@ -52,6 +52,9 @@ void Input::tick(float dt)
                 engine->graphics->windowResized();
             }
         }
+
+
+
     }
 
     handleMovementKeys();
@@ -173,6 +176,7 @@ void Input::handleMovementKeys()
     if(isPressed(SDLK_1)){
         engine->graphics->camera->printOut();
     }
+    
 
 
     if (isPressed(SDLK_r))
@@ -208,7 +212,7 @@ void Input::handleMovementKeys()
 
             float c = (1.57-dist)/1.57;
             float r = c * 0;
-            float g = c * .75;
+            float g = c * .75;mat4
             float b = c;
             glm::vec3 color = glm::vec3(r, g, b);
             engine->graphics->setClearColor(color);

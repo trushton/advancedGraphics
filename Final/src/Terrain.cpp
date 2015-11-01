@@ -146,6 +146,7 @@ bool Terrain::buildTerrain() {
         }
     }
 
+
     // Build normals
     std::vector< std::vector<glm::vec3> > vNormals[2];
     for(int i = 0; i < 2; i++)
