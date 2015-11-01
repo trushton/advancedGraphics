@@ -17,7 +17,7 @@ void grass_tech::init(){
     initShaderLocations();
 
     tex = new Texture("../bin/terrain/grass.png", GL_TEXTURE_2D);
-    pathTex = new Texture("../bin/terrain/path2.jpg", GL_TEXTURE_2D);
+    pathTex = new Texture("../bin/terrain/path3.jpg", GL_TEXTURE_2D);
 
     //create the VAO
     glUseProgram(program);

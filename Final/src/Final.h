@@ -24,6 +24,7 @@
 #include "waterPlane.h"
 #include "Terrain.h"
 #include "MousePicker.h"
+#include "Projector.h"
 
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
@@ -58,8 +59,6 @@ public:
     void renderParticles();
     void renderFlag();
     void renderWater();
-    void renderWater2();
-    void DrawBMP(SDL_Surface* MouseImage, int mouseX, int mouseY);
 
     Plane flag;
     ParticleSystem fireworks;
@@ -78,11 +77,11 @@ private:
     DirectionalLight m_dirLight;
     vector<PointLight> m_pointLight;
 
-    Model box, sphere, quad, box2;
+    Model flagPole, sphere, quad, tree;
     Skybox * skybox;
     Terrain *terrain;
 
-
+    Projector* proj;
 
     int windowWidth;
     int windowHeight;
@@ -90,8 +89,8 @@ private:
     std::chrono::time_point<std::chrono::high_resolution_clock> t1, t2;
     int time;
 
-    water_tech water_program, water_program2, water_program3;
-    waterPlane water, water2, water3;
+    water_tech water_program;
+    waterPlane water;
     Flag flag_program;
 
 };

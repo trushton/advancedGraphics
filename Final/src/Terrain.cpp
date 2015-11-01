@@ -377,12 +377,12 @@ void Terrain::CreatePositionBuffer()
 
         //randomizes which grass blades are rendered
         //if (activate < 0.2) {
-            if (direction > 0.5 && pathPos[i].x == 255) {
+            if (direction > 0.5 && pathPos[i].r == 0 && pathPos[i].g == 255) {
                 positions[i] = glm::vec3(Vertices[i].position.x * renderScale.x + val *1.3 ,
                                          Vertices[i].position.y * renderScale.y,
                                          Vertices[i].position.z * renderScale.z - val*1.3);
             }
-            else if(pathPos[i].x == 255)  {
+            else if(pathPos[i].r == 0 && pathPos[i].g == 255)  {
                 positions[i] = glm::vec3(Vertices[i].position.x * renderScale.x -val*1.25,
                                          Vertices[i].position.y * renderScale.y,
                                          Vertices[i].position.z * renderScale.z +val*1.2);
@@ -402,7 +402,7 @@ void Terrain::ReadPath() {
     uint height, width;
 
 
-    path.load("../bin/terrain/path3.jpg");
+    path.load("../bin/terrain/path4.jpg");
     path.convertTo32Bits();
     height = path.getHeight();
     width = path.getWidth();

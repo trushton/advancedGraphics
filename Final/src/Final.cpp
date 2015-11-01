@@ -35,8 +35,8 @@ void Final::init()
 
     sphere.loadModel("../bin/sphere.obj");
     quad.loadModel("../bin/quad.obj");
-    box.loadModel("../bin/objects/flagpole2.obj");
-    //box2.loadModel("../bin/tutorial.obj");
+    flagPole.loadModel("../bin/objects/flagpole2.obj");
+    tree.loadModel("../bin/tree/tree.obj");
 
     skybox = new Skybox();
 
@@ -62,6 +62,14 @@ void Final::init()
 
     picker = new MousePicker(Engine::getEngine()->graphics->projection, Engine::getEngine()->graphics->camera->getView(), windowWidth, windowHeight, terrain);
 
+    //set up projector
+    proj = new Projector();
+    proj->setFile("../bin/smiley-face.jpg");
+    proj->setup();
+    proj->setScreenDims(windowWidth, windowHeight);
+    proj->setDimensions(500,500);
+    proj->setPosition(glm::vec3(0,0,0));
+
     fireworks.initWithPos(glm::vec3(-5, 0, 15));
 
     t2 = t1 = std::chrono::high_resolution_clock::now();
@@ -72,8 +80,8 @@ void Final::tick(float dt)
 {
     sphere.model = glm::mat4(1.0f);
     quad.model = glm::mat4(1.0f);
-    box.model = glm::mat4(1.0f);
-    box2.model = glm::mat4(1.0f);
+    flagPole.model = glm::mat4(1.0f);
+    tree.model = glm::mat4(1.0f);
 
 }
 
@@ -86,6 +94,7 @@ void Final::render()
     DSGeometryPass();
     skybox->render();
 
+    //proj->render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
 
     glEnable(GL_STENCIL_TEST);
     for (unsigned int i = 0 ; i < m_pointLight.size(); i++) {
@@ -103,10 +112,11 @@ void Final::render()
 
     DSFinalPass();
 
-    picker->update();
-    cout << picker->CurrentRay.x << " " << picker->CurrentRay.y << " " << picker->CurrentRay.z << endl;
+    if(Engine::getEngine()->clicked) {
+        picker->update();
+        cout << picker->CurrentRay.x << " " << picker->CurrentRay.y << " " << picker->CurrentRay.z << endl;
+    }
 
-    //cout << picker->CurrentRay.x << " " << picker->CurrentRay.y << " " << picker->CurrentRay.z << endl;
 }
 
 void Final::renderParticles()
@@ -158,25 +168,7 @@ void Final::renderWater()
     water.render();
 }
 
-void Final::renderWater2()
-{
-    water_program2.enable();
-    static float waveTime = 0.2f, waveWidth = 0.2f, waveHeight = 4.0f, waveFreq = 0.05f;
-    waveTime += waveFreq;
 
-    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * water2.model;
-    water_program2.set("gWVP", mvp);
-    water_program2.set("gWorld", water2.model);
-    water_program2.set("gColorMap", 0);
-    water_program2.set("time", terrain->time);
-
-
-    water_program2.set("waveTime", waveTime);
-    water_program2.set("waveWidth", waveWidth);
-    water_program2.set("waveHeight", waveHeight);
-
-    water2.render();
-}
 
 
 void Final::DSGeometryPass()
@@ -202,44 +194,32 @@ void Final::DSGeometryPass()
 
     renderFlag();
     renderWater();
-    //renderWater2();
-
-
-    //box2
-//    box2.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, -200, 0));
-//    box2.model = glm::scale(box2.model, glm::vec3(1, 1, 1));
-//
-//    glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * box2.model;
-//
-//    m_DSGeomPassTech.set("gWVP", mvp);
-//    m_DSGeomPassTech.set("gWorld", box2.model);
-//    m_DSGeomPassTech.set("gColorMap", 0);
-//
-//    box2.renderModel();
 
 
     m_DSGeomPassTech.enable();
-//    m_DSGeomPassTech.set("gWVP", mvp);
-//    m_DSGeomPassTech.set("gWorld", terrain.model);
-//    m_DSGeomPassTech.set("gColorMap", 0);
 
+    flagPole.model = glm::translate(glm::mat4(1.0f), glm::vec3(430, 260, 390));
+    flagPole.model = glm::scale(flagPole.model, glm::vec3(1, 3, 1));
 
-
-    //box1
-
-    box.model = glm::translate(glm::mat4(1.0f), glm::vec3(430, 260, 390));
-    box.model = glm::scale(box.model, glm::vec3(1, 3, 1));
-
-    glm::mat4 mvp2 = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * box.model;
+    glm::mat4 mvp2 = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * flagPole.model;
 
     m_DSGeomPassTech.set("gWVP", mvp2);
-    m_DSGeomPassTech.set("gWorld", box.model);
+    m_DSGeomPassTech.set("gWorld", flagPole.model);
     m_DSGeomPassTech.set("gColorMap", 0);
     m_DSGeomPassTech.set("time", time);
 
-    box.renderModel();
+    flagPole.renderModel();
 
+    tree.model = glm::translate(glm::mat4(1.0f), glm::vec3(-206, 143, 180));
+    tree.model = glm::scale(tree.model, glm::vec3(10,10,10));
 
+    mvp2 = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * tree.model;
+
+    m_DSGeomPassTech.set("gWVP", mvp2);
+    m_DSGeomPassTech.set("gWorld", tree.model);
+    m_DSGeomPassTech.set("gColorMap", 0);
+
+    tree.renderModel();
 
     glDepthMask(GL_FALSE);
 

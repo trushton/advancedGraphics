@@ -31,6 +31,7 @@ void Input::tick(float dt)
     //Handle events on queue
     while (SDL_PollEvent(&e) != 0)
     {
+        engine->clicked = false;
         if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP)
         {
             handleKeyboardEvent(e);
@@ -52,7 +53,9 @@ void Input::tick(float dt)
                 engine->graphics->windowResized();
             }
         }
-
+        else if(e.type == SDL_MOUSEBUTTONDOWN){
+            engine->clicked = true;
+        }
 
 
     }

@@ -21,7 +21,7 @@ void main() {
 
 
 
-    if(Pos.y / renderScale.y <= 0.6 && Pos.y / renderScale.y >= 0.35){
+    if(Pos.y / renderScale.y <= 0.6 && Pos.y / renderScale.y >= 0.00){
         vec3 toCamera = normalize(gCameraPos - Pos);
         vec3 up = vec3(0.0,1.0,0.0);
         vec3 right = cross(toCamera, up);
