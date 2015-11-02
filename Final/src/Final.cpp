@@ -114,6 +114,14 @@ void Final::render()
 
     if(Engine::getEngine()->clicked) {
         picker->update();
+        glm::vec3 temp = picker->getCurrentRay();
+        if(Engine::getEngine()->rayColor) {
+            temp = glm::abs(temp);
+            m_dirLight.Color = temp;
+        }
+        else{
+            m_dirLight.Direction = temp;
+        }
         cout << picker->CurrentRay.x << " " << picker->CurrentRay.y << " " << picker->CurrentRay.z << endl;
     }
 
@@ -312,8 +320,7 @@ float Final::CalcPointLightBSphere(const PointLight &Light)
 
 void Final::DSDirectionalLightPass()
 {
-    static float spin = 0.02;
-    spin += 0.02;
+
     m_gbuffer.BindForLightPass();
     m_DSDirLightPassTech.enable();
 
@@ -327,7 +334,7 @@ void Final::DSDirectionalLightPass()
 
 
     quad.model = glm::mat4(1.0f);
-    m_dirLight.Direction = glm::vec3(cos(spin), -1, sin(spin));
+    m_DSDirLightPassTech.SetDirectionalLight(m_dirLight);
     m_DSDirLightPassTech.set("gWVP", glm::mat4(1.0f));
     m_DSDirLightPassTech.set("gPositionMap", GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
     m_DSDirLightPassTech.set("gColorMap", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
@@ -360,7 +367,7 @@ void Final::InitLights()
     PointLight temp;
     temp.DiffuseIntensity = 0.9f;
     temp.Color = COLOR_BLUE;
-    temp.Position = glm::vec3(0.0f,0.0f,15.0f);
+    temp.Position = glm::vec3(Engine::getEngine()->graphics->camera->getPos());
     temp.Attenuation.Constant = .6f;
     temp.Attenuation.Linear = .5f;
     temp.Attenuation.Exp = .3f;

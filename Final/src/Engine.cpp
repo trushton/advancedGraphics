@@ -25,7 +25,7 @@ void Engine::init()
         std::cerr << "Unable to initilize SDL" << std::endl;
         exit(1);
     }
-
+    rayColor = false;
     input = new Input(this);
     graphics = new Graphics(this);
 

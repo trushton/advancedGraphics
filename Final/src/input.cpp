@@ -179,6 +179,9 @@ void Input::handleMovementKeys()
     if(isPressed(SDLK_1)){
         engine->graphics->camera->printOut();
     }
+    if(isPressed(SDLK_2)){
+        engine->rayColor = !engine->rayColor;
+    }
     
 
 
