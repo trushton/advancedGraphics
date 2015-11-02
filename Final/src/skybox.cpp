@@ -105,7 +105,7 @@ GLuint loadCubemap(string m_fileNames [])
         image.load(m_fileNames[i].c_str());
         image.convertTo32Bits();
 
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 6, GL_RGBA, image.getWidth(), image.getHeight(), 0, GL_BGRA,
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, image.getWidth(), image.getHeight(), 0, GL_BGRA,
                      GL_UNSIGNED_BYTE, image.accessPixels());
     }
 
@@ -153,6 +153,7 @@ void Skybox::initShaderLocations()
     glUseProgram(program);
     locations["view"] = glGetUniformLocation(program, "view");
     locations["projection"] = glGetUniformLocation(program, "projection");
+    locations["skybox"] = glGetUniformLocation(program,"skybox");
 }
 
 void Skybox::tick(float dt)
@@ -176,7 +177,7 @@ void Skybox::render()
     // pass the view and projection matrices to the shader
     set("view", view);
     set("projection", projection);
-
+    set("skybox",6);
     // bind the VAO and texture to render the skybox
     glBindVertexArray(m_VAO);
     glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
