@@ -64,13 +64,13 @@ void Final::init()
 
     //set up projector
     proj = new Projector();
-    proj->setFile("../bin/smiley-face.jpg");
+    proj->setFile("../bin/greenBunny.jpg");
     proj->setup();
     proj->setScreenDims(windowWidth, windowHeight);
     proj->setDimensions(500,500);
-    proj->setPosition(glm::vec3(0,0,0));
+    proj->setPosition(glm::vec3(-200,1000,-200));
 
-    fireworks.initWithPos(glm::vec3(-5, 0, 15));
+    fireworks.initWithPos(glm::vec3(429.6, 384, 389.8));
 
     t2 = t1 = std::chrono::high_resolution_clock::now();
     time = 0;
@@ -92,9 +92,14 @@ void Final::render()
     m_gbuffer.StartFrame();
 
     DSGeometryPass();
+
+    if(Engine::getEngine()->project){
+        proj->render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
+    }
     skybox->render();
 
-    //proj->render(Engine::getEngine()->graphics->view, Engine::getEngine()->graphics->projection);
+
+
 
     glEnable(GL_STENCIL_TEST);
     for (unsigned int i = 0 ; i < m_pointLight.size(); i++) {
@@ -116,12 +121,13 @@ void Final::render()
         picker->update();
         glm::vec3 temp = picker->getCurrentRay();
         if(Engine::getEngine()->rayColor) {
-            temp = glm::abs(temp);
+            temp = glm::abs(temp) ;
             m_dirLight.Color = temp;
         }
         else{
             m_dirLight.Direction = temp;
         }
+        //flag.model = glm::translate(flag.model, *picker->getTerrainPoint());
         cout << picker->CurrentRay.x << " " << picker->CurrentRay.y << " " << picker->CurrentRay.z << endl;
     }
 
@@ -149,7 +155,7 @@ void Final::renderFlag() {
 
     flag_program.set("gWVP", mvp);
     flag_program.set("gWorld", flag.model);
-    flag_program.set("gColorMap", 0);
+    flag_program.set("gColorMap", 6);
 
     flag_program.set("waveTime", waveTime);
     flag_program.set("waveWidth", waveWidth);
@@ -167,7 +173,7 @@ void Final::renderWater()
     glm::mat4 mvp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * water.model;
     water_program.set("gWVP", mvp);
     water_program.set("gWorld", water.model);
-    water_program.set("gColorMap", 0);
+    water_program.set("gColorMap", 6);
     water_program.set("time", terrain->time);
 
     water_program.set("waveTime", waveTime);
@@ -213,7 +219,7 @@ void Final::DSGeometryPass()
 
     m_DSGeomPassTech.set("gWVP", mvp2);
     m_DSGeomPassTech.set("gWorld", flagPole.model);
-    m_DSGeomPassTech.set("gColorMap", 0);
+    m_DSGeomPassTech.set("gColorMap", 7);
     m_DSGeomPassTech.set("time", time);
 
     flagPole.renderModel();
@@ -225,12 +231,14 @@ void Final::DSGeometryPass()
 
     m_DSGeomPassTech.set("gWVP", mvp2);
     m_DSGeomPassTech.set("gWorld", tree.model);
-    m_DSGeomPassTech.set("gColorMap", 0);
+    m_DSGeomPassTech.set("gColorMap", 7);
 
     tree.renderModel();
 
     glDepthMask(GL_FALSE);
 
+//    glBindTexture(GL_TEXTURE_2D, 0);
+//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Final::DSStencilPass(unsigned int PointLightIndex)
@@ -280,7 +288,6 @@ void Final::DSPointLightsPass(unsigned int PointLightIndex)
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
 
-
     sphere.model = glm::translate(glm::mat4(1.0f), glm::vec3(m_pointLight[PointLightIndex].Position));
 
     float BSphereScale = CalcPointLightBSphere(m_pointLight[PointLightIndex]);
@@ -315,7 +322,7 @@ float Final::CalcPointLightBSphere(const PointLight &Light)
                 /
                 2 * Light.Attenuation.Exp;
     //return 1000;
-    return ret;
+    return 100*ret;
 }
 
 void Final::DSDirectionalLightPass()
@@ -365,12 +372,12 @@ void Final::InitLights()
     m_dirLight.Direction = glm::vec3(-1.0f, -1.0f, -1.0f);
 
     PointLight temp;
-    temp.DiffuseIntensity = 0.9f;
+    temp.DiffuseIntensity = 1.0f;
     temp.Color = COLOR_BLUE;
-    temp.Position = glm::vec3(Engine::getEngine()->graphics->camera->getPos());
-    temp.Attenuation.Constant = .6f;
-    temp.Attenuation.Linear = .5f;
-    temp.Attenuation.Exp = .3f;
+    temp.Position = glm::vec3(-218,154,173);
+    temp.Attenuation.Constant = .10f;
+    temp.Attenuation.Linear = 0.1f;
+    temp.Attenuation.Exp = .1f;
     m_pointLight.push_back(temp);
 
     temp.Color = COLOR_RED;

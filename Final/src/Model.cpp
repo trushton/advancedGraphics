@@ -203,7 +203,7 @@ void Model::initializeMaterials(const aiScene *scene, unsigned meshIndex)
                 // bind the texture data buffer
                 glGenTextures(1, &meshList[meshIndex].TB);
                 glBindTexture(GL_TEXTURE_2D, meshList[meshIndex].TB);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, meshList[meshIndex].image.getWidth(),
+                glTexImage2D(GL_TEXTURE_2D, 7, GL_RGBA, meshList[meshIndex].image.getWidth(),
                              meshList[meshIndex].image.getHeight(),
                              0, GL_BGRA, GL_UNSIGNED_BYTE,
                              (GLvoid *) meshList[meshIndex].image.accessPixels());
@@ -227,7 +227,7 @@ void Model::renderModel()
         const unsigned int MaterialIndex = meshList[i].materialIndex;
 
 
-        glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE7);
 
         glBindTexture(GL_TEXTURE_2D, meshList[i].TB);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, meshList[i].image.getWidth(), meshList[i].image.getHeight(), 0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid *) meshList[i].image.accessPixels());

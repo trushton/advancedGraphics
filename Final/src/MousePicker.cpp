@@ -20,6 +20,7 @@ void MousePicker::update(){
 //        glm::vec3 result = binarySearch(0,0,RAY_RANGE, CurrentRay);
 //        glm::vec3* temp = &result;
 //        CurrentTerrainPoint = temp;
+//        cout << CurrentTerrainPoint->x << " " << CurrentTerrainPoint->y << " " << CurrentTerrainPoint->z << endl;
 //    }
 }
 
@@ -64,7 +65,7 @@ glm::vec3 MousePicker::getPointOnRay(glm::vec3 ray, float distance) {
 
 glm::vec3 MousePicker::binarySearch(int count, float start, float finish, glm::vec3 ray) {
     float half = start + ((finish - start) / 2.0f);
-    if(count >= RECURSION_COUNT){
+    if(count <= RECURSION_COUNT){
         glm::vec3 endPoint = getPointOnRay(ray, half);
         Terrain* train = getTerrain();
         if(train != NULL){
@@ -93,7 +94,7 @@ bool MousePicker::isUnderground(glm::vec3 testPoint) {
     float height = 0;
     if(terrain != NULL){
         for(uint i = 0; i < train->Vertices.size(); i++){
-            if(abs(train->Vertices[i].position.x - testPoint.x) < 5 && abs(train->Vertices[i].position.z - testPoint.z) < 5){
+            if(abs(train->Vertices[i].position.x - testPoint.x) < 50 && abs(train->Vertices[i].position.z - testPoint.z) < 50){
                 height = train->Vertices[i].position.y;
                 return testPoint.y < height;
             }

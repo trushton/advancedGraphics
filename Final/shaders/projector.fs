@@ -17,7 +17,7 @@ uniform float specularPower; // specular power
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 tex;
-
+uniform float alpha;
 // Cameras position in the world
 uniform vec3 EyePos;
 
@@ -35,17 +35,20 @@ void main()
   vec2 TexCoord = CalcTexCoord();
 
   // Just a pass through for now
-  vec3 pos = texture(gPositionMap,TexCoord).xyz;
+  vec4 pos = texture(gPositionMap,TexCoord);
   vec4 texmap = texture(gTextureMap,TexCoord);
-  vec4 test = (tex * projection * view * vec4(pos,1.0));
+  vec4 test = (tex * projection * view * vec4(pos));
   vec2 uv = test.xy;
-
-  if( test.w > 0 &&  uv.x >= 0 && uv.x <= 1 && uv.y >= 0 && uv.y <= 1 )
+  
+  if( test.w >= 0 &&  uv.x >= 0 && uv.x <= 1 && uv.y >= 0 && uv.y <= 1 && pos.a > 0.0 && alpha > 0.01)
   {
-    TexOut = vec4(texture(proj_tex,uv.xy).xyz,.7);
+    vec4 temp = texture(proj_tex,uv.xy);
+    TexOut = vec4(temp.xyz,alpha*temp.a);
+    //TexOut = pos;vec4(1,0,0,1);
   }
   else
   {
     discard;
   }
+  //TexOut = pos;
 }

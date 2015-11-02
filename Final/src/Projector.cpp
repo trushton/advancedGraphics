@@ -64,10 +64,10 @@ void Projector::render(glm::mat4& view2, glm::mat4& projection2)
 {
     view = glm::lookAt( position, //Eye Position
                         position + direction, //Focus point
-                        -up);
+                        up);
 
-    glActiveTexture(GL_TEXTURE5);
-    tex->bind(GL_TEXTURE5);
+    tex->bind(GL_TEXTURE8);
+    glActiveTexture(GL_TEXTURE8);
 
     Renderer.useProgram();
     Renderer.setUniformFloat("alpha",alpha);
@@ -79,7 +79,7 @@ void Projector::render(glm::mat4& view2, glm::mat4& projection2)
     // enable three textures
     Renderer.setUniformInteger("gPositionMap", 0);
     Renderer.setUniformInteger("gTextureMap", 1);
-    Renderer.setUniformInteger("proj_tex", 5);
+    Renderer.setUniformInteger("proj_tex", 8);
 
     float SCREEN_SIZE[2] = {(float)SCREEN_WIDTH, (float)SCREEN_HEIGHT};
     Renderer.setUniformFloatArray2("gScreenSize", 1, SCREEN_SIZE);

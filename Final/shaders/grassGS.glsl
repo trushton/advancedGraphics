@@ -15,6 +15,7 @@ uniform float fMaxTextureV;
 
 out vec3 Color;
 out vec2 TexCoord;
+out vec4 outPos;
 
 void main() {
     vec3 Pos = gl_in[0].gl_Position.xyz;
@@ -32,6 +33,7 @@ void main() {
         Pos -= (right * 6);
         gl_Position = gVP * vec4(Pos, 1.0);
         TexCoord = vec2(0.0, 0.0);
+        outPos = gl_Position;
         EmitVertex();
 
         green = abs(cos(original.y)) / 5.0;
@@ -42,6 +44,8 @@ void main() {
         Pos += (right *3);
         gl_Position = gVP * vec4(Pos, 1.0);
         TexCoord = vec2(0.0, 1.0);
+                outPos = gl_Position;
+
         EmitVertex();
 
         Pos.y -= 10;
@@ -49,6 +53,8 @@ void main() {
         Pos.z -= abs(2* sin(time+ cos(original.z)));
         gl_Position = gVP * vec4(Pos, 1.0);
         TexCoord = vec2(1.0, 0.0);
+                outPos = gl_Position;
+
         EmitVertex();
 
         green = abs(cos(original.y))/5;
@@ -59,6 +65,8 @@ void main() {
         Pos += (right * 3);
         gl_Position = gVP * vec4(Pos, 1.0);
         TexCoord = vec2(1.0, 1.0);
+                outPos = gl_Position;
+
         EmitVertex();
 
         EndPrimitive();

@@ -15,8 +15,8 @@ class Terrain;
 class MousePicker {
 public:
 
-      int RECURSION_COUNT = 200;
-      float RAY_RANGE = 600;
+      int RECURSION_COUNT = 2000;
+      float RAY_RANGE = 6000;
     glm::vec3 CurrentRay;
     glm::vec3* CurrentTerrainPoint;
     glm::mat4 projectionMatrix;

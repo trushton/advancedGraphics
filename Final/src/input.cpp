@@ -180,8 +180,12 @@ void Input::handleMovementKeys()
         engine->graphics->camera->printOut();
     }
     if(isPressed(SDLK_2)){
+        engine->project = !engine->project;
+    }
+    if(isPressed(SDLK_q)){
         engine->rayColor = !engine->rayColor;
     }
+
     
 
 

@@ -26,7 +26,7 @@ public:
     Input *input;
     Graphics *graphics;
     std::chrono::time_point<std::chrono::high_resolution_clock> t1, t2;
-    bool clicked, rayColor;
+    bool clicked, rayColor, project;
 
 private:
     static Engine *currentEngine;

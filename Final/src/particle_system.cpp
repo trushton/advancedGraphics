@@ -75,7 +75,7 @@ void ParticleSystem::initWithPos(const glm::vec3 &pos)
     update->set("secondary_shell_lifetime", 2500.0f);
 
     render->enable();
-    render->set("color_map", COLOR_TEXTURE_UNIT_INDEX);
+    render->set("color_map", 6);
     //render->set("alpha_map", 2);
 
 
@@ -159,7 +159,7 @@ void ParticleSystem::renderParticles()
 
     if (texture)
     {
-        texture->bind(COLOR_TEXTURE_UNIT);
+        texture->bind(6);
     }
 
 //    if(alphaTexture)

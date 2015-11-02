@@ -26,6 +26,7 @@ void Engine::init()
         exit(1);
     }
     rayColor = false;
+    project = false;
     input = new Input(this);
     graphics = new Graphics(this);
 

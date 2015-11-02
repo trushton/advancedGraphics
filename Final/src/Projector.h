@@ -59,6 +59,12 @@ public:
         position.y = 100;
     }
 
+    void setView(){
+        view = glm::lookAt( position, //Eye Position
+                            position + direction, //Focus point
+                            up); //Positive Y is up
+    }
+
 private:
     int SCREEN_WIDTH, SCREEN_HEIGHT;
     glm::mat4 view;

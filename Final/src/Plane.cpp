@@ -97,7 +97,7 @@ void Plane::render()
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
 
-    Tex->bind(GL_TEXTURE0);
+    Tex->bind(GL_TEXTURE6);
     //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture->m_pImage->columns(), texture->m_pImage->rows(), -0.5, GL_RGBA, GL_UNSIGNED_BYTE,texture->m_blob.data());
 
 

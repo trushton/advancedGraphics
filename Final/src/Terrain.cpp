@@ -312,20 +312,20 @@ void Terrain::render(float dt)
 //    spin += dt * M_PI / 2;
 //    SetLight();
 
-    texture[0]->bind(GL_TEXTURE0);
-    texture[1]->bind(GL_TEXTURE1);
-    texture[2]->bind(GL_TEXTURE2);
-    texture[3]->bind(GL_TEXTURE3);
-    texture[4]->bind(GL_TEXTURE4);
-    texture[5]->bind(GL_TEXTURE5);
+    texture[0]->bind(GL_TEXTURE1);
+    texture[1]->bind(GL_TEXTURE2);
+    texture[2]->bind(GL_TEXTURE3);
+    texture[3]->bind(GL_TEXTURE4);
+    texture[4]->bind(GL_TEXTURE5);
+    texture[5]->bind(GL_TEXTURE6);
 
     // Texture Data
-    set("TextureLocations[0]", 0);
-    set("TextureLocations[1]", 1);
-    set("TextureLocations[2]", 2);
-    set("TextureLocations[3]", 3);
-    set("TextureLocations[4]", 4);
-    set("TextureLocations[5]", 5);
+    set("TextureLocations[0]", 1);
+    set("TextureLocations[1]", 2);
+    set("TextureLocations[2]", 3);
+    set("TextureLocations[3]", 4);
+    set("TextureLocations[4]", 5);
+    set("TextureLocations[5]", 6);
 
 
     glEnableVertexAttribArray(0);
@@ -435,16 +435,15 @@ void Terrain::RenderGrass()
     glm::mat4 vp = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->view;
     glm::vec3 camPos = Engine::getEngine()->graphics->camera->getPos();
     grass.set("model", model);
-
+    grass.tex->bind(GL_TEXTURE5);
     grass.set("gVP", vp);
     grass.set("gCameraPos", camPos);
     grass.set("time", time);
-    grass.set("gColorMap", 0);
+    grass.set("gColorMap", 5);
     grass.set("gPathMap", 1);
     grass.set("renderScale", renderScale);
     grass.set("fMaxTextureU", float(icols));
     grass.set("fMaxTextureV", float(irows));
-    grass.tex->bind(GL_TEXTURE0);
     grass.pathTex->bind(GL_TEXTURE1);
 
     glEnableVertexAttribArray(0);
