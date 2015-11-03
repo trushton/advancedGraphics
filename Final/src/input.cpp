@@ -185,7 +185,9 @@ void Input::handleMovementKeys()
     if(isPressed(SDLK_q)){
         engine->rayColor = !engine->rayColor;
     }
-
+    if(isPressed(SDLK_3)){
+        engine->dirlight = !engine->dirlight;
+    }
     
 
 

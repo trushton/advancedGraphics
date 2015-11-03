@@ -27,6 +27,7 @@ void Engine::init()
     }
     rayColor = false;
     project = false;
+    dirlight = true;
     input = new Input(this);
     graphics = new Graphics(this);
 

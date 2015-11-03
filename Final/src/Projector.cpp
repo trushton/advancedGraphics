@@ -14,8 +14,8 @@ Projector::Projector()
     projection = glm::ortho<float>(-1000, 1000, 1000, -1000, 0.9f, 10000.0f);
 
 
-    up = glm::vec3(0, 0, -1);
-    direction = glm::vec3(0, -1, 0);
+    up = glm::vec3(0, 1, 0);
+    direction = glm::vec3(0, 0, -1);
 
     position = glm::vec3(110, 0, 110);
     view = glm::lookAt( position, //Eye Position

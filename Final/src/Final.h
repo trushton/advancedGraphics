@@ -77,7 +77,7 @@ private:
     DirectionalLight m_dirLight;
     vector<PointLight> m_pointLight;
 
-    Model flagPole, sphere, quad, tree;
+    Model flagPole, sphere, quad, tree, clouds;
     Skybox * skybox;
     Terrain *terrain;
 

@@ -29,7 +29,7 @@ vec2 CalcTexCoord()
 }
 
 layout (location = 0) out vec4 TexOut;
-
+vec4 tempColor;
 void main()
 {
   vec2 TexCoord = CalcTexCoord();
@@ -43,12 +43,20 @@ void main()
   if( test.w >= 0 &&  uv.x >= 0 && uv.x <= 1 && uv.y >= 0 && uv.y <= 1 && pos.a > 0.0 && alpha > 0.01)
   {
     vec4 temp = texture(proj_tex,uv.xy);
-    TexOut = vec4(temp.xyz,alpha*temp.a);
+
+    tempColor = vec4(temp.xyz,alpha*temp.a);
     //TexOut = pos;vec4(1,0,0,1);
   }
   else
   {
     discard;
   }
+
+  //if(tempColor.x == 0){
+      TexOut = tempColor;
+  //}
+  //else{
+  //discard;
+  //}
   //TexOut = pos;
 }

@@ -37,6 +37,7 @@ void Final::init()
     quad.loadModel("../bin/quad.obj");
     flagPole.loadModel("../bin/objects/flagpole2.obj");
     tree.loadModel("../bin/tree/tree.obj");
+    clouds.loadModel("../bin/Cluds.obj");
 
     skybox = new Skybox();
 
@@ -64,11 +65,11 @@ void Final::init()
 
     //set up projector
     proj = new Projector();
-    proj->setFile("../bin/greenBunny.jpg");
+    proj->setFile("../bin/terrain/BatLogo.png");
     proj->setup();
     proj->setScreenDims(windowWidth, windowHeight);
-    proj->setDimensions(500,500);
-    proj->setPosition(glm::vec3(-200,1000,-200));
+    proj->setDimensions(1400,900);
+    proj->setPosition(glm::vec3(-700,9000,13000));
 
     fireworks.initWithPos(glm::vec3(429.6, 384, 389.8));
 
@@ -104,13 +105,17 @@ void Final::render()
     glEnable(GL_STENCIL_TEST);
     for (unsigned int i = 0 ; i < m_pointLight.size(); i++) {
         DSStencilPass(i);
-        DSPointLightsPass(i);
+        if(!Engine::getEngine()->dirlight){
+            DSPointLightsPass(i);
+        }
     }
 
 
     glDisable(GL_STENCIL_TEST);
 
-    DSDirectionalLightPass();
+    if(Engine::getEngine()->dirlight){
+        DSDirectionalLightPass();
+    }
 
     renderParticles();
 
@@ -235,6 +240,21 @@ void Final::DSGeometryPass()
 
     tree.renderModel();
 
+    if(Engine::getEngine()->project){
+        clouds.model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 8600, 15000));
+        clouds.model = glm::rotate(clouds.model, 4.697f, glm::vec3(1,0,0));
+        clouds.model = glm::scale(clouds.model, glm::vec3(20,1,20));
+
+        mvp2 = Engine::getEngine()->graphics->projection * Engine::getEngine()->graphics->camera->getView() * clouds.model;
+
+        m_DSGeomPassTech.set("gWVP", mvp2);
+        m_DSGeomPassTech.set("gWorld", clouds.model);
+        m_DSGeomPassTech.set("gColorMap", 7);
+
+        clouds.renderModel();
+    }
+
+
     glDepthMask(GL_FALSE);
 
 //    glBindTexture(GL_TEXTURE_2D, 0);
@@ -301,8 +321,8 @@ void Final::DSPointLightsPass(unsigned int PointLightIndex)
     m_DSPointLightPassTech.set("gPositionMap", GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
     m_DSPointLightPassTech.set("gColorMap", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
     m_DSPointLightPassTech.set("gNormalMap", GBuffer::GBUFFER_TEXTURE_TYPE_NORMAL);
-    m_DSPointLightPassTech.set("gMatSpecularIntensity", 150.0f);
-    m_DSPointLightPassTech.set("gSpecularPower", 32.0f);
+    m_DSPointLightPassTech.set("gMatSpecularIntensity", 15000.0f);
+    m_DSPointLightPassTech.set("gSpecularPower", 320.0f);
 
 
     glUniform2f(m_DSPointLightPassTech.getLocation("gScreenSize"), (float) windowWidth, (float) windowHeight);
@@ -322,7 +342,7 @@ float Final::CalcPointLightBSphere(const PointLight &Light)
                 /
                 2 * Light.Attenuation.Exp;
     //return 1000;
-    return 100*ret;
+    return 300*ret;
 }
 
 void Final::DSDirectionalLightPass()
@@ -372,7 +392,8 @@ void Final::InitLights()
     m_dirLight.Direction = glm::vec3(-1.0f, -1.0f, -1.0f);
 
     PointLight temp;
-    temp.DiffuseIntensity = 1.0f;
+    temp.DiffuseIntensity = .3f;
+    temp.AmbientIntensity = 0.2f;
     temp.Color = COLOR_BLUE;
     temp.Position = glm::vec3(-218,154,173);
     temp.Attenuation.Constant = .10f;
@@ -381,10 +402,10 @@ void Final::InitLights()
     m_pointLight.push_back(temp);
 
     temp.Color = COLOR_RED;
-    temp.Position = glm::vec3(0.0f,5.0f,5.0f);
+    temp.Position = glm::vec3(-285.0f, 225.0f, 380.0f);
     m_pointLight.push_back(temp);
 
-    temp.Color = COLOR_WHITE;
-    temp.Position = glm::vec3(5.0f,10.0f,0.0f);
+    temp.Color = COLOR_GREEN;
+    temp.Position = glm::vec3(418, 254,360);
     m_pointLight.push_back(temp);
 }
