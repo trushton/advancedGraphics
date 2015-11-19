@@ -114,8 +114,12 @@ void Final::render()
     glDisable(GL_STENCIL_TEST);
 
     if(Engine::getEngine()->dirlight){
-        DSDirectionalLightPass();
+        m_dirLight.AmbientIntensity = 0.3;
     }
+    else{
+        m_dirLight.AmbientIntensity = 0.05;
+    }
+    DSDirectionalLightPass();
 
     renderParticles();
 
@@ -130,6 +134,7 @@ void Final::render()
             m_dirLight.Color = temp;
         }
         else{
+            m_dirLight.Color = COLOR_WHITE;
             m_dirLight.Direction = temp;
         }
         //flag.model = glm::translate(flag.model, *picker->getTerrainPoint());
@@ -321,8 +326,8 @@ void Final::DSPointLightsPass(unsigned int PointLightIndex)
     m_DSPointLightPassTech.set("gPositionMap", GBuffer::GBUFFER_TEXTURE_TYPE_POSITION);
     m_DSPointLightPassTech.set("gColorMap", GBuffer::GBUFFER_TEXTURE_TYPE_DIFFUSE);
     m_DSPointLightPassTech.set("gNormalMap", GBuffer::GBUFFER_TEXTURE_TYPE_NORMAL);
-    m_DSPointLightPassTech.set("gMatSpecularIntensity", 15000.0f);
-    m_DSPointLightPassTech.set("gSpecularPower", 320.0f);
+    m_DSPointLightPassTech.set("gMatSpecularIntensity", 10.10f);
+    m_DSPointLightPassTech.set("gSpecularPower", 3.0f);
 
 
     glUniform2f(m_DSPointLightPassTech.getLocation("gScreenSize"), (float) windowWidth, (float) windowHeight);
@@ -342,7 +347,7 @@ float Final::CalcPointLightBSphere(const PointLight &Light)
                 /
                 2 * Light.Attenuation.Exp;
     //return 1000;
-    return 300*ret;
+    return 1000*ret;
 }
 
 void Final::DSDirectionalLightPass()
@@ -392,20 +397,36 @@ void Final::InitLights()
     m_dirLight.Direction = glm::vec3(-1.0f, -1.0f, -1.0f);
 
     PointLight temp;
-    temp.DiffuseIntensity = .3f;
-    temp.AmbientIntensity = 0.2f;
+    temp.DiffuseIntensity = 10.3f;
+    temp.AmbientIntensity = 100.9f;
     temp.Color = COLOR_BLUE;
-    temp.Position = glm::vec3(-218,154,173);
+    temp.Position = glm::vec3(-218,215,-350);
     temp.Attenuation.Constant = .10f;
     temp.Attenuation.Linear = 0.1f;
     temp.Attenuation.Exp = .1f;
     m_pointLight.push_back(temp);
 
     temp.Color = COLOR_RED;
-    temp.Position = glm::vec3(-285.0f, 225.0f, 380.0f);
+    temp.Position = glm::vec3(-285.0f, 245.0f, 380.0f);
     m_pointLight.push_back(temp);
 
     temp.Color = COLOR_GREEN;
-    temp.Position = glm::vec3(418, 254,360);
+    temp.Position = glm::vec3(418, 314,360);
+    m_pointLight.push_back(temp);
+
+    temp.Color = COLOR_YELLOW;
+    temp.Position = glm::vec3(348, 237,-370);
+    m_pointLight.push_back(temp);
+
+    temp.Color = COLOR_CYAN;
+    temp.Position = glm::vec3(110, 135, -50);
+    m_pointLight.push_back(temp);
+
+    temp.Color = COLOR_MAGENTA;
+    temp.Position = glm::vec3(20, 130, 164);
+    m_pointLight.push_back(temp);
+
+    temp.Color = COLOR_CYAN;
+    temp.Position = glm::vec3(-250, 150, 170);
     m_pointLight.push_back(temp);
 }

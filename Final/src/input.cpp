@@ -2,6 +2,7 @@
 #include "input.h"
 #include "graphics.h"
 #include "camera.h"
+#include <unistd.h>
 
 
 Input::Input(Engine *eng)
@@ -181,21 +182,27 @@ void Input::handleMovementKeys()
     }
     if(isPressed(SDLK_2)){
         engine->project = !engine->project;
+        usleep(80000);
+
     }
     if(isPressed(SDLK_q)){
         engine->rayColor = !engine->rayColor;
+        usleep(80000);
+
     }
     if(isPressed(SDLK_3)){
         engine->dirlight = !engine->dirlight;
+        usleep(80000);
+
     }
     
 
 
     if (isPressed(SDLK_r))
     {
-        SDL_SetRelativeMouseMode(SDL_FALSE);
-        //mouseEnabled = !mouseEnabled;
-
+        //SDL_SetRelativeMouseMode(SDL_FALSE);
+        mouseEnabled = !mouseEnabled;
+        usleep(100000);
     }
     if(isPressed(SDLK_TAB)){
         static float angle = 0.0f;
