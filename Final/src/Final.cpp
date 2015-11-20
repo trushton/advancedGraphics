@@ -114,7 +114,7 @@ void Final::render()
     glDisable(GL_STENCIL_TEST);
 
     if(Engine::getEngine()->dirlight){
-        m_dirLight.AmbientIntensity = 0.3;
+        m_dirLight.AmbientIntensity = 0.5;
     }
     else{
         m_dirLight.AmbientIntensity = 0.05;

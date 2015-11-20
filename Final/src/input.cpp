@@ -213,6 +213,18 @@ void Input::handleMovementKeys()
         cout << total << endl;
     }
 
+    if(isPressed(SDLK_RIGHT)){
+        Projector* p = engine->graphics->final->proj;
+        glm::vec3 newPos = glm::vec3(p->position.x-5, p->position.y, p->position.z);
+        engine->graphics->final->proj->setPosition(newPos);
+
+    }
+    if(isPressed(SDLK_LEFT)){
+        Projector* p = engine->graphics->final->proj;
+        glm::vec3 newPos = glm::vec3(p->position.x+5, p->position.y, p->position.z);
+        engine->graphics->final->proj->setPosition(newPos);
+    }
+
 
     //User requests quit
     if (isPressed(SDLK_ESCAPE))

@@ -65,6 +65,8 @@ public:
                             up); //Positive Y is up
     }
 
+    glm::vec3 position;
+
 private:
     int SCREEN_WIDTH, SCREEN_HEIGHT;
     glm::mat4 view;
@@ -75,7 +77,6 @@ private:
 
     //these are necessary for the view matrix
     glm::vec3 direction;
-    glm::vec3 position;
     glm::vec3 up;
     glm::vec3 origin;
 

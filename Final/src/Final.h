@@ -63,6 +63,7 @@ public:
     Plane flag;
     ParticleSystem fireworks;
     MousePicker* picker;
+    Projector* proj;
 
 
 private:
@@ -81,7 +82,6 @@ private:
     Skybox * skybox;
     Terrain *terrain;
 
-    Projector* proj;
 
     int windowWidth;
     int windowHeight;
